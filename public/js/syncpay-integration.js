@@ -20,10 +20,10 @@ class SyncPayIntegration {
     async getAuthToken() {
         this.log('🔐 [DEBUG] Iniciando autenticação com SyncPay...');
         try {
-            this.log('📡 [DEBUG] Fazendo requisição para:', `${this.config.base_url}/api/partner/v1/auth-token`);
+            this.log('📡 [DEBUG] Fazendo requisição para:', `${this.config.base_url}/partner/v1/auth-token`);
             this.log('🔑 [DEBUG] Credenciais:', { client_id: this.config.client_id, client_secret: '***' });
             
-            const response = await fetch(`${this.config.base_url}/api/partner/v1/auth-token`, {
+            const response = await fetch(`${this.config.base_url}/partner/v1/auth-token`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
@@ -111,11 +111,11 @@ class SyncPayIntegration {
                 ]
             };
             
-            this.log('📡 [DEBUG] Fazendo requisição PIX para:', `${this.config.base_url}/api/partner/v1/cash-in`);
+            this.log('📡 [DEBUG] Fazendo requisição PIX para:', `${this.config.base_url}/partner/v1/cash-in`);
             this.log('📦 [DEBUG] Dados da requisição:', requestBody);
 
             // Criar transação PIX
-            const response = await fetch(`${this.config.base_url}/api/partner/v1/cash-in`, {
+            const response = await fetch(`${this.config.base_url}/partner/v1/cash-in`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -249,9 +249,9 @@ class SyncPayIntegration {
                     await this.getAuthToken();
                 }
 
-                this.log('📡 [DEBUG] Fazendo requisição de status para:', `${this.config.base_url}/api/partner/v1/transactions/${transactionId}`);
+                this.log('📡 [DEBUG] Fazendo requisição de status para:', `${this.config.base_url}/partner/v1/transactions/${transactionId}`);
 
-                const response = await fetch(`${this.config.base_url}/api/partner/v1/transactions/${transactionId}`, {
+                const response = await fetch(`${this.config.base_url}/partner/v1/transactions/${transactionId}`, {
                     headers: {
                         'Authorization': `Bearer ${this.authToken}`
                     }

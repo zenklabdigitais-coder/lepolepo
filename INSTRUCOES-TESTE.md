@@ -67,7 +67,7 @@ npm start
 🚀 Servidor rodando na porta 3000
 📱 Acesse: http://localhost:3000
 🔧 Proxy SyncPay: http://localhost:3000/api/syncpay
-[PROXY] POST /auth-token -> /api/partner/v1/auth-token
+[PROXY] POST /auth-token -> /partner/v1/auth-token
 [PROXY] Resposta: 200
 ```
 

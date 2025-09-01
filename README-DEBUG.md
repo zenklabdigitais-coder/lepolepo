@@ -81,7 +81,7 @@ O servidor agora inclui:
 ### Logs do Servidor
 O servidor mostra logs detalhados:
 ```
-[PROXY] POST /auth-token -> /api/partner/v1/auth-token
+[PROXY] POST /auth-token -> /partner/v1/auth-token
 [PROXY] Resposta: 200
 ```
 
