@@ -2,6 +2,8 @@ const express = require('express');
 const cors = require('cors');
 const { createProxyMiddleware } = require('http-proxy-middleware');
 const path = require('path');
+const axios = require('axios');
+const { getToken } = require('./authService');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -39,6 +41,23 @@ app.use('/api/syncpay', createProxyMiddleware({
     },
     logLevel: 'debug'
 }));
+
+// Rota protegida de exemplo - consulta de saldo
+app.get('/balance', async (req, res) => {
+    try {
+        const token = await getToken();
+        const response = await axios.get('https://api.syncpayments.com.br/api/partner/v1/balance', {
+            headers: { Authorization: `Bearer ${token}` }
+        });
+        res.json(response.data);
+    } catch (err) {
+        console.error('[Balance] Erro ao obter saldo:', err.response?.data || err.message);
+        res.status(500).json({
+            message: 'Não foi possível obter o saldo',
+            details: err.response?.data || err.message
+        });
+    }
+});
 
 // Rota de teste para verificar se o servidor está funcionando
 app.get('/api/health', (req, res) => {
