@@ -1,0 +1,34 @@
+🌐 NGROK TÚNEL ATIVO
+========================================
+
+✅ Servidor Local: http://localhost:3000
+✅ URL Pública: https://8f298a9ff705.ngrok-free.app
+
+📱 PARA TESTE EXTERNO:
+- Acesse: https://8f298a9ff705.ngrok-free.app
+- Funciona em qualquer dispositivo com internet
+- Ideal para testar em smartphones
+
+🔧 PAINEL DE CONTROLE NGROK:
+- URL: http://localhost:4040
+- Para ver logs e estatísticas do túnel
+
+📋 INSTRUÇÕES DE TESTE:
+1. Abra a URL pública no navegador
+2. Pressione F12 para abrir o console
+3. Clique em um botão de pagamento
+4. Observe os logs de debug
+5. Teste o QR Code com apps de pagamento
+
+⚠️ IMPORTANTE:
+- Esta URL é temporária e muda a cada reinicialização
+- Use apenas para testes
+- O túnel expira após algumas horas
+
+🔄 PARA REINICIAR:
+- Pare o ngrok (Ctrl+C)
+- Execute: ngrok http 3000
+- Nova URL será gerada
+
+📞 STATUS: ✅ ATIVO
+⏰ Criado em: $(Get-Date)
