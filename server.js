@@ -13,8 +13,8 @@ app.use(cors({
     allowedHeaders: ['Content-Type', 'Authorization']
 }));
 
-// Servir arquivos estáticos
-app.use(express.static(path.join(__dirname)));
+// Servir arquivos estáticos do diretório public
+app.use(express.static(path.join(__dirname, 'public')));
 
 // Proxy para API SyncPay (contorna CORS)
 app.use('/api/syncpay', createProxyMiddleware({
@@ -61,7 +61,7 @@ app.get('/api/test-syncpay', (req, res) => {
 
 // Rota principal
 app.get('/', (req, res) => {
-    res.sendFile(path.join(__dirname, 'index.html'));
+    res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
 app.listen(PORT, '0.0.0.0', () => {
