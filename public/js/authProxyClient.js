@@ -1,13 +1,22 @@
 // Função para obter token de autenticação via proxy local
 async function fetchAuthToken() {
-  const payload = {
-    client_id: window.SYNCPAY_CONFIG?.client_id || '',
-    client_secret: window.SYNCPAY_CONFIG?.client_secret || '',
+  var config = window.SYNCPAY_CONFIG || {};
+  var clientId = config.client_id;
+  var clientSecret = config.client_secret;
+
+  if (!clientId || !clientSecret) {
+    alert('client_id ou client_secret ausentes.');
+    return;
+  }
+
+  var payload = {
+    client_id: clientId,
+    client_secret: clientSecret,
     '01K1259MAXE0TNRXV2C2WQN2MV': 'valor'
   };
 
   try {
-    const response = await fetch('/api/auth-token', {
+    var response = await fetch('/api/auth-token', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
@@ -16,14 +25,21 @@ async function fetchAuthToken() {
     });
 
     if (!response.ok) {
-      throw new Error(`Erro na requisição: ${response.status}`);
+      throw new Error('Erro na requisição: ' + response.status);
     }
 
-    const data = await response.json();
-    console.log('Access token:', data.access_token);
-    return data.access_token;
+    var data = await response.json();
+
+    if (data.access_token) {
+      sessionStorage.setItem('access_token', data.access_token);
+      alert('Token obtido com sucesso.');
+      return data.access_token;
+    }
+
+    throw new Error('Resposta sem access_token');
   } catch (error) {
     console.error('Erro ao obter token:', error);
+    alert('Erro ao obter token: ' + (error && error.message ? error.message : error));
   }
 }
 
