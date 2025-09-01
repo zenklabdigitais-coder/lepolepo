@@ -19,7 +19,7 @@ const SYNCPAY_CONFIG = {
             price: 59.70,
             description: 'Assinatura 3 meses - Stella Beghini'
         },
-        biannual: {
+        semestrial: {
             price: 119.40,
             description: 'Assinatura 6 meses - Stella Beghini'
         }
