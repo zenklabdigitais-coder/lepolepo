@@ -1,5 +1,5 @@
-// Configuração da API SyncPay
-// ✅ CREDENCIAIS REAIS CONFIGURADAS
+// Configuração da API SyncPay - PRODUÇÃO
+// ✅ CREDENCIAIS REAIS CONFIGURADAS PARA API DE PRODUÇÃO
 
 const SYNCPAY_CONFIG = {
     // URL base da API SyncPay (usando proxy local para contornar CORS)

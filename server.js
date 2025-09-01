@@ -18,10 +18,10 @@ app.use(express.static(path.join(__dirname)));
 
 // Proxy para API SyncPay (contorna CORS)
 app.use('/api/syncpay', createProxyMiddleware({
-    target: 'https://syncpay.apidog.io',
+    target: 'https://api.syncpayments.com.br',
     changeOrigin: true,
     pathRewrite: {
-        '^/api/syncpay': '/api/partner/v1'
+        '^/api/syncpay': ''
     },
     onProxyReq: (proxyReq, req, res) => {
         console.log(`[PROXY] ${req.method} ${req.path} -> ${proxyReq.path}`);
@@ -54,7 +54,7 @@ app.get('/api/test-syncpay', (req, res) => {
     res.json({
         message: 'Teste do proxy SyncPay',
         proxy_url: '/api/syncpay',
-        target_url: 'https://syncpay.apidog.io/api/partner/v1',
+        target_url: 'https://api.syncpayments.com.br/api/v1',
         timestamp: new Date().toISOString()
     });
 });

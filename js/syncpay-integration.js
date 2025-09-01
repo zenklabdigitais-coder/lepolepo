@@ -133,7 +133,12 @@ class SyncPayIntegration {
                 amount: transaction.amount
             });
             
-            return transaction;
+            return {
+                id: transaction.id,
+                pix_code: transaction.pix_code,
+                status: transaction.status,
+                amount: transaction.amount
+            };
 
         } catch (error) {
             this.log('💥 [DEBUG] Erro ao criar transação PIX:', error);
@@ -146,7 +151,7 @@ class SyncPayIntegration {
     // Função para mostrar modal de PIX
     showPixModal(pixData) {
         this.log('🖥️ [DEBUG] Exibindo modal PIX com dados:', {
-            transaction_id: pixData.transaction_id,
+            transaction_id: pixData.id,
             pix_code: pixData.pix_code ? '***' : 'null'
         });
         
@@ -189,7 +194,7 @@ class SyncPayIntegration {
         this.generateQRCode(pixData.pix_code);
         
         // Iniciar verificação de status
-        this.checkPaymentStatus(pixData.transaction_id);
+        this.checkPaymentStatus(pixData.id);
     }
 
     // Função para gerar QR Code
