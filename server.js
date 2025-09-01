@@ -64,9 +64,10 @@ app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'index.html'));
 });
 
-app.listen(PORT, () => {
+app.listen(PORT, '0.0.0.0', () => {
     console.log(`🚀 Servidor rodando na porta ${PORT}`);
     console.log(`📱 Acesse: http://localhost:${PORT}`);
+    console.log(`🌐 Acesse externamente: http://0.0.0.0:${PORT}`);
     console.log(`🔧 Proxy SyncPay: http://localhost:${PORT}/api/syncpay`);
     console.log(`🧪 Teste do proxy: http://localhost:${PORT}/api/test-syncpay`);
 });

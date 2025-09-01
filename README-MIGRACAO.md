@@ -32,6 +32,12 @@ document.head.appendChild(script);
 3. Tente gerar um PIX de teste
 4. Verifique os logs no console
 
+### 3. Deploy na Vercel
+1. Faça push para GitHub
+2. Conecte na Vercel
+3. Deploy automático será feito
+4. Acesse a URL fornecida pela Vercel
+
 ### 3. Verificação de Endpoints
 ```bash
 # Teste do proxy
@@ -125,8 +131,8 @@ pathRewrite: { '^/api/syncpay': '/api/partner/v1' }
 ## 🎯 Próximos Passos
 
 1. ✅ Migração para API de produção
-2. 🔄 Testes em ambiente de staging
-3. 🚀 Deploy em produção
+2. ✅ Remoção de dependências ngrok
+3. 🚀 Deploy na Vercel
 4. 📊 Monitoramento contínuo
 5. 🔧 Otimizações baseadas em métricas
 

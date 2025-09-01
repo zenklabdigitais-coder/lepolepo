@@ -76,9 +76,9 @@ class SyncPayIntegration {
     }
 
     // Função para criar transação PIX
-    async createPixTransaction(amount, description) {
+    async createPixTransaction(amount, description, clientData) {
         this.log('💰 [DEBUG] Iniciando criação de transação PIX...');
-        this.log('📊 [DEBUG] Dados da transação:', { amount, description });
+        this.log('📊 [DEBUG] Dados da transação:', { amount, description, clientData });
         
         try {
             // Verificar/obter token
@@ -95,16 +95,27 @@ class SyncPayIntegration {
             }
 
             const requestBody = {
-                amount: amount * 100, // Converter para centavos
+                amount: amount,
                 description: description,
-                expires_in: 3600 // 1 hora
+                client: {
+                    name: clientData.name,
+                    cpf: clientData.cpf,
+                    email: clientData.email,
+                    phone: clientData.phone
+                },
+                split: [
+                    {
+                        percentage: 100,
+                        user_id: this.config.user_id || "9f3c5b3a-41bc-4322-90e6-a87a98eefeca"
+                    }
+                ]
             };
             
-            this.log('📡 [DEBUG] Fazendo requisição PIX para:', `${this.config.base_url}/api/partner/v1/pix/cashin`);
+            this.log('📡 [DEBUG] Fazendo requisição PIX para:', `${this.config.base_url}/api/partner/v1/cash-in`);
             this.log('📦 [DEBUG] Dados da requisição:', requestBody);
 
             // Criar transação PIX
-            const response = await fetch(`${this.config.base_url}/api/partner/v1/pix/cashin`, {
+            const response = await fetch(`${this.config.base_url}/api/partner/v1/cash-in`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -127,17 +138,17 @@ class SyncPayIntegration {
 
             const transaction = await response.json();
             this.log('✅ [DEBUG] Transação PIX criada com sucesso:', {
-                id: transaction.id,
+                identifier: transaction.identifier,
                 pix_code: transaction.pix_code ? '***' : 'null',
-                status: transaction.status,
-                amount: transaction.amount
+                amount: transaction.amount,
+                status: 'pending'
             });
             
             return {
-                id: transaction.id,
+                identifier: transaction.identifier,
                 pix_code: transaction.pix_code,
-                status: transaction.status,
-                amount: transaction.amount
+                amount: transaction.amount,
+                status: 'pending'
             };
 
         } catch (error) {

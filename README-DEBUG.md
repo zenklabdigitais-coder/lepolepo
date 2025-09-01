@@ -47,15 +47,19 @@ client_id: 'SEU_CLIENT_ID_REAL',
 client_secret: 'SEU_CLIENT_SECRET_REAL'
 ```
 
-### Passo 3: Iniciar Servidor
+### Passo 3: Testar Localmente
 ```bash
 npm start
 ```
-
-### Passo 4: Testar
 - Acesse: `http://localhost:3000`
 - Teste os botões de pagamento PIX
 - Verifique o console do navegador para logs de debug
+
+### Passo 4: Deploy na Vercel
+1. Faça push do código para o GitHub
+2. Conecte o repositório na Vercel
+3. Configure as variáveis de ambiente se necessário
+4. Deploy automático será feito
 
 ## 🔧 Configuração do Servidor
 
@@ -94,6 +98,26 @@ O JavaScript mostra logs no console:
 2. **Testar integração** com valores reais
 3. **Configurar webhooks** se necessário
 4. **Implementar tratamento de erros** mais robusto
+
+## 🚀 Deploy na Vercel
+
+### Configuração Automática
+O projeto está configurado para deploy automático na Vercel:
+
+1. **Estrutura Pronta**: O `server.js` e `package.json` estão configurados
+2. **Proxy Funcional**: O proxy para API SyncPay funciona em produção
+3. **Arquivos Estáticos**: Todos os arquivos CSS/JS estão organizados
+
+### Passos para Deploy
+1. **GitHub**: Faça push do código para um repositório
+2. **Vercel**: Conecte o repositório na Vercel
+3. **Configuração**: A Vercel detectará automaticamente que é um projeto Node.js
+4. **Deploy**: O deploy será feito automaticamente
+
+### Variáveis de Ambiente (Opcional)
+Se necessário, configure na Vercel:
+- `PORT`: Porta do servidor (padrão: 3000)
+- `NODE_ENV`: Ambiente (production/development)
 
 ## 📞 Suporte
 

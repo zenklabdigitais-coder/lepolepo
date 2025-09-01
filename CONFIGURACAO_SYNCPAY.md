@@ -81,7 +81,9 @@ Modifique o campo `description` para personalizar a descrição que aparece na t
 ### 6. **Teste de Funcionamento**
 
 1. **Configure suas credenciais** no `js/config.js`
-2. **Abra o site** no navegador
+2. **Teste localmente:**
+   - Execute `npm start`
+   - Acesse `http://localhost:3000`
 3. **Clique em qualquer botão** de assinatura
 4. **Verifique se:**
    - Modal de PIX abre corretamente
@@ -89,7 +91,15 @@ Modifique o campo `description` para personalizar a descrição que aparece na t
    - Código PIX pode ser copiado
    - Status é monitorado
 
-### 7. **Solução de Problemas**
+### 7. **Deploy na Vercel**
+
+1. **Faça push** do código para GitHub
+2. **Conecte** o repositório na Vercel
+3. **Configure** as variáveis de ambiente se necessário
+4. **Deploy automático** será feito
+5. **Acesse** a URL fornecida pela Vercel
+
+### 8. **Solução de Problemas**
 
 #### **Erro de Autenticação:**
 - Verifique se `client_id` e `client_secret` estão corretos
@@ -103,7 +113,7 @@ Modifique o campo `description` para personalizar a descrição que aparece na t
 - Verifique se todos os arquivos JS e CSS foram incluídos
 - Confirme se não há erros JavaScript no console
 
-### 8. **Suporte**
+### 9. **Suporte**
 
 Para suporte técnico da SyncPay, consulte:
 - 📖 [Documentação oficial](https://syncpay.apidog.io/)

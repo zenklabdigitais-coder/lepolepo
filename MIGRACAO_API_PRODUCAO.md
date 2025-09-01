@@ -2,7 +2,7 @@
 
 ## Resumo das Alterações
 
-Este documento registra as alterações realizadas para migrar a integração de pagamento PIX da API de mock/teste para a API de produção da SyncPayments.
+Este documento registra as alterações realizadas para migrar a integração de pagamento PIX da API de mock/teste para a API de produção da SyncPayments e remover dependências do ngrok para deploy na Vercel.
 
 ## Arquivos Modificados
 
@@ -78,6 +78,24 @@ if (transaction.status === 'expirado')  // PIX expirado
 ### 3. js/config.js
 - Atualizado comentário para indicar uso da API de produção
 
+### 4. Arquivos Removidos (ngrok)
+- `ngrok.exe` - Executável do ngrok
+- `ngrok.zip` - Arquivo compactado do ngrok
+- `ngrok-config.yml` - Configuração do ngrok
+- `ngrok-info.txt` - Informações do ngrok
+- `start-ngrok.bat` - Script para iniciar ngrok (Windows)
+- `start-ngrok.ps1` - Script para iniciar ngrok (PowerShell)
+- `test-ngrok.js` - Script de teste do ngrok
+- `test-ngrok-simple.js` - Script de teste simples do ngrok
+- `diagnostico-ngrok.js` - Script de diagnóstico do ngrok
+- `INSTRUCOES-NGROK.md` - Instruções de uso do ngrok
+
+### 5. Arquivos Atualizados
+- `test-status.html` - Removidas referências ao ngrok, adicionadas informações sobre Vercel
+- `README-DEBUG.md` - Adicionadas instruções para deploy na Vercel
+- `README-MIGRACAO.md` - Atualizado para refletir remoção do ngrok
+- `CONFIGURACAO_SYNCPAY.md` - Adicionadas instruções para deploy na Vercel
+
 ## Compatibilidade
 
 A migração mantém a mesma interface pública da classe `SyncPayIntegration`, garantindo que nenhuma alteração seja necessária no código que utiliza esta integração.
@@ -88,6 +106,8 @@ A migração mantém a mesma interface pública da classe `SyncPayIntegration`, 
 2. **Teste de Criação de PIX:** Confirmar se a cobrança está sendo criada
 3. **Teste de Status:** Verificar se a consulta de status está funcionando
 4. **Teste de Pagamento:** Simular um pagamento real para validar o fluxo completo
+5. **Teste Local:** Executar `npm start` e testar em `http://localhost:3000`
+6. **Teste Vercel:** Fazer deploy e testar na URL fornecida pela Vercel
 
 ## Rollback
 

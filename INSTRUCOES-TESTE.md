@@ -75,12 +75,14 @@ npm start
 
 Para testar em dispositivos móveis:
 
-1. **Usar ngrok** (se necessário):
-   ```bash
-   ngrok http 3000
-   ```
+1. **Deploy na Vercel** (recomendado):
+   - Faça push para GitHub
+   - Conecte na Vercel
+   - Use a URL fornecida pela Vercel
 
-2. **Acessar via URL do ngrok** no dispositivo móvel
+2. **Teste local** (mesma rede):
+   - Use o IP local da sua máquina
+   - Exemplo: `http://192.168.1.100:3000`
 
 3. **Testar QR Code** com apps de pagamento reais
 
