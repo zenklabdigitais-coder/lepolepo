@@ -146,7 +146,7 @@
 
 .payment-benefits h4 {
     color: #333;
-    font-size: 16px;
+    font-size: 18px;
     font-weight: 600;
     margin: 0 0 10px 0;
     text-align: left;
@@ -162,7 +162,7 @@
     padding: 1px 0;
     padding-left: 25px;
     position: relative;
-    font-size: 14px;
+    font-size: 16px;
     color: #666;
     line-height: 1.2;
 }
@@ -173,6 +173,7 @@
     left: 0;
     color: #F58170;
     font-weight: bold;
+    font-size: 16px;
 }
 
 /* SEÇÃO DO PLANO */
@@ -201,7 +202,7 @@
 
 .payment-plan-price {
     color: #333;
-    font-size: 28px;
+    font-size: 14px;
     font-weight: 700;
     margin: 0;
 }
@@ -347,9 +348,13 @@
     .payment-modal-body {
         padding: 20px;
     }
-    
+
     .payment-plan-price {
-        font-size: 24px;
+        font-size: 12px;
+    }
+
+    .payment-qr-container {
+        display: none;
     }
 }
 

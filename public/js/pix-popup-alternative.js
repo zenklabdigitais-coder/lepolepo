@@ -173,7 +173,7 @@ class PixPopupAlternative {
             .pix-popup-benefits h4 {
                 color: #333;
                 margin: 0 0 8px 0;
-                font-size: 16px;
+                font-size: 18px;
                 font-weight: 600;
                 text-align: left;
             }
@@ -188,7 +188,7 @@ class PixPopupAlternative {
                 padding: 1px 0;
                 padding-left: 25px;
                 position: relative;
-                font-size: 14px;
+                font-size: 16px;
                 color: #666;
                 line-height: 1.2;
             }
@@ -199,6 +199,7 @@ class PixPopupAlternative {
                 left: 0;
                 color: #F58170;
                 font-weight: bold;
+                font-size: 16px;
             }
 
             .pix-popup-plan {
@@ -226,7 +227,7 @@ class PixPopupAlternative {
 
             .pix-popup-plan-price {
                 color: #333;
-                font-size: 28px;
+                font-size: 14px;
                 font-weight: 700;
                 margin: 0;
             }
@@ -353,9 +354,13 @@ class PixPopupAlternative {
                 .pix-popup-body {
                     padding: 20px;
                 }
-                
+
                 .pix-popup-plan-price {
-                    font-size: 24px;
+                    font-size: 12px;
+                }
+
+                .pix-popup-qr-container {
+                    display: none;
                 }
             }
 
@@ -507,20 +512,31 @@ class PixPopupAlternative {
         try {
             const qrContainer = document.getElementById('pixPopupQRContainer');
             const qrCodeElement = document.getElementById('pixPopupQRCode');
-            
+
             if (!qrCodeElement) {
                 console.warn('⚠️ Elemento QR Code não encontrado');
                 return;
             }
 
+            const isMobile = window.innerWidth <= 768;
+            if (qrContainer) {
+                if (isMobile) {
+                    qrContainer.style.display = 'none';
+                    return;
+                }
+                qrContainer.style.display = 'block';
+            }
+
             // Limpar QR Code anterior
             qrCodeElement.innerHTML = '';
-            
+
+            const size = 300;
+
             if (typeof QRCode !== 'undefined') {
                 // Usar QRCode.js se disponível
                 await QRCode.toCanvas(qrCodeElement, pixCode, {
-                    width: 200,
-                    height: 200,
+                    width: size,
+                    height: size,
                     margin: 2,
                     color: {
                         dark: '#333333',
@@ -531,16 +547,12 @@ class PixPopupAlternative {
             } else {
                 // Fallback para API online
                 const img = document.createElement('img');
-                img.src = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(pixCode)}`;
+                img.src = `https://api.qrserver.com/v1/create-qr-code/?size=${size}x${size}&data=${encodeURIComponent(pixCode)}`;
                 img.alt = 'QR Code PIX';
-                img.style.maxWidth = '200px';
+                img.style.maxWidth = `${size}px`;
                 img.style.height = 'auto';
                 qrCodeElement.appendChild(img);
                 console.log('✅ QR Code gerado com API fallback');
-            }
-            
-            if (qrContainer) {
-                qrContainer.style.display = 'block';
             }
         } catch (error) {
             console.error('❌ Erro ao gerar QR Code:', error);
