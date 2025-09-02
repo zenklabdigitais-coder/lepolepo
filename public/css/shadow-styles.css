@@ -1418,6 +1418,13 @@
     flex-direction: column;
     gap: 6px;
   }
+  .background .medias-container .count-container .lock-icon {
+    display: flex;
+    justify-content: center;
+  }
+  .background .medias-container .count-container .lock-icon svg {
+    width: 24px;
+  }
   .background .medias-container .count-container .user-name {
     margin: 0;
     font-weight: 600;
