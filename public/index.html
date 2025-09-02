@@ -1080,6 +1080,12 @@ $(document).ready(function() {
     <!-- QRCode.js para gerar QR Codes -->
     <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
     
+    <!-- Gateway Selector CSS -->
+    <link rel="stylesheet" href="css/gateway-selector.css">
+    
+    <!-- Gateway Selector JS -->
+    <script src="js/gatewaySelector.js"></script>
+    
     <!-- Configuração SyncPay -->
     <script src="js/config.js"></script>
     
@@ -1263,6 +1269,40 @@ setTimeout(() => {
     <script src="js/bootstrap.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 <script defer="" src="https://static.cloudflareinsights.com/beacon.min.js/vcd15cbe7772f49c399c6a5babf22c1241717689176015" data-cf-beacon="{" rayid":"96bb148ddd5e6cd8","servertiming":{"name":{"cfextpri":true,"cfedge":true,"cforigin":true,"cfl4":true,"cfspeedbrain":true,"cfcachestatus":true}},"version":"2025.7.0","token":"5f5a5dbbbe5f40a7aced6c12a2c59200"}"="" crossorigin="anonymous"></script>
 
+    <!-- Seletor de Gateway de Pagamento -->
+    <div id="gateway-selector" class="gateway-selector-container" style="position: fixed; top: 20px; right: 20px; z-index: 1000; max-width: 400px; display: none;">
+        <div class="gateway-selector-header">
+            <h3 class="gateway-selector-title">🎯 Gateway de Pagamento</h3>
+            <span id="gateway-indicator" class="gateway-indicator syncpay">SYNCPAY</span>
+        </div>
+        
+        <div class="gateway-controls">
+            <select id="gateway-select" class="gateway-select">
+                <option value="syncpay">SyncPay</option>
+                <option value="pushinpay">PushinPay</option>
+            </select>
+            
+            <button id="test-gateway" class="test-gateway-btn">
+                🧪 Testar Gateway
+            </button>
+        </div>
+        
+        <div id="gateway-info" class="gateway-info">
+            <h4>SyncPay</h4>
+            <p>Gateway de pagamento SyncPay</p>
+            <ul>
+                <li>PIX</li>
+                <li>Cartão de Crédito</li>
+                <li>Boleto</li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- Botão para mostrar/ocultar seletor de gateway -->
+    <button id="toggle-gateway-selector" style="position: fixed; bottom: 20px; right: 20px; z-index: 1000; padding: 12px 24px; background: linear-gradient(45deg, #667eea, #764ba2); color: white; border: none; border-radius: 25px; font-weight: bold; cursor: pointer; box-shadow: 0 4px 15px rgba(0,0,0,0.2);">
+        🎯 Gateway
+    </button>
+
     <!-- Botão Obter Token - COMENTADO -->
     <!-- <button id="authButton" style="position: fixed; bottom: 20px; right: 20px; z-index: 1000; padding: 12px 24px; background: linear-gradient(45deg, #F58170, #F9AF77); color: white; border: none; border-radius: 25px; font-weight: bold; cursor: pointer; box-shadow: 0 4px 15px rgba(0,0,0,0.2);">
         Obter Token
@@ -1284,5 +1324,25 @@ setTimeout(() => {
     
     <!-- Exemplo de uso (opcional - remover em produção) -->
     <script src="js/exemplo-uso-syncpay.js"></script>
+
+    <!-- Controle do Seletor de Gateway -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const toggleButton = document.getElementById('toggle-gateway-selector');
+            const gatewaySelector = document.getElementById('gateway-selector');
+            
+            if (toggleButton && gatewaySelector) {
+                toggleButton.addEventListener('click', function() {
+                    if (gatewaySelector.style.display === 'none') {
+                        gatewaySelector.style.display = 'block';
+                        toggleButton.textContent = '❌ Fechar';
+                    } else {
+                        gatewaySelector.style.display = 'none';
+                        toggleButton.textContent = '🎯 Gateway';
+                    }
+                });
+            }
+        });
+    </script>
 
 </body></html>

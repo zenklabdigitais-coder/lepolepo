@@ -5,9 +5,13 @@ const path = require('path');
 const fetch = require('node-fetch');
 const { syncpayGet, syncpayPost } = require('./syncpayApi');
 const WebhookHandler = require('./webhookHandler');
+const PaymentGateway = require('./paymentGateway');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
+
+// Instanciar o gateway de pagamento
+const paymentGateway = new PaymentGateway('syncpay'); // Padrão SyncPay
 
 // Configurar CORS
 app.use(cors({
@@ -352,12 +356,166 @@ app.delete('/api/webhooks/:id', async (req, res) => {
     }
 });
 
+// ===== ROTAS DO GATEWAY DE PAGAMENTO =====
+
+// Rota para obter gateways disponíveis
+app.get('/api/gateways', (req, res) => {
+    try {
+        const gateways = paymentGateway.getAvailableGateways();
+        res.json({
+            success: true,
+            gateways: gateways,
+            current: paymentGateway.getCurrentGateway()
+        });
+    } catch (error) {
+        console.error('[Gateways] Erro ao listar gateways:', error.message);
+        res.status(500).json({
+            success: false,
+            message: 'Erro ao listar gateways disponíveis',
+            error: error.message
+        });
+    }
+});
+
+// Rota para alterar gateway
+app.post('/api/gateways/switch', (req, res) => {
+    try {
+        const { gateway } = req.body;
+        
+        if (!gateway) {
+            return res.status(400).json({
+                success: false,
+                message: 'Gateway deve ser especificado'
+            });
+        }
+
+        paymentGateway.setGateway(gateway);
+        
+        res.json({
+            success: true,
+            message: `Gateway alterado para ${gateway}`,
+            current: paymentGateway.getCurrentGateway()
+        });
+    } catch (error) {
+        console.error('[Gateways] Erro ao alterar gateway:', error.message);
+        res.status(500).json({
+            success: false,
+            message: 'Erro ao alterar gateway',
+            error: error.message
+        });
+    }
+});
+
+// Rota para obter gateway atual
+app.get('/api/gateways/current', (req, res) => {
+    try {
+        res.json({
+            success: true,
+            gateway: paymentGateway.getCurrentGateway()
+        });
+    } catch (error) {
+        console.error('[Gateways] Erro ao obter gateway atual:', error.message);
+        res.status(500).json({
+            success: false,
+            message: 'Erro ao obter gateway atual',
+            error: error.message
+        });
+    }
+});
+
+// ===== ROTAS DE PAGAMENTO UNIFICADAS =====
+
+// Rota para criar pagamento PIX (funciona com ambos os gateways)
+app.post('/api/payments/pix/create', async (req, res) => {
+    try {
+        console.log('💰 [DEBUG] Criando pagamento PIX...');
+        console.log('📋 [DEBUG] Dados recebidos:', JSON.stringify(req.body, null, 2));
+        
+        // Validar dados do pagamento
+        paymentGateway.validatePaymentData(req.body);
+        
+        const paymentResult = await paymentGateway.createPixPayment(req.body);
+        
+        console.log('✅ [DEBUG] Pagamento criado com sucesso:', paymentResult);
+        
+        res.json({
+            success: true,
+            message: 'Pagamento PIX criado com sucesso',
+            gateway: paymentGateway.getCurrentGateway(),
+            data: paymentResult
+        });
+    } catch (error) {
+        console.error('❌ [DEBUG] Erro ao criar pagamento PIX:', error.message);
+        res.status(error.response?.status || 500).json({
+            success: false,
+            message: 'Erro ao criar pagamento PIX',
+            gateway: paymentGateway.getCurrentGateway(),
+            error: error.response?.data || error.message
+        });
+    }
+});
+
+// Rota para consultar status do pagamento
+app.get('/api/payments/:paymentId/status', async (req, res) => {
+    try {
+        const { paymentId } = req.params;
+        console.log(`🔍 [DEBUG] Consultando status do pagamento ${paymentId}...`);
+        
+        const statusResult = await paymentGateway.getPaymentStatus(paymentId);
+        
+        console.log('✅ [DEBUG] Status consultado com sucesso:', statusResult);
+        
+        res.json({
+            success: true,
+            message: 'Status do pagamento consultado com sucesso',
+            gateway: paymentGateway.getCurrentGateway(),
+            data: statusResult
+        });
+    } catch (error) {
+        console.error('❌ [DEBUG] Erro ao consultar status:', error.message);
+        res.status(error.response?.status || 500).json({
+            success: false,
+            message: 'Erro ao consultar status do pagamento',
+            gateway: paymentGateway.getCurrentGateway(),
+            error: error.response?.data || error.message
+        });
+    }
+});
+
+// Rota para listar pagamentos
+app.get('/api/payments', async (req, res) => {
+    try {
+        const filters = req.query;
+        console.log('📋 [DEBUG] Listando pagamentos com filtros:', filters);
+        
+        const paymentsResult = await paymentGateway.listPayments(filters);
+        
+        console.log('✅ [DEBUG] Pagamentos listados com sucesso');
+        
+        res.json({
+            success: true,
+            message: 'Pagamentos listados com sucesso',
+            gateway: paymentGateway.getCurrentGateway(),
+            data: paymentsResult
+        });
+    } catch (error) {
+        console.error('❌ [DEBUG] Erro ao listar pagamentos:', error.message);
+        res.status(error.response?.status || 500).json({
+            success: false,
+            message: 'Erro ao listar pagamentos',
+            gateway: paymentGateway.getCurrentGateway(),
+            error: error.response?.data || error.message
+        });
+    }
+});
+
 // Rota de teste para verificar se o servidor está funcionando
 app.get('/api/health', (req, res) => {
     res.json({
         status: 'OK',
         timestamp: new Date().toISOString(),
-        message: 'Servidor funcionando corretamente'
+        message: 'Servidor funcionando corretamente',
+        currentGateway: paymentGateway.getCurrentGateway()
     });
 });
 
