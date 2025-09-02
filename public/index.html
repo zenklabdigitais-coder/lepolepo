@@ -50,6 +50,7 @@
     <link rel="stylesheet" href="css/perfil.css">
     <link rel="stylesheet" href="css/privacy.components.css">
     <link rel="stylesheet" href="css/pix-modal.css">
+    <link rel="stylesheet" href="css/payment-modal.css">
 
     <!-- Swiper js -->
     <script src="js/swiper-element-bundle.min.js"></script>
@@ -997,9 +998,23 @@ $(document).ready(function() {
     
     <!-- Integração SyncPay -->
     <script src="js/syncpay-integration.js"></script>
+    
+    <!-- Modal de Pagamento -->
+    <script src="js/payment-modal.js"></script>
 
     
 <script>
+// Verificar se sweetalert está disponível
+if (typeof swal === 'undefined') {
+    console.warn('SweetAlert não está disponível, usando fallback para alerts');
+    window.swal = function(options) {
+        if (typeof options === 'string') {
+            alert(options);
+        } else if (options && options.title) {
+            alert(options.title);
+        }
+    };
+}
 
     function convertUnicodeToAscii(texto) {
         return texto.replace(/&#x([A-Fa-f0-9]+);/g, function (match, hex) {
