@@ -745,7 +745,16 @@ $(document).ready(function() {
             return;
         }
         const plan = plans.monthly;
-        const transaction = await syncPay.createPixTransaction(plan.price, plan.description);
+        
+        // Dados do cliente (pode ser coletado de um formulário)
+        const clientData = {
+            name: 'Cliente Teste',
+            cpf: '12345678900',
+            email: 'cliente@teste.com',
+            phone: '11999999999'
+        };
+        
+        const transaction = await syncPay.createPixTransaction(plan.price, plan.description, clientData);
         
         if (typeof swal !== 'undefined') {
             swal.close();
@@ -760,7 +769,7 @@ $(document).ready(function() {
         if (transaction) {
             syncPay.showPixModal({
                 pix_code: transaction.pix_code,
-                transaction_id: transaction.id
+                id: transaction.id
             });
         }
     });
@@ -779,7 +788,16 @@ $(document).ready(function() {
             return;
         }
         const plan = plans.quarterly;
-        const transaction = await syncPay.createPixTransaction(plan.price, plan.description);
+        
+        // Dados do cliente (pode ser coletado de um formulário)
+        const clientData = {
+            name: 'Cliente Teste',
+            cpf: '12345678900',
+            email: 'cliente@teste.com',
+            phone: '11999999999'
+        };
+        
+        const transaction = await syncPay.createPixTransaction(plan.price, plan.description, clientData);
         
         if (typeof swal !== 'undefined') {
             swal.close();
@@ -794,7 +812,7 @@ $(document).ready(function() {
         if (transaction) {
             syncPay.showPixModal({
                 pix_code: transaction.pix_code,
-                transaction_id: transaction.id
+                id: transaction.id
             });
         }
     });
@@ -808,12 +826,21 @@ $(document).ready(function() {
         syncPay.showLoading();
         
         const plans = window.SYNCPAY_CONFIG?.plans;
-        if (!plans?.biannual) {
+        if (!plans?.semestrial) {
             console.error('Plano semestral não configurado em SYNCPAY_CONFIG');
             return;
         }
-        const plan = plans.biannual;
-        const transaction = await syncPay.createPixTransaction(plan.price, plan.description);
+        const plan = plans.semestrial;
+        
+        // Dados do cliente (pode ser coletado de um formulário)
+        const clientData = {
+            name: 'Cliente Teste',
+            cpf: '12345678900',
+            email: 'cliente@teste.com',
+            phone: '11999999999'
+        };
+        
+        const transaction = await syncPay.createPixTransaction(plan.price, plan.description, clientData);
         
         if (typeof swal !== 'undefined') {
             swal.close();
@@ -828,7 +855,7 @@ $(document).ready(function() {
         if (transaction) {
             syncPay.showPixModal({
                 pix_code: transaction.pix_code,
-                transaction_id: transaction.id
+                id: transaction.id
             });
         }
     });

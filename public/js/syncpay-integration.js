@@ -16,32 +16,25 @@ class SyncPayIntegration {
         }
     }
 
-    // Função para obter token de autenticação
+    // Função para obter token de autenticação (via backend proxy)
     async getAuthToken() {
-        this.log('🔐 [DEBUG] Iniciando autenticação com SyncPay...');
+        this.log('🔐 [DEBUG] Iniciando autenticação com SyncPay via backend...');
         try {
-            this.log('📡 [DEBUG] Fazendo requisição para:', `${this.config.base_url}/partner/v1/auth-token`);
-            this.log('🔑 [DEBUG] Credenciais:', { client_id: this.config.client_id, client_secret: '***' });
+            this.log('📡 [DEBUG] Fazendo requisição para backend:', '/api/auth-token');
             
-            const response = await fetch(`${this.config.base_url}/partner/v1/auth-token`, {
+            const response = await fetch('/api/auth-token', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    client_id: this.config.client_id,
-                    client_secret: this.config.client_secret,
-                    '01K1259MAXE0TNRXV2C2WQN2MV': 'valor'
-                })
+                }
             });
 
             this.log('📊 [DEBUG] Status da resposta:', response.status);
-            this.log('📋 [DEBUG] Headers da resposta:', Object.fromEntries(response.headers.entries()));
 
             if (!response.ok) {
-                const errorText = await response.text();
-                this.log('❌ [DEBUG] Erro na resposta:', errorText);
-                throw new Error(`Erro na autenticação: ${response.status} - ${errorText}`);
+                const errorData = await response.json();
+                this.log('❌ [DEBUG] Erro na resposta:', errorData);
+                throw new Error(`Erro na autenticação: ${response.status} - ${errorData.message}`);
             }
 
             const data = await response.json();
@@ -76,25 +69,12 @@ class SyncPayIntegration {
         return isValid;
     }
 
-    // Função para criar transação PIX
+    // Função para criar transação PIX (via backend proxy)
     async createPixTransaction(amount, description, clientData) {
-        this.log('💰 [DEBUG] Iniciando criação de transação PIX...');
+        this.log('💰 [DEBUG] Iniciando criação de transação PIX via backend...');
         this.log('📊 [DEBUG] Dados da transação:', { amount, description, clientData });
         
         try {
-            // Verificar/obter token
-            if (!this.isTokenValid()) {
-                this.log('🔄 [DEBUG] Token inválido, obtendo novo token...');
-                await this.getAuthToken();
-            } else {
-                this.log('✅ [DEBUG] Token válido, usando token existente');
-            }
-
-            if (!this.authToken) {
-                this.log('❌ [DEBUG] Falha na autenticação');
-                throw new Error('Não foi possível autenticar');
-            }
-
             const requestBody = {
                 amount: amount,
                 description: description,
@@ -112,44 +92,39 @@ class SyncPayIntegration {
                 ]
             };
             
-            this.log('📡 [DEBUG] Fazendo requisição PIX para:', `${this.config.base_url}/partner/v1/cash-in`);
+            this.log('📡 [DEBUG] Fazendo requisição PIX para backend:', '/api/cash-in');
             this.log('📦 [DEBUG] Dados da requisição:', requestBody);
 
-            // Criar transação PIX
-            const response = await fetch(`${this.config.base_url}/partner/v1/cash-in`, {
+            // Criar transação PIX via backend proxy
+            const response = await fetch('/api/cash-in', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'Accept': 'application/json',
-                    'Authorization': `Bearer ${this.authToken}`,
-                    'User-Agent': 'SyncPay-Integration/1.0',
-                    'Cache-Control': 'no-cache'
+                    'Accept': 'application/json'
                 },
                 body: JSON.stringify(requestBody)
             });
 
             this.log('📊 [DEBUG] Status da resposta PIX:', response.status);
-            this.log('📋 [DEBUG] Headers da resposta PIX:', Object.fromEntries(response.headers.entries()));
 
             if (!response.ok) {
-                const errorText = await response.text();
-                this.log('❌ [DEBUG] Erro na resposta PIX:', errorText);
-                throw new Error(`Erro ao criar transação PIX: ${response.status} - ${errorText}`);
+                const errorData = await response.json();
+                this.log('❌ [DEBUG] Erro na resposta PIX:', errorData);
+                throw new Error(`Erro ao criar transação PIX: ${response.status} - ${errorData.message}`);
             }
 
             const transaction = await response.json();
             this.log('✅ [DEBUG] Transação PIX criada com sucesso:', {
                 identifier: transaction.identifier,
                 pix_code: transaction.pix_code ? '***' : 'null',
-                amount: transaction.amount,
-                status: 'pending'
+                message: transaction.message
             });
             
             return {
+                id: transaction.identifier,
                 identifier: transaction.identifier,
                 pix_code: transaction.pix_code,
-                amount: transaction.amount,
-                status: 'pending'
+                message: transaction.message
             };
 
         } catch (error) {
@@ -244,45 +219,41 @@ class SyncPayIntegration {
         const checkStatus = async () => {
             try {
                 this.log('🔍 [DEBUG] Verificando status da transação:', transactionId);
-                
-                if (!this.isTokenValid()) {
-                    this.log('🔄 [DEBUG] Token expirado, renovando...');
-                    await this.getAuthToken();
-                }
 
-                this.log('📡 [DEBUG] Fazendo requisição de status para:', `${this.config.base_url}/partner/v1/transactions/${transactionId}`);
+                this.log('📡 [DEBUG] Fazendo requisição de status para backend:', `/api/transaction/${transactionId}`);
 
-                const response = await fetch(`${this.config.base_url}/partner/v1/transactions/${transactionId}`, {
+                const response = await fetch(`/api/transaction/${transactionId}`, {
                     headers: {
-                        'Authorization': `Bearer ${this.authToken}`
+                        'Content-Type': 'application/json'
                     }
                 });
 
                 this.log('📊 [DEBUG] Status da resposta de verificação:', response.status);
 
                 if (response.ok) {
-                    const transaction = await response.json();
+                    const result = await response.json();
+                    const transaction = result.data || result;
                     this.log('📋 [DEBUG] Dados da transação:', {
-                        id: transaction.id,
+                        reference_id: transaction.reference_id,
                         status: transaction.status,
                         amount: transaction.amount,
-                        created_at: transaction.created_at
+                        transaction_date: transaction.transaction_date
                     });
                     
                     if (transaction.status === 'completed') {
                         this.log('✅ [DEBUG] Pagamento confirmado!');
                         this.showPaymentSuccess();
                         return;
-                    } else if (transaction.status === 'expired') {
-                        this.log('⏰ [DEBUG] PIX expirado!');
+                    } else if (transaction.status === 'failed' || transaction.status === 'expired') {
+                        this.log('⏰ [DEBUG] PIX falhou/expirado!');
                         this.showPaymentExpired();
                         return;
                     } else {
                         this.log('⏳ [DEBUG] Status atual:', transaction.status);
                     }
                 } else {
-                    const errorText = await response.text();
-                    this.log('❌ [DEBUG] Erro ao verificar status:', errorText);
+                    const errorData = await response.json();
+                    this.log('❌ [DEBUG] Erro ao verificar status:', errorData);
                 }
             } catch (error) {
                 this.log('💥 [DEBUG] Erro ao verificar status:', error);

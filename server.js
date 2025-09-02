@@ -2,6 +2,7 @@ require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const path = require('path');
+const fetch = require('node-fetch');
 const { syncpayGet, syncpayPost } = require('./syncpayApi');
 
 const app = express();
@@ -20,8 +21,45 @@ app.use(express.json());
 // Servir arquivos estáticos do diretório public
 app.use(express.static(path.join(__dirname, 'public')));
 
+// Rota para obter token de autenticação
+app.post('/api/auth-token', async (req, res) => {
+    try {
+        console.log('🔐 [DEBUG] Gerando token de autenticação...');
+        const response = await fetch('https://api.syncpayments.com.br/api/partner/v1/auth-token', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                client_id: process.env.SYNCPAY_CLIENT_ID || '708ddc0b-357d-4548-b158-615684caa616',
+                client_secret: process.env.SYNCPAY_CLIENT_SECRET || 'c08d40e5-3049-48c9-85c0-fd3cc6ca502c',
+                '01K1259MAXE0TNRXV2C2WQN2MV': process.env.SYNCPAY_EXTRA || 'valor'
+            })
+        });
+
+        if (!response.ok) {
+            const errorText = await response.text();
+            console.error('[Auth] Erro na autenticação:', errorText);
+            return res.status(response.status).json({
+                message: 'Erro na autenticação',
+                details: errorText
+            });
+        }
+
+        const data = await response.json();
+        console.log('✅ [DEBUG] Token gerado com sucesso');
+        res.json(data);
+    } catch (err) {
+        console.error('[Auth] Erro ao obter token:', err.message);
+        res.status(500).json({
+            message: 'Não foi possível autenticar',
+            details: err.message
+        });
+    }
+});
+
 // Rota protegida de exemplo - consulta de saldo
-app.get('/balance', async (req, res) => {
+app.get('/api/balance', async (req, res) => {
     try {
         const response = await syncpayGet('/balance');
         res.json(response.data);
@@ -35,14 +73,65 @@ app.get('/balance', async (req, res) => {
 });
 
 // Rota para criação de transação (cash-in)
-app.post('/cash-in', async (req, res) => {
+app.post('/api/cash-in', async (req, res) => {
     try {
+        console.log('💰 [DEBUG] Criando transação PIX:', req.body);
         const response = await syncpayPost('/cash-in', req.body);
+        console.log('✅ [DEBUG] Transação criada com sucesso:', response.data);
         res.json(response.data);
     } catch (err) {
         console.error('[Cash-in] Erro ao criar transação:', err.response?.data || err.message);
         res.status(err.response?.status || 500).json({
             message: 'Não foi possível criar a transação',
+            details: err.response?.data || err.message
+        });
+    }
+});
+
+// Rota para criação de transação de saque (cash-out)
+app.post('/api/cash-out', async (req, res) => {
+    try {
+        console.log('💸 [DEBUG] Criando saque PIX:', req.body);
+        const response = await syncpayPost('/cash-out', req.body);
+        console.log('✅ [DEBUG] Saque criado com sucesso:', response.data);
+        res.json(response.data);
+    } catch (err) {
+        console.error('[Cash-out] Erro ao criar saque:', err.response?.data || err.message);
+        res.status(err.response?.status || 500).json({
+            message: 'Não foi possível criar o saque',
+            details: err.response?.data || err.message
+        });
+    }
+});
+
+// Rota para consultar status de transação
+app.get('/api/transaction/:identifier', async (req, res) => {
+    try {
+        const { identifier } = req.params;
+        console.log('🔍 [DEBUG] Consultando status da transação:', identifier);
+        const response = await syncpayGet(`/transaction/${identifier}`);
+        console.log('✅ [DEBUG] Status obtido:', response.data);
+        res.json(response.data);
+    } catch (err) {
+        console.error('[Transaction] Erro ao consultar status:', err.response?.data || err.message);
+        res.status(err.response?.status || 500).json({
+            message: 'Não foi possível consultar o status da transação',
+            details: err.response?.data || err.message
+        });
+    }
+});
+
+// Rota para consultar dados do parceiro
+app.get('/api/profile', async (req, res) => {
+    try {
+        console.log('👤 [DEBUG] Consultando dados do parceiro...');
+        const response = await syncpayGet('/profile');
+        console.log('✅ [DEBUG] Dados do parceiro obtidos:', response.data);
+        res.json(response.data);
+    } catch (err) {
+        console.error('[Profile] Erro ao consultar perfil:', err.response?.data || err.message);
+        res.status(err.response?.status || 500).json({
+            message: 'Não foi possível consultar dados do parceiro',
             details: err.response?.data || err.message
         });
     }
