@@ -190,8 +190,9 @@ class PaymentModal {
             }
 
             const isMobile = window.innerWidth <= 768;
+            const allowMobileQR = window.APP_CONFIG ? window.APP_CONFIG.generateQRCodeOnMobile : false;
             if (qrContainer) {
-                if (isMobile) {
+                if (isMobile && !allowMobileQR) {
                     qrContainer.style.display = 'none';
                     return;
                 }

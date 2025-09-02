@@ -68,7 +68,8 @@ app.get('/api/config', (req, res) => {
         gateway: cfg.gateway,
         syncpay: cfg.syncpay,
         pushinpay: cfg.pushinpay,
-        redirectUrl: cfg.redirectUrl
+        redirectUrl: cfg.redirectUrl,
+        generateQRCodeOnMobile: cfg.generateQRCodeOnMobile
     });
 });
 
