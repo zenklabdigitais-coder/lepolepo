@@ -61,6 +61,12 @@ class PaymentModal {
                     <p class="payment-plan-price" id="paymentPlanPrice">R$ 15,00</p>
                 </div>
                 
+                <div class="payment-qr-container" id="paymentQRContainer">
+                    <div class="payment-qr-code" id="paymentQRCode">
+                        <!-- QR Code será inserido aqui -->
+                    </div>
+                </div>
+
                 <div class="payment-pix">
                     <p class="payment-pix-label">CHAVE PIX</p>
                     <div class="payment-pix-code" id="paymentPixCode">
@@ -69,12 +75,6 @@ class PaymentModal {
                     <button class="payment-copy-button" id="paymentCopyButton">
                         COPIAR CHAVE PIX
                     </button>
-                </div>
-                
-                <div class="payment-qr-container" id="paymentQRContainer">
-                    <div class="payment-qr-code" id="paymentQRCode">
-                        <!-- QR Code será inserido aqui -->
-                    </div>
                 </div>
                 
                 <div class="payment-status" id="paymentStatus">
@@ -162,6 +162,8 @@ class PaymentModal {
                 pixCode = 'Código PIX será gerado em breve...';
             }
 
+            // Garantir que o código PIX esteja em uma única linha
+            pixCode = pixCode.replace(/\r?\n|\r/g, '').trim();
             pixCodeElement.textContent = pixCode;
 
             // Habilitar/desabilitar botão de copiar
