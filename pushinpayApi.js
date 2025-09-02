@@ -30,27 +30,33 @@ async function pushinpayPost(endpoint, data, config = {}) {
 // Função para criar um pagamento PIX
 async function createPixPayment(paymentData) {
   try {
-    // Por enquanto, retornar erro informativo até a API estar configurada corretamente
-    throw new Error('PushinPay API não está configurada corretamente. Por favor, verifique a documentação da API e configure os endpoints corretos.');
+    // Validar valor mínimo (50 centavos)
+    const valueInCents = Math.round(paymentData.amount * 100);
+    if (valueInCents < 50) {
+      throw new Error('Valor mínimo é de 50 centavos (R$ 0,50)');
+    }
+
+    // Estrutura de dados conforme documentação oficial da PushinPay
+    const requestData = {
+      value: valueInCents,  // Valor em centavos
+      webhook_url: paymentData.webhook_url || undefined,  // Opcional
+      split_rules: paymentData.split_rules || []  // Array para divisão
+    };
+
+    // Remover campos undefined para não enviar na requisição
+    Object.keys(requestData).forEach(key => 
+      requestData[key] === undefined && delete requestData[key]
+    );
+
+    console.log('📤 Enviando dados para PushinPay:', requestData);
+
+    // Endpoint correto conforme documentação: POST /api/pix/cashIn
+    const response = await pushinpayPost('/api/pix/cashIn', requestData);
     
-    // Código original comentado até a API estar funcionando
-    /*
-    const response = await pushinpayPost('/v1/pix', {
-      amount: paymentData.amount,
-      description: paymentData.description || 'Pagamento via PIX',
-      external_id: paymentData.external_id || `payment_${Date.now()}`,
-      expires_in: paymentData.expires_in || 3600, // 1 hora por padrão
-      customer: {
-        name: paymentData.customer_name,
-        email: paymentData.customer_email,
-        document: paymentData.customer_document
-      }
-    });
-    
+    console.log('📥 Resposta da PushinPay:', response.data);
     return response.data;
-    */
   } catch (error) {
-    console.error('Erro ao criar pagamento PIX:', error.response?.data || error.message);
+    console.error('❌ Erro ao criar pagamento PIX PushinPay:', error.response?.data || error.message);
     throw error;
   }
 }
@@ -58,22 +64,41 @@ async function createPixPayment(paymentData) {
 // Função para consultar status do pagamento
 async function getPaymentStatus(paymentId) {
   try {
-    const response = await pushinpayGet(`/v1/pix/${paymentId}`);
+    console.log('🔍 Consultando status do pagamento:', paymentId);
+    
+    // Endpoint correto conforme documentação: GET /api/transactions/{ID}
+    const response = await pushinpayGet(`/api/transactions/${paymentId}`);
+    
+    console.log('📥 Status recebido da PushinPay:', response.data);
     return response.data;
   } catch (error) {
-    console.error('Erro ao consultar status do pagamento:', error.response?.data || error.message);
+    console.error('❌ Erro ao consultar status do pagamento PushinPay:', error.response?.data || error.message);
+    
+    // Se retornar 404, a documentação menciona que retorna null
+    if (error.response?.status === 404) {
+      return null;
+    }
+    
     throw error;
   }
 }
 
 // Função para listar pagamentos
+// NOTA: A documentação da PushinPay não fornece endpoint para listar pagamentos
+// Esta funcionalidade pode não estar disponível na API atual
 async function listPayments(filters = {}) {
   try {
+    console.warn('⚠️ Endpoint de listagem não documentado na PushinPay');
+    throw new Error('Funcionalidade de listagem de pagamentos não disponível na API PushinPay');
+    
+    // Código comentado - endpoint não existe na documentação oficial
+    /*
     const queryParams = new URLSearchParams(filters).toString();
-    const response = await pushinpayGet(`/v1/pix?${queryParams}`);
+    const response = await pushinpayGet(`/api/payments?${queryParams}`);
     return response.data;
+    */
   } catch (error) {
-    console.error('Erro ao listar pagamentos:', error.response?.data || error.message);
+    console.error('❌ Erro ao listar pagamentos PushinPay:', error.response?.data || error.message);
     throw error;
   }
 }
