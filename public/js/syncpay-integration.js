@@ -126,12 +126,9 @@
         console.log('💰 Consultando saldo...');
 
         try {
-            const token = await getValidToken();
-
-            const response = await fetch(`${API_CONFIG.baseUrl}${API_CONFIG.balanceEndpoint}`, {
+            const response = await fetch('/api/balance', {
                 method: 'GET',
                 headers: {
-                    'Authorization': `Bearer ${token}`,
                     'Accept': 'application/json'
                 }
             });
@@ -204,8 +201,6 @@
         }
 
         try {
-            const token = await getValidToken();
-
             const requestData = {
                 amount: cashInData.amount,
                 description: cashInData.description || null,
@@ -224,10 +219,9 @@
 
             console.log('📤 Enviando dados do cash-in:', requestData);
 
-            const response = await fetch(`${API_CONFIG.baseUrl}${API_CONFIG.cashInEndpoint}`, {
+            const response = await fetch('/api/cash-in', {
                 method: 'POST',
                 headers: {
-                    'Authorization': `Bearer ${token}`,
                     'Content-Type': 'application/json',
                     'Accept': 'application/json'
                 },
@@ -264,12 +258,9 @@
         }
 
         try {
-            const token = await getValidToken();
-
-            const response = await fetch(`${API_CONFIG.baseUrl}${API_CONFIG.transactionEndpoint}/${identifier}`, {
+            const response = await fetch(`/api/transaction/${identifier}`, {
                 method: 'GET',
                 headers: {
-                    'Authorization': `Bearer ${token}`,
                     'Accept': 'application/json'
                 }
             });
@@ -325,8 +316,6 @@
         }
 
         try {
-            const token = await getValidToken();
-
             const requestData = {
                 amount: cashOutData.amount,
                 description: cashOutData.description || null,
@@ -340,10 +329,9 @@
 
             console.log('📤 Enviando dados do cash-out:', requestData);
 
-            const response = await fetch(`${API_CONFIG.baseUrl}/cash-out`, {
+            const response = await fetch('/api/cash-out', {
                 method: 'POST',
                 headers: {
-                    'Authorization': `Bearer ${token}`,
                     'Content-Type': 'application/json',
                     'Accept': 'application/json'
                 },
@@ -376,12 +364,11 @@
         console.log('👤 Consultando dados do parceiro...');
 
         try {
-            const token = await getValidToken();
 
-            const response = await fetch(`${API_CONFIG.baseUrl}/profile`, {
+
+            const response = await fetch('/api/profile', {
                 method: 'GET',
                 headers: {
-                    'Authorization': `Bearer ${token}`,
                     'Accept': 'application/json'
                 }
             });
@@ -416,9 +403,9 @@
         console.log('🔗 Listando webhooks...');
 
         try {
-            const token = await getValidToken();
 
-            let url = `${API_CONFIG.baseUrl}/webhooks`;
+
+            let url = '/api/webhooks';
             const params = new URLSearchParams();
             
             if (search) params.append('search', search);
@@ -431,7 +418,6 @@
             const response = await fetch(url, {
                 method: 'GET',
                 headers: {
-                    'Authorization': `Bearer ${token}`,
                     'Accept': 'application/json'
                 }
             });
@@ -473,8 +459,6 @@
         }
 
         try {
-            const token = await getValidToken();
-
             const requestData = {
                 title: webhookData.title,
                 url: webhookData.url,
@@ -484,10 +468,9 @@
 
             console.log('📤 Enviando dados do webhook:', requestData);
 
-            const response = await fetch(`${API_CONFIG.baseUrl}/webhooks`, {
+            const response = await fetch('/api/webhooks', {
                 method: 'POST',
                 headers: {
-                    'Authorization': `Bearer ${token}`,
                     'Content-Type': 'application/json',
                     'Accept': 'application/json'
                 },
@@ -535,8 +518,6 @@
         }
 
         try {
-            const token = await getValidToken();
-
             const requestData = {
                 title: webhookData.title,
                 url: webhookData.url,
@@ -546,10 +527,9 @@
 
             console.log('📤 Enviando dados de atualização do webhook:', requestData);
 
-            const response = await fetch(`${API_CONFIG.baseUrl}/webhooks/${id}`, {
+            const response = await fetch(`/api/webhooks/${id}`, {
                 method: 'PUT',
                 headers: {
-                    'Authorization': `Bearer ${token}`,
                     'Content-Type': 'application/json',
                     'Accept': 'application/json'
                 },
@@ -586,12 +566,11 @@
         }
 
         try {
-            const token = await getValidToken();
 
-            const response = await fetch(`${API_CONFIG.baseUrl}/webhooks/${id}`, {
+
+            const response = await fetch(`/api/webhooks/${id}`, {
                 method: 'DELETE',
                 headers: {
-                    'Authorization': `Bearer ${token}`,
                     'Accept': 'application/json'
                 }
             });
