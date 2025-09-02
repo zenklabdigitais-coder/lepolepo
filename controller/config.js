@@ -60,17 +60,17 @@ const PLANS = dynamic.plans || {};
 // ============================
 const WEBHOOK_CONFIG = {
     // URL base para receber webhooks (configure conforme seu domínio)
-    BASE_URL: process.env.WEBHOOK_BASE_URL || 'https://seu-dominio.com',
-    
+    BASE_URL: dynamic.webhook?.baseUrl || 'https://seu-dominio.com',
+
     // Endpoints de webhook
     ENDPOINTS: {
         syncpay: '/webhook/syncpay',
         pushinpay: '/webhook/pushinpay'
     },
-    
+
     // Configurações de segurança
     VALIDATE_SIGNATURE: true,
-    SECRET_KEY: process.env.WEBHOOK_SECRET || 'sua-chave-secreta-aqui' // ← ALTERE AQUI
+    SECRET_KEY: dynamic.webhook?.secret || 'sua-chave-secreta-aqui'
 };
 
 // ============================
