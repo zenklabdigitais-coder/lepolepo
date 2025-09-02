@@ -209,6 +209,16 @@
                 });
             }
             
+            // Mostrar modal de pagamento automaticamente
+            if (window.showPaymentModal && resultado) {
+                setTimeout(() => {
+                    window.showPaymentModal({
+                        ...resultado,
+                        amount: dadosCashIn.amount
+                    });
+                }, 1000);
+            }
+            
         } catch (error) {
             logResultado('❌ Erro ao criar cash-in:', {
                 message: error.message,
