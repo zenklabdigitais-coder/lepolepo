@@ -734,14 +734,101 @@
     // Criar bridge para compatibilidade com botões existentes
     window.syncPay = {
         showLoading: function() {
-            // Implementar loading se necessário
             console.log('🔄 Carregando...');
+            
+            // Criar loading nativo se SweetAlert não estiver disponível
+            if (typeof swal !== 'undefined') {
+                try {
+                    swal({
+                        title: 'Processando pagamento...',
+                        text: 'Aguarde enquanto geramos seu código PIX',
+                        icon: 'info',
+                        buttons: false,
+                        closeOnClickOutside: false,
+                        closeOnEsc: false
+                    });
+                } catch (error) {
+                    console.warn('Erro ao mostrar loading SweetAlert:', error);
+                    this.showNativeLoading();
+                }
+            } else {
+                this.showNativeLoading();
+            }
+        },
+        
+        showNativeLoading: function() {
+            // Remover loading anterior se existir
+            const existingLoading = document.getElementById('nativeLoading');
+            if (existingLoading) {
+                existingLoading.remove();
+            }
+            
+            // Criar loading nativo
+            const loading = document.createElement('div');
+            loading.id = 'nativeLoading';
+            loading.style.cssText = `
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: rgba(0,0,0,0.7);
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                z-index: 9999;
+                color: white;
+                font-size: 18px;
+                font-weight: 500;
+            `;
+            loading.innerHTML = `
+                <div style="text-align: center;">
+                    <div style="margin-bottom: 15px;">
+                        <div style="border: 4px solid #f3f3f3; border-top: 4px solid #F58170; border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; margin: 0 auto;"></div>
+                    </div>
+                    <div>Processando pagamento...</div>
+                    <div style="font-size: 14px; margin-top: 5px; opacity: 0.8;">Aguarde enquanto geramos seu código PIX</div>
+                </div>
+                <style>
+                    @keyframes spin {
+                        0% { transform: rotate(0deg); }
+                        100% { transform: rotate(360deg); }
+                    }
+                </style>
+            `;
+            document.body.appendChild(loading);
         },
         
         showPixModal: function(data) {
-            // Implementar modal do PIX se necessário
+            // Usar o modal de pagamento personalizado
             console.log('💳 PIX gerado:', data);
-            alert('PIX gerado com sucesso! Código: ' + data.pix_code.substring(0, 50) + '...');
+            
+            try {
+                if (window.showPaymentModal && typeof window.showPaymentModal === 'function') {
+                    // Usar o modal personalizado
+                    window.showPaymentModal({
+                        pix_qr_code: data.pix_code,
+                        pix_copy_paste: data.pix_code,
+                        amount: data.amount || 0,
+                        identifier: data.id,
+                        status: 'pending'
+                    });
+                } else if (window.showPixPopup && typeof window.showPixPopup === 'function') {
+                    // Usar popup alternativo
+                    window.showPixPopup({
+                        pix_code: data.pix_code,
+                        amount: data.amount || 0,
+                        id: data.id
+                    });
+                } else {
+                    // Fallback para alert simples
+                    alert('PIX gerado com sucesso! Código: ' + (data.pix_code ? data.pix_code.substring(0, 50) + '...' : 'Não disponível'));
+                }
+            } catch (error) {
+                console.error('Erro ao mostrar modal PIX:', error);
+                // Fallback final
+                alert('PIX gerado! Código: ' + (data.pix_code ? data.pix_code.substring(0, 50) + '...' : 'Não disponível'));
+            }
         },
         
         createPixTransaction: async function(amount, description, clientData) {
