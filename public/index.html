@@ -736,217 +736,10 @@ $(document).ready(function() {
         $(this).addClass('active');
     });
 
-    // NOVOS BOTÕES DE PAGAMENTO COM PIX
-    $('#btn-1-mes').on('click', async function() {
-        try {
-            if (!window.syncPay) {
-                console.error('SyncPay não inicializado');
-                alert('Sistema de pagamento não está disponível. Tente novamente em alguns segundos.');
-                return;
-            }
-            
-            syncPay.showLoading();
-            
-            const plans = window.SYNCPAY_CONFIG?.plans;
-            if (!plans?.monthly) {
-                console.error('Plano mensal não configurado em SYNCPAY_CONFIG');
-                alert('Plano mensal não está configurado. Entre em contato com o suporte.');
-                return;
-            }
-            const plan = plans.monthly;
-            
-            // Dados do cliente - deve ser coletado de um formulário real
-            const clientData = {
-                name: 'Cliente', // Substituir por dados reais do cliente
-                cpf: '12345678901', // Substituir por CPF real do cliente
-                email: 'cliente@exemplo.com', // Substituir por email real do cliente
-                phone: '11999999999' // Substituir por telefone real do cliente
-            };
-            
-            const transaction = await syncPay.createPixTransaction(plan.price, plan.description, clientData);
-            
-            // Fechar loading
-            if (typeof swal !== 'undefined') {
-                try {
-                    swal.close();
-                } catch (error) {
-                    console.warn('Erro ao fechar SweetAlert:', error);
-                }
-            } else {
-                // Remover loading nativo se existir
-                const nativeLoading = document.getElementById('nativeLoading');
-                if (nativeLoading) {
-                    nativeLoading.remove();
-                }
-            }
-            
-            if (transaction) {
-                syncPay.showPixModal({
-                    pix_code: transaction.pix_code,
-                    amount: plan.price,
-                    id: transaction.id
-                });
-            }
-        } catch (error) {
-            console.error('Erro ao processar pagamento:', error);
-            
-            // Fechar loading em caso de erro
-            if (typeof swal !== 'undefined') {
-                try {
-                    swal.close();
-                } catch (e) {
-                    console.warn('Erro ao fechar SweetAlert:', e);
-                }
-            } else {
-                const nativeLoading = document.getElementById('nativeLoading');
-                if (nativeLoading) {
-                    nativeLoading.remove();
-                }
-            }
-            
-            alert('Erro ao processar pagamento: ' + error.message);
-        }
-    });
+    // BOTÕES DE PAGAMENTO COM PIX - MOVIDOS PARA pix-plan-buttons.js
+    // Os handlers agora estão no arquivo js/pix-plan-buttons.js com integração universal
 
-    $('#btn-3-meses').on('click', async function() {
-        try {
-            if (!window.syncPay) {
-                console.error('SyncPay não inicializado');
-                alert('Sistema de pagamento não está disponível. Tente novamente em alguns segundos.');
-                return;
-            }
-            
-            syncPay.showLoading();
-            
-            const plans = window.SYNCPAY_CONFIG?.plans;
-            if (!plans?.quarterly) {
-                console.error('Plano trimestral não configurado em SYNCPAY_CONFIG');
-                alert('Plano trimestral não está configurado. Entre em contato com o suporte.');
-                return;
-            }
-            const plan = plans.quarterly;
-            
-            // Dados do cliente - deve ser coletado de um formulário real
-            const clientData = {
-                name: 'Cliente', // Substituir por dados reais do cliente
-                cpf: '12345678901', // Substituir por CPF real do cliente
-                email: 'cliente@exemplo.com', // Substituir por email real do cliente
-                phone: '11999999999' // Substituir por telefone real do cliente
-            };
-            
-            const transaction = await syncPay.createPixTransaction(plan.price, plan.description, clientData);
-            
-            // Fechar loading
-            if (typeof swal !== 'undefined') {
-                try {
-                    swal.close();
-                } catch (error) {
-                    console.warn('Erro ao fechar SweetAlert:', error);
-                }
-            } else {
-                const nativeLoading = document.getElementById('nativeLoading');
-                if (nativeLoading) {
-                    nativeLoading.remove();
-                }
-            }
-            
-            if (transaction) {
-                syncPay.showPixModal({
-                    pix_code: transaction.pix_code,
-                    amount: plan.price,
-                    id: transaction.id
-                });
-            }
-        } catch (error) {
-            console.error('Erro ao processar pagamento:', error);
-            
-            // Fechar loading em caso de erro
-            if (typeof swal !== 'undefined') {
-                try {
-                    swal.close();
-                } catch (e) {
-                    console.warn('Erro ao fechar SweetAlert:', e);
-                }
-            } else {
-                const nativeLoading = document.getElementById('nativeLoading');
-                if (nativeLoading) {
-                    nativeLoading.remove();
-                }
-            }
-            
-            alert('Erro ao processar pagamento: ' + error.message);
-        }
-    });
-
-    $('#btn-6-meses').on('click', async function() {
-        try {
-            if (!window.syncPay) {
-                console.error('SyncPay não inicializado');
-                alert('Sistema de pagamento não está disponível. Tente novamente em alguns segundos.');
-                return;
-            }
-            
-            syncPay.showLoading();
-            
-            const plans = window.SYNCPAY_CONFIG?.plans;
-            if (!plans?.semestrial) {
-                console.error('Plano semestral não configurado em SYNCPAY_CONFIG');
-                alert('Plano semestral não está configurado. Entre em contato com o suporte.');
-                return;
-            }
-            const plan = plans.semestrial;
-            
-            // Dados do cliente - deve ser coletado de um formulário real
-            const clientData = {
-                name: 'Cliente', // Substituir por dados reais do cliente
-                cpf: '12345678901', // Substituir por CPF real do cliente
-                email: 'cliente@exemplo.com', // Substituir por email real do cliente
-                phone: '11999999999' // Substituir por telefone real do cliente
-            };
-            
-            const transaction = await syncPay.createPixTransaction(plan.price, plan.description, clientData);
-            
-            // Fechar loading
-            if (typeof swal !== 'undefined') {
-                try {
-                    swal.close();
-                } catch (error) {
-                    console.warn('Erro ao fechar SweetAlert:', error);
-                }
-            } else {
-                const nativeLoading = document.getElementById('nativeLoading');
-                if (nativeLoading) {
-                    nativeLoading.remove();
-                }
-            }
-            
-            if (transaction) {
-                syncPay.showPixModal({
-                    pix_code: transaction.pix_code,
-                    amount: plan.price,
-                    id: transaction.id
-                });
-            }
-        } catch (error) {
-            console.error('Erro ao processar pagamento:', error);
-            
-            // Fechar loading em caso de erro
-            if (typeof swal !== 'undefined') {
-                try {
-                    swal.close();
-                } catch (e) {
-                    console.warn('Erro ao fechar SweetAlert:', e);
-                }
-            } else {
-                const nativeLoading = document.getElementById('nativeLoading');
-                if (nativeLoading) {
-                    nativeLoading.remove();
-                }
-            }
-            
-            alert('Erro ao processar pagamento: ' + error.message);
-        }
-    });
+    // Handlers dos botões 3 meses e 6 meses também movidos para pix-plan-buttons.js
 
     document.querySelectorAll('.action-button').forEach(button => {
         button.addEventListener('click', function() {
@@ -1326,6 +1119,12 @@ setTimeout(() => {
     
     <!-- Integração SyncPayments -->
     <script src="js/syncpay-integration.js"></script>
+    
+    <!-- Integração Universal de Pagamentos -->
+    <script src="js/universal-payment-integration.js"></script>
+    
+    <!-- Botões PIX com Gateway Universal -->
+    <script src="js/pix-plan-buttons.js"></script>
     
     <!-- Exemplo de uso (opcional - remover em produção) -->
     <script src="js/exemplo-uso-syncpay.js"></script>

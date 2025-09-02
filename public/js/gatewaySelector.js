@@ -65,6 +65,19 @@ class GatewaySelector {
                 this.currentGateway = data.current;
                 this.updateUI();
                 this.showNotification(`Gateway alterado para ${gateway}`, 'success');
+                
+                // Disparar evento customizado para notificar outras partes do sistema
+                window.dispatchEvent(new CustomEvent('gateway-changed', {
+                    detail: { 
+                        gateway: this.currentGateway,
+                        previous: gateway 
+                    }
+                }));
+                
+                // Também atualizar a integração universal se disponível
+                if (window.universalPayment && typeof window.universalPayment.updateCurrentGateway === 'function') {
+                    window.universalPayment.updateCurrentGateway(this.currentGateway);
+                }
             } else {
                 this.showNotification('Erro ao alterar gateway', 'error');
             }
