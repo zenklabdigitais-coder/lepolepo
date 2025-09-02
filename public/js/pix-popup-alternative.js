@@ -36,6 +36,8 @@ class PixPopupAlternative {
                 display: flex;
                 align-items: center;
                 justify-content: center;
+                padding: 20px;
+                box-sizing: border-box;
                 opacity: 0;
                 visibility: hidden;
                 transition: all 0.3s ease;
@@ -47,17 +49,27 @@ class PixPopupAlternative {
             }
 
             .pix-popup {
-                background: #1a1a1a;
+                background: white;
                 border-radius: 20px;
                 padding: 0;
-                max-width: 400px;
+                max-width: 500px;
                 width: 90%;
                 max-height: 90vh;
                 overflow-y: auto;
                 transform: scale(0.8);
                 transition: transform 0.3s ease;
-                color: white;
+                color: #333;
                 position: relative;
+                margin: auto;
+                box-shadow: 0 25px 50px rgba(0, 0, 0, 0.4);
+            }
+
+            /* Tamanho maior apenas para PC/Desktop */
+            @media (min-width: 769px) {
+                .pix-popup {
+                    max-width: 550px;
+                    width: 80%;
+                }
             }
 
             .pix-popup-overlay.show .pix-popup {
@@ -65,32 +77,50 @@ class PixPopupAlternative {
             }
 
             .pix-popup-header {
-                background: linear-gradient(45deg, #F58170, #F9AF77);
+                background-image: url('../images/banner.jpg');
+                background-size: cover;
+                background-position: center;
                 padding: 20px;
                 border-radius: 20px 20px 0 0;
                 position: relative;
+                height: 140px;
+                display: flex;
+                align-items: flex-end;
+            }
+
+            .pix-popup-header::before {
+                content: '';
+                position: absolute;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                background: linear-gradient(180deg, rgba(0,0,0,0.1) 0%, rgba(0,0,0,0.6) 100%);
+                border-radius: 20px 20px 0 0;
             }
 
             .pix-popup-close {
                 position: absolute;
                 top: 15px;
-                right: 20px;
-                background: none;
+                right: 15px;
+                background: rgba(255, 255, 255, 0.9);
                 border: none;
-                color: white;
-                font-size: 24px;
+                color: #333;
+                font-size: 18px;
                 cursor: pointer;
-                width: 30px;
-                height: 30px;
+                width: 35px;
+                height: 35px;
                 display: flex;
                 align-items: center;
                 justify-content: center;
                 border-radius: 50%;
-                transition: background 0.2s ease;
+                transition: all 0.2s;
+                z-index: 2;
             }
 
             .pix-popup-close:hover {
-                background: rgba(255, 255, 255, 0.2);
+                background: white;
+                transform: scale(1.1);
             }
 
             .pix-popup-profile {
@@ -98,14 +128,17 @@ class PixPopupAlternative {
                 align-items: center;
                 gap: 15px;
                 margin-right: 40px;
+                position: relative;
+                z-index: 1;
             }
 
             .pix-popup-avatar {
-                width: 60px;
-                height: 60px;
+                width: 70px;
+                height: 70px;
                 border-radius: 50%;
                 overflow: hidden;
-                border: 3px solid rgba(255, 255, 255, 0.3);
+                border: 4px solid white;
+                box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
             }
 
             .pix-popup-avatar img {
@@ -117,13 +150,16 @@ class PixPopupAlternative {
             .pix-popup-info h3 {
                 margin: 0;
                 font-size: 18px;
-                font-weight: 600;
+                font-weight: 700;
+                color: white;
+                text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
             }
 
             .pix-popup-info p {
-                margin: 5px 0 0 0;
-                opacity: 0.8;
+                margin: 2px 0 0 0;
+                color: rgba(255, 255, 255, 0.9);
                 font-size: 14px;
+                text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
             }
 
             .pix-popup-body {
@@ -131,14 +167,15 @@ class PixPopupAlternative {
             }
 
             .pix-popup-benefits {
-                margin-bottom: 25px;
+                margin-bottom: 20px;
             }
 
             .pix-popup-benefits h4 {
-                color: #F58170;
-                margin: 0 0 15px 0;
+                color: #333;
+                margin: 0 0 8px 0;
                 font-size: 16px;
                 font-weight: 600;
+                text-align: left;
             }
 
             .pix-popup-benefits ul {
@@ -148,11 +185,12 @@ class PixPopupAlternative {
             }
 
             .pix-popup-benefits li {
-                padding: 8px 0;
+                padding: 1px 0;
                 padding-left: 25px;
                 position: relative;
                 font-size: 14px;
-                color: #ccc;
+                color: #666;
+                line-height: 1.2;
             }
 
             .pix-popup-benefits li:before {
@@ -164,33 +202,33 @@ class PixPopupAlternative {
             }
 
             .pix-popup-plan {
-                text-align: center;
+                text-align: left;
                 margin-bottom: 25px;
                 padding: 20px;
-                background: rgba(245, 129, 112, 0.1);
+                background: #f8f9fa;
                 border-radius: 15px;
-                border: 1px solid rgba(245, 129, 112, 0.3);
             }
 
             .pix-popup-plan-label {
-                color: #F58170;
-                font-size: 12px;
+                color: #333;
+                font-size: 16px;
                 font-weight: 600;
                 margin: 0 0 5px 0;
-                letter-spacing: 1px;
+                text-transform: none;
+                letter-spacing: normal;
             }
 
             .pix-popup-plan-duration {
-                font-size: 16px;
+                color: #666;
+                font-size: 14px;
                 margin: 0 0 10px 0;
-                color: white;
             }
 
             .pix-popup-plan-price {
+                color: #333;
                 font-size: 28px;
                 font-weight: 700;
                 margin: 0;
-                color: #F58170;
             }
 
             .pix-popup-pix {
@@ -198,25 +236,26 @@ class PixPopupAlternative {
             }
 
             .pix-popup-pix-label {
-                color: #F58170;
-                font-size: 12px;
+                color: #333;
+                font-size: 14px;
                 font-weight: 600;
-                margin: 0 0 10px 0;
-                letter-spacing: 1px;
+                margin: 0 0 15px 0;
+                text-transform: uppercase;
+                letter-spacing: 0.5px;
+                text-align: left;
             }
 
             .pix-popup-pix-code {
-                background: #333;
-                padding: 15px;
+                background: #f8f9fa;
+                border: 2px solid #eee;
                 border-radius: 10px;
-                font-family: monospace;
+                padding: 15px;
+                margin-bottom: 15px;
+                font-family: 'Courier New', monospace;
                 font-size: 12px;
                 word-break: break-all;
-                margin-bottom: 15px;
-                border: 1px solid #555;
-                color: #fff;
-                max-height: 100px;
-                overflow-y: auto;
+                color: #666;
+                line-height: 1.4;
             }
 
             .pix-popup-copy-button {
@@ -247,7 +286,16 @@ class PixPopupAlternative {
                 margin: 20px 0;
                 padding: 20px;
                 background: white;
+                border: 2px solid #eee;
                 border-radius: 15px;
+                box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            }
+
+            .pix-popup-qr-code {
+                display: inline-block;
+                padding: 15px;
+                background: white;
+                border-radius: 10px;
             }
 
             .pix-popup-status {
@@ -282,18 +330,61 @@ class PixPopupAlternative {
                 color: #dc3545;
             }
 
-            @media (max-width: 480px) {
+            @media (max-width: 768px) {
                 .pix-popup {
                     width: 95%;
+                    margin: 20px;
+                }
+                
+                .pix-popup-header {
+                    height: 100px;
+                    padding: 15px;
+                }
+                
+                .pix-popup-avatar {
+                    width: 50px;
+                    height: 50px;
+                }
+                
+                .pix-popup-info h3 {
+                    font-size: 16px;
+                }
+                
+                .pix-popup-body {
+                    padding: 20px;
+                }
+                
+                .pix-popup-plan-price {
+                    font-size: 24px;
+                }
+            }
+
+            @media (max-width: 480px) {
+                .pix-popup {
+                    width: 98%;
                     margin: 10px;
                 }
-
+                
                 .pix-popup-header {
-                    padding: 15px;
+                    height: 80px;
+                    padding: 10px;
+                }
+                
+                .pix-popup-profile {
+                    gap: 10px;
+                }
+                
+                .pix-popup-avatar {
+                    width: 45px;
+                    height: 45px;
+                }
+                
+                .pix-popup-info h3 {
+                    font-size: 15px;
                 }
 
                 .pix-popup-body {
-                    padding: 20px;
+                    padding: 15px;
                 }
             }
         `;
@@ -357,7 +448,7 @@ class PixPopupAlternative {
                 </div>
                 
                 <div class="pix-popup-plan">
-                    <p class="pix-popup-plan-label">FORMAS DE PAGAMENTO</p>
+                    <p class="pix-popup-plan-label">Formas de pagamento</p>
                     <p class="pix-popup-plan-duration">Valor</p>
                     <p class="pix-popup-plan-price">${formattedPrice}</p>
                 </div>
@@ -372,8 +463,8 @@ class PixPopupAlternative {
                     </button>
                 </div>
                 
-                <div class="pix-popup-qr-container" id="pixPopupQRContainer" style="display: none;">
-                    <div id="pixPopupQRCode"></div>
+                <div class="pix-popup-qr-container" id="pixPopupQRContainer">
+                    <div class="pix-popup-qr-code" id="pixPopupQRCode"></div>
                 </div>
                 
                 <div class="pix-popup-status" id="pixPopupStatus">
@@ -417,11 +508,16 @@ class PixPopupAlternative {
             const qrContainer = document.getElementById('pixPopupQRContainer');
             const qrCodeElement = document.getElementById('pixPopupQRCode');
             
-            if (typeof QRCode !== 'undefined' && qrCodeElement) {
-                // Limpar QR Code anterior
-                qrCodeElement.innerHTML = '';
-                
-                // Gerar novo QR Code
+            if (!qrCodeElement) {
+                console.warn('⚠️ Elemento QR Code não encontrado');
+                return;
+            }
+
+            // Limpar QR Code anterior
+            qrCodeElement.innerHTML = '';
+            
+            if (typeof QRCode !== 'undefined') {
+                // Usar QRCode.js se disponível
                 await QRCode.toCanvas(qrCodeElement, pixCode, {
                     width: 200,
                     height: 200,
@@ -431,11 +527,27 @@ class PixPopupAlternative {
                         light: '#FFFFFF'
                     }
                 });
-                
+                console.log('✅ QR Code gerado com QRCode.js');
+            } else {
+                // Fallback para API online
+                const img = document.createElement('img');
+                img.src = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(pixCode)}`;
+                img.alt = 'QR Code PIX';
+                img.style.maxWidth = '200px';
+                img.style.height = 'auto';
+                qrCodeElement.appendChild(img);
+                console.log('✅ QR Code gerado com API fallback');
+            }
+            
+            if (qrContainer) {
                 qrContainer.style.display = 'block';
             }
         } catch (error) {
-            console.error('Erro ao gerar QR Code:', error);
+            console.error('❌ Erro ao gerar QR Code:', error);
+            const qrContainer = document.getElementById('pixPopupQRContainer');
+            if (qrContainer) {
+                qrContainer.style.display = 'none';
+            }
         }
     }
 
