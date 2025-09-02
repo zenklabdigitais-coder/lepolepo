@@ -1,12 +1,14 @@
 const axios = require('axios');
+const { getConfig } = require('./loadConfig');
 
-// Token deve ser configurado via variável de ambiente por segurança
-const PUSHINPAY_TOKEN = process.env.PUSHINPAY_TOKEN || '36250|MPvURHE0gE6lqsPN0PtwDOUVISoLjSyvqYUvuDPi47f09b29';
+// Carregar configurações dinâmicas
+const cfg = getConfig();
+const PUSHINPAY_TOKEN = cfg.pushinpay?.token || '';
 
 // URLs conforme documentação oficial
 const API_BASE_PROD = 'https://api.pushinpay.com.br';
 const API_BASE_SANDBOX = 'https://api-sandbox.pushinpay.com.br';
-const API_BASE = process.env.PUSHINPAY_ENVIRONMENT === 'sandbox' ? API_BASE_SANDBOX : API_BASE_PROD;
+const API_BASE = cfg.environment === 'sandbox' ? API_BASE_SANDBOX : API_BASE_PROD;
 
 async function pushinpayGet(endpoint, config = {}) {
   return axios.get(`${API_BASE}${endpoint}`, {
@@ -167,11 +169,14 @@ async function listPayments(filters = {}) {
 
 // Função para verificar configuração e ambiente
 function getEnvironmentInfo() {
+  const cfg = getConfig();
+  const token = cfg.pushinpay?.token;
+  const environment = cfg.environment || 'production';
   return {
-    environment: process.env.PUSHINPAY_ENVIRONMENT || 'production',
-    api_base: API_BASE,
-    token_configured: !!PUSHINPAY_TOKEN,
-    token_preview: PUSHINPAY_TOKEN ? `${PUSHINPAY_TOKEN.substring(0, 10)}...` : 'Não configurado'
+    environment,
+    api_base: environment === 'sandbox' ? API_BASE_SANDBOX : API_BASE_PROD,
+    token_configured: !!token,
+    token_preview: token ? `${token.substring(0, 10)}...` : 'Não configurado'
   };
 }
 

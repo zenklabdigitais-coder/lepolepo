@@ -8,6 +8,10 @@
   "pushinpay": {
     "token": "36250|MPvURHE0gE6lqsPN0PtwDOUVISoLjSyvqYUvuDPi47f09b29"
   },
+  "webhook": {
+    "baseUrl": "https://seu-dominio.com",
+    "secret": "sua-chave-secreta-aqui"
+  },
   "model": {
     "name": "Arthur Lopes",
     "handle": "@arthur_lopes",

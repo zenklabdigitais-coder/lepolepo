@@ -5,10 +5,12 @@
 
 const express = require('express');
 const crypto = require('crypto');
+const { getConfig } = require('./loadConfig');
 
 class WebhookHandler {
     constructor() {
-        this.webhookSecret = process.env.SYNCPAY_WEBHOOK_SECRET || 'default_secret';
+        const cfg = getConfig();
+        this.webhookSecret = cfg.webhook?.secret || 'default_secret';
     }
 
     /**

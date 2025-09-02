@@ -20,6 +20,10 @@ async function main() {
   cfg.syncpay.clientSecret = await ask('SyncPay Client Secret', cfg.syncpay.clientSecret);
   cfg.pushinpay.token = await ask('PushinPay Token', cfg.pushinpay.token);
 
+  cfg.webhook = cfg.webhook || { baseUrl: 'https://seu-dominio.com', secret: 'sua-chave-secreta-aqui' };
+  cfg.webhook.baseUrl = await ask('Webhook base URL', cfg.webhook.baseUrl);
+  cfg.webhook.secret = await ask('Webhook secret', cfg.webhook.secret);
+
   cfg.model.name = await ask('Model name', cfg.model.name);
   cfg.model.handle = await ask('Model @', cfg.model.handle);
   cfg.model.bio = await ask('Model bio', cfg.model.bio);
