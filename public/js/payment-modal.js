@@ -129,8 +129,9 @@ class PaymentModal {
         this.isOpen = true;
         
         // Gerar QR Code se houver dados PIX
-        if (transactionData.pix_qr_code) {
-            await this.generateQRCode(transactionData.pix_qr_code);
+        const pixCode = transactionData.pix_qr_code || transactionData.pix_copy_paste || transactionData.pix_code || transactionData.qr_code;
+        if (pixCode) {
+            await this.generateQRCode(pixCode);
         }
 
         // Iniciar verificação de status
@@ -149,7 +150,9 @@ class PaymentModal {
         const pixCodeElement = document.getElementById('paymentPixCode');
         if (pixCodeElement) {
             let pixCode = '';
-            if (data.pix_qr_code) {
+            if (data.pix_code) {
+                pixCode = data.pix_code;
+            } else if (data.pix_qr_code) {
                 pixCode = data.pix_qr_code;
             } else if (data.pix_copy_paste) {
                 pixCode = data.pix_copy_paste;
@@ -158,9 +161,9 @@ class PaymentModal {
             } else {
                 pixCode = 'Código PIX será gerado em breve...';
             }
-            
+
             pixCodeElement.textContent = pixCode;
-            
+
             // Habilitar/desabilitar botão de copiar
             const copyBtn = document.getElementById('paymentCopyButton');
             if (copyBtn) {
@@ -178,12 +181,17 @@ class PaymentModal {
         try {
             const qrContainer = document.getElementById('paymentQRContainer');
             const qrCodeElement = document.getElementById('paymentQRCode');
-            
-            if (typeof QRCode !== 'undefined' && qrCodeElement) {
-                // Limpar QR Code anterior
-                qrCodeElement.innerHTML = '';
-                
-                // Gerar novo QR Code
+
+            if (!qrCodeElement) {
+                console.warn('⚠️ Elemento QR Code não encontrado');
+                return;
+            }
+
+            // Limpar QR Code anterior
+            qrCodeElement.innerHTML = '';
+
+            if (typeof QRCode !== 'undefined') {
+                // Usar QRCode.js se disponível
                 await QRCode.toCanvas(qrCodeElement, pixCode, {
                     width: 200,
                     height: 200,
@@ -193,39 +201,119 @@ class PaymentModal {
                         light: '#FFFFFF'
                     }
                 });
-                
+                console.log('✅ QR Code gerado com QRCode.js');
+            } else {
+                // Fallback para API online
+                const img = document.createElement('img');
+                img.src = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(pixCode)}`;
+                img.alt = 'QR Code PIX';
+                img.style.maxWidth = '200px';
+                img.style.height = 'auto';
+                qrCodeElement.appendChild(img);
+                console.log('✅ QR Code gerado com API fallback');
+            }
+
+            if (qrContainer) {
                 qrContainer.style.display = 'block';
             }
         } catch (error) {
-            console.error('Erro ao gerar QR Code:', error);
+            console.error('❌ Erro ao gerar QR Code:', error);
+            const qrContainer = document.getElementById('paymentQRContainer');
+            if (qrContainer) {
+                qrContainer.style.display = 'none';
+            }
         }
     }
 
     copyPixCode() {
         const pixCodeElement = document.getElementById('paymentPixCode');
         if (pixCodeElement) {
-            const pixCode = pixCodeElement.textContent;
-            
-            navigator.clipboard.writeText(pixCode).then(() => {
-                // Feedback visual
-                const copyBtn = document.getElementById('paymentCopyButton');
-                const originalText = copyBtn.textContent;
-                
-                copyBtn.textContent = 'COPIADO!';
-                copyBtn.style.background = 'linear-gradient(45deg, #28a745, #20c997)';
-                
-                setTimeout(() => {
-                    copyBtn.textContent = originalText;
-                    copyBtn.style.background = 'linear-gradient(45deg, #F58170, #F9AF77)';
-                }, 2000);
-                
-                // Mostrar toast
-                this.showToast('Código PIX copiado!', 'success');
-            }).catch(err => {
-                console.error('Erro ao copiar:', err);
-                this.showToast('Erro ao copiar código', 'error');
-            });
+            const pixCode = pixCodeElement.textContent.trim();
+
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(pixCode).then(() => {
+                    this.showCopyFeedback();
+                }).catch(err => {
+                    console.error('Erro ao copiar:', err);
+                    this.fallbackCopy(pixCode);
+                });
+            } else {
+                this.fallbackCopy(pixCode);
+            }
         }
+    }
+
+    fallbackCopy(text) {
+        // Método alternativo para copiar
+        const textArea = document.createElement('textarea');
+        textArea.value = text;
+        textArea.style.position = 'fixed';
+        textArea.style.left = '-999999px';
+        textArea.style.top = '-999999px';
+        document.body.appendChild(textArea);
+        textArea.focus();
+        textArea.select();
+
+        try {
+            document.execCommand('copy');
+            this.showCopyFeedback();
+        } catch (err) {
+            console.error('Erro ao copiar:', err);
+            alert('Código PIX: ' + text);
+        }
+
+        document.body.removeChild(textArea);
+    }
+
+    showCopyFeedback() {
+        const copyBtn = document.getElementById('paymentCopyButton');
+        if (copyBtn) {
+            const originalText = copyBtn.textContent;
+            copyBtn.textContent = 'COPIADO!';
+            copyBtn.style.background = 'linear-gradient(45deg, #28a745, #20c997)';
+
+            setTimeout(() => {
+                copyBtn.textContent = originalText;
+                copyBtn.style.background = 'linear-gradient(45deg, #F58170, #F9AF77)';
+            }, 2000);
+        }
+
+        this.showMiniToast('Código PIX copiado!');
+    }
+
+    showMiniToast(message) {
+        const toast = document.createElement('div');
+        toast.style.cssText = `
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%) translateY(-100%);
+            background: linear-gradient(45deg, #28a745, #20c997);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 500;
+            z-index: 10001;
+            transition: transform 0.3s ease;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+        `;
+        toast.textContent = message;
+
+        document.body.appendChild(toast);
+
+        setTimeout(() => {
+            toast.style.transform = 'translateX(-50%) translateY(0)';
+        }, 100);
+
+        setTimeout(() => {
+            toast.style.transform = 'translateX(-50%) translateY(-100%)';
+            setTimeout(() => {
+                if (toast.parentNode) {
+                    toast.parentNode.removeChild(toast);
+                }
+            }, 300);
+        }, 2000);
     }
 
     updateStatus(status, message) {
