@@ -57,15 +57,80 @@ app.post('/api/auth-token', async (req, res) => {
 
         console.log('🌐 [DEBUG] Fazendo requisição para:', 'https://api.syncpayments.com.br/api/partner/v1/auth-token');
 
-        const response = await fetch('https://api.syncpayments.com.br/api/partner/v1/auth-token', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Accept': 'application/json',
-                'User-Agent': 'SyncPay-Integration/1.0'
-            },
-            body: JSON.stringify(authData)
-        });
+        // Adicionar timeout e melhor tratamento de erro
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 30000); // 30 segundos timeout
+
+        try {
+            const response = await fetch('https://api.syncpayments.com.br/api/partner/v1/auth-token', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json',
+                    'User-Agent': 'SyncPay-Integration/1.0'
+                },
+                body: JSON.stringify(authData),
+                signal: controller.signal
+            });
+            
+            clearTimeout(timeoutId);
+            
+            console.log('📥 [DEBUG] Status da resposta:', response.status, response.statusText);
+            console.log('📋 [DEBUG] Headers da resposta:', Object.fromEntries(response.headers.entries()));
+
+            if (!response.ok) {
+                const errorText = await response.text();
+                console.error('[Auth] Erro na autenticação:', response.status, errorText);
+                
+                // Tentar parsear como JSON se possível
+                let errorData;
+                try {
+                    errorData = JSON.parse(errorText);
+                } catch (e) {
+                    errorData = { message: errorText };
+                }
+                
+                return res.status(response.status).json({
+                    message: 'Erro na autenticação com a API SyncPayments',
+                    status: response.status,
+                    statusText: response.statusText,
+                    details: errorData
+                });
+            }
+
+            const data = await response.json();
+            console.log('✅ [DEBUG] Token gerado com sucesso');
+            console.log('📋 [DEBUG] Resposta da API:', JSON.stringify(data, null, 2));
+            
+            // Validar se a resposta contém os campos obrigatórios
+            if (!data.access_token) {
+                console.error('[Auth] Token não encontrado na resposta');
+                return res.status(500).json({
+                    message: 'Resposta inválida da API',
+                    error: 'access_token não encontrado na resposta'
+                });
+            }
+            
+            res.json(data);
+            
+        } catch (fetchError) {
+            clearTimeout(timeoutId);
+            
+            if (fetchError.name === 'AbortError') {
+                console.error('[Auth] Timeout na requisição para API externa');
+                return res.status(504).json({
+                    message: 'Timeout na conexão com a API SyncPayments',
+                    error: 'A requisição demorou mais de 30 segundos'
+                });
+            }
+            
+            console.error('[Auth] Erro de rede:', fetchError.message);
+            return res.status(503).json({
+                message: 'Erro de conexão com a API SyncPayments',
+                error: fetchError.message,
+                type: 'NETWORK_ERROR'
+            });
+        }
 
         console.log('📥 [DEBUG] Status da resposta:', response.status, response.statusText);
         console.log('📋 [DEBUG] Headers da resposta:', Object.fromEntries(response.headers.entries()));
