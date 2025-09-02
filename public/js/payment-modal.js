@@ -413,31 +413,31 @@ class PaymentModal {
     }
 
     close() {
-        this.overlay.classList.remove('show');
+        if (this.overlay) {
+            this.overlay.classList.remove('show');
+        }
         this.isOpen = false;
         this.stopStatusCheck();
-        
-        // Remover modal do DOM após animação
-        setTimeout(() => {
-            if (this.overlay && this.overlay.parentNode) {
-                this.overlay.parentNode.removeChild(this.overlay);
-            }
-        }, 300);
     }
 
     formatCurrency(amount) {
-        // Se amount já está em reais (formato decimal)
-        if (amount < 100) {
-            return new Intl.NumberFormat('pt-BR', {
-                style: 'currency',
-                currency: 'BRL'
-            }).format(amount);
+        // Aceitar números em string com vírgula
+        let value = typeof amount === 'string'
+            ? parseFloat(amount.replace(',', '.'))
+            : amount;
+
+        if (isNaN(value)) value = 0;
+
+        // Se o valor possui casas decimais, assume que já está em reais
+        // Caso contrário, trata como centavos
+        if (Number.isInteger(value)) {
+            value = value / 100;
         }
-        // Se amount está em centavos
+
         return new Intl.NumberFormat('pt-BR', {
             style: 'currency',
             currency: 'BRL'
-        }).format(amount / 100);
+        }).format(value);
     }
 
     showToast(message, type = 'info') {
