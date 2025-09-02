@@ -77,7 +77,7 @@
                 console.log('💾 Token salvo no sessionStorage');
                 console.log('⏰ Token expira em:', new Date(data.expires_at).toLocaleString());
                 
-                alert('✅ Autenticação realizada com sucesso!\n\nToken de acesso salvo.');
+                // alert('✅ Autenticação realizada com sucesso!\n\nToken de acesso salvo.'); // COMENTADO - removido aviso de autenticação
             } else {
                 throw new Error('Token de acesso não encontrado na resposta');
             }

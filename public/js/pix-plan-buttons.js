@@ -23,7 +23,11 @@
                 alert('Erro ao gerar PIX.');
             } finally {
                 if (typeof swal !== 'undefined') {
-                    swal.close();
+                    try {
+                        swal.close();
+                    } catch (error) {
+                        console.warn('Erro ao fechar SweetAlert:', error);
+                    }
                 } else {
                     $('#nativeLoading').remove();
                 }
