@@ -39,8 +39,8 @@ class PaymentModal {
                         <img src="images/perfil.jpg" alt="Perfil">
                     </div>
                     <div class="payment-profile-info">
-                        <h3>Stella Beghini</h3>
-                        <p>@stella_beghini</p>
+                        <h3 class="model-name" data-config="model.name">Stella Beghini</h3>
+                        <p class="model-handle" data-config="model.handle">@stella_beghini</p>
                     </div>
                 </div>
             </div>
@@ -58,7 +58,7 @@ class PaymentModal {
                 <div class="payment-plan">
                     <p class="payment-plan-label">Formas de pagamento</p>
                     <p class="payment-plan-duration">Valor</p>
-                    <p class="payment-plan-price" id="paymentPlanPrice">R$ 15,00</p>
+                    <p class="payment-plan-price" id="paymentPlanPrice">R$ 0,00</p>
                 </div>
                 
                 <div class="payment-qr-container" id="paymentQRContainer">

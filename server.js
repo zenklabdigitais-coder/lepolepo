@@ -6,6 +6,7 @@ const fetch = require('node-fetch');
 const { syncpayGet, syncpayPost } = require('./syncpayApi');
 const WebhookHandler = require('./webhookHandler');
 const PaymentGateway = require('./paymentGateway');
+const { getConfig } = require('./loadConfig');
 
 // ============================
 // NOVO SISTEMA DE CONTROLLER
@@ -58,6 +59,18 @@ app.use((req, res, next) => {
 
 // Servir arquivos estáticos do diretório public
 app.use(express.static(path.join(__dirname, 'public')));
+
+// Rota para fornecer configurações públicas ao frontend
+app.get('/api/config', (req, res) => {
+    const cfg = getConfig();
+    res.json({
+        model: cfg.model,
+        plans: cfg.plans,
+        gateway: cfg.gateway,
+        syncpay: cfg.syncpay,
+        pushinpay: cfg.pushinpay
+    });
+});
 
 // Rota para obter token de autenticação
 app.post('/api/auth-token', async (req, res) => {

@@ -18,34 +18,24 @@
 // CONFIGURAÇÃO PRINCIPAL
 // ============================
 
-/**
- * Escolha qual gateway de pagamento usar:
- * 'syncpay' - Para usar SyncPay
- * 'pushinpay' - Para usar PushinPay
- */
-const ACTIVE_GATEWAY = 'syncpay'; // ← ALTERE AQUI PARA ESCOLHER A API
+const { getConfig } = require('../loadConfig');
+const dynamic = getConfig();
 
 /**
- * Ambiente de execução:
- * 'production' - Ambiente de produção (URLs reais)
- * 'sandbox' - Ambiente de teste/desenvolvimento
+ * Gateway ativo e ambiente definidos em app-config.json
  */
-const ENVIRONMENT = 'production'; // ← ALTERE PARA 'sandbox' SE NECESSÁRIO
+const ACTIVE_GATEWAY = dynamic.gateway || 'syncpay';
+const ENVIRONMENT = dynamic.environment || 'production';
 
 // ============================
 // CONFIGURAÇÕES SYNCPAY
 // ============================
 const SYNCPAY_CONFIG = {
-    // Credenciais de autenticação (obrigatórias)
-    CLIENT_ID: '708ddc0b-357d-4548-b158-615684caa616', // ← ALTERE AQUI
-    CLIENT_SECRET: 'c08d40e5-3049-48c9-85c0-fd3cc6ca502c', // ← ALTERE AQUI
-    
-    // URLs da API
+    CLIENT_ID: dynamic.syncpay?.clientId || '',
+    CLIENT_SECRET: dynamic.syncpay?.clientSecret || '',
     API_BASE_URL: 'https://api.syncpayments.com.br/api/partner/v1',
     AUTH_URL: 'https://api.syncpayments.com.br/api/partner/v1/auth-token',
-    
-    // Configurações adicionais
-    TIMEOUT: 30000, // 30 segundos
+    TIMEOUT: 30000,
     RETRY_ATTEMPTS: 3
 };
 
@@ -53,18 +43,17 @@ const SYNCPAY_CONFIG = {
 // CONFIGURAÇÕES PUSHINPAY
 // ============================
 const PUSHINPAY_CONFIG = {
-    // Token de autenticação (obrigatório)
-    TOKEN: '36250|MPvURHE0gE6lqsPN0PtwDOUVISoLjSyvqYUvuDPi47f09b29', // ← ALTERE AQUI
-    
-    // URLs da API
+    TOKEN: dynamic.pushinpay?.token || '',
     API_BASE_URL_PROD: 'https://api.pushinpay.com.br',
     API_BASE_URL_SANDBOX: 'https://api-sandbox.pushinpay.com.br',
-    
-    // Configurações adicionais
-    TIMEOUT: 30000, // 30 segundos
+    TIMEOUT: 30000,
     RETRY_ATTEMPTS: 3,
-    MIN_VALUE_CENTS: 50 // Valor mínimo em centavos (R$ 0,50)
+    MIN_VALUE_CENTS: 50
 };
+
+// Informações de modelo e planos
+const MODEL_INFO = dynamic.model || { name: '', handle: '', bio: '' };
+const PLANS = dynamic.plans || {};
 
 // ============================
 // CONFIGURAÇÕES WEBHOOK
@@ -204,6 +193,8 @@ module.exports = {
     PUSHINPAY_CONFIG,
     WEBHOOK_CONFIG,
     GENERAL_CONFIG,
+    MODEL_INFO,
+    PLANS,
     
     // Funções utilitárias
     validateConfig,
