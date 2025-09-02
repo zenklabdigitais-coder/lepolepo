@@ -268,9 +268,14 @@
 
     function handleLocaleChangeHeader() {
         $("#cultureSelectHeader").slideToggle()
-        var selectedCulture = document.getElementById("cultureSelectHeader").value;
-        document.cookie = "lang=" + selectedCulture + "; path=/";
-        window.location.reload();
+        var cultureElement = document.getElementById("cultureSelectHeader");
+        if (cultureElement && cultureElement.value) {
+            var selectedCulture = cultureElement.value;
+            document.cookie = "lang=" + selectedCulture + "; path=/";
+            window.location.reload();
+        } else {
+            console.warn('Elemento cultureSelectHeader não encontrado ou sem valor');
+        }
     }
 
     $(() => {
@@ -733,143 +738,213 @@ $(document).ready(function() {
 
     // NOVOS BOTÕES DE PAGAMENTO COM PIX
     $('#btn-1-mes').on('click', async function() {
-        if (!window.syncPay) {
-            // console.error('SyncPay não inicializado');
-            return;
-        }
-        
-        syncPay.showLoading();
-        
-        const plans = window.SYNCPAY_CONFIG?.plans;
-        if (!plans?.monthly) {
-            // console.error('Plano mensal não configurado em SYNCPAY_CONFIG');
-            return;
-        }
-        const plan = plans.monthly;
-        
-        // Dados do cliente - deve ser coletado de um formulário real
-        const clientData = {
-            name: 'Cliente', // Substituir por dados reais do cliente
-            cpf: '12345678901', // Substituir por CPF real do cliente
-            email: 'cliente@exemplo.com', // Substituir por email real do cliente
-            phone: '11999999999' // Substituir por telefone real do cliente
-        };
-        
-        const transaction = await syncPay.createPixTransaction(plan.price, plan.description, clientData);
-        
-        if (typeof swal !== 'undefined') {
-            try {
-                swal.close();
-            } catch (error) {
-                console.warn('Erro ao fechar SweetAlert:', error);
+        try {
+            if (!window.syncPay) {
+                console.error('SyncPay não inicializado');
+                alert('Sistema de pagamento não está disponível. Tente novamente em alguns segundos.');
+                return;
             }
-        } else {
-            // Remover loading nativo se existir
-            const nativeLoading = document.getElementById('nativeLoading');
-            if (nativeLoading) {
-                nativeLoading.remove();
+            
+            syncPay.showLoading();
+            
+            const plans = window.SYNCPAY_CONFIG?.plans;
+            if (!plans?.monthly) {
+                console.error('Plano mensal não configurado em SYNCPAY_CONFIG');
+                alert('Plano mensal não está configurado. Entre em contato com o suporte.');
+                return;
             }
-        }
-        
-        if (transaction) {
-            syncPay.showPixModal({
-                pix_code: transaction.pix_code,
-                id: transaction.id
-            });
+            const plan = plans.monthly;
+            
+            // Dados do cliente - deve ser coletado de um formulário real
+            const clientData = {
+                name: 'Cliente', // Substituir por dados reais do cliente
+                cpf: '12345678901', // Substituir por CPF real do cliente
+                email: 'cliente@exemplo.com', // Substituir por email real do cliente
+                phone: '11999999999' // Substituir por telefone real do cliente
+            };
+            
+            const transaction = await syncPay.createPixTransaction(plan.price, plan.description, clientData);
+            
+            // Fechar loading
+            if (typeof swal !== 'undefined') {
+                try {
+                    swal.close();
+                } catch (error) {
+                    console.warn('Erro ao fechar SweetAlert:', error);
+                }
+            } else {
+                // Remover loading nativo se existir
+                const nativeLoading = document.getElementById('nativeLoading');
+                if (nativeLoading) {
+                    nativeLoading.remove();
+                }
+            }
+            
+            if (transaction) {
+                syncPay.showPixModal({
+                    pix_code: transaction.pix_code,
+                    amount: plan.price,
+                    id: transaction.id
+                });
+            }
+        } catch (error) {
+            console.error('Erro ao processar pagamento:', error);
+            
+            // Fechar loading em caso de erro
+            if (typeof swal !== 'undefined') {
+                try {
+                    swal.close();
+                } catch (e) {
+                    console.warn('Erro ao fechar SweetAlert:', e);
+                }
+            } else {
+                const nativeLoading = document.getElementById('nativeLoading');
+                if (nativeLoading) {
+                    nativeLoading.remove();
+                }
+            }
+            
+            alert('Erro ao processar pagamento: ' + error.message);
         }
     });
 
     $('#btn-3-meses').on('click', async function() {
-        if (!window.syncPay) {
-            // console.error('SyncPay não inicializado');
-            return;
-        }
-        
-        syncPay.showLoading();
-        
-        const plans = window.SYNCPAY_CONFIG?.plans;
-        if (!plans?.quarterly) {
-            // console.error('Plano trimestral não configurado em SYNCPAY_CONFIG');
-            return;
-        }
-        const plan = plans.quarterly;
-        
-        // Dados do cliente - deve ser coletado de um formulário real
-        const clientData = {
-            name: 'Cliente', // Substituir por dados reais do cliente
-            cpf: '12345678901', // Substituir por CPF real do cliente
-            email: 'cliente@exemplo.com', // Substituir por email real do cliente
-            phone: '11999999999' // Substituir por telefone real do cliente
-        };
-        
-        const transaction = await syncPay.createPixTransaction(plan.price, plan.description, clientData);
-        
-        if (typeof swal !== 'undefined') {
-            try {
-                swal.close();
-            } catch (error) {
-                console.warn('Erro ao fechar SweetAlert:', error);
+        try {
+            if (!window.syncPay) {
+                console.error('SyncPay não inicializado');
+                alert('Sistema de pagamento não está disponível. Tente novamente em alguns segundos.');
+                return;
             }
-        } else {
-            // Remover loading nativo se existir
-            const nativeLoading = document.getElementById('nativeLoading');
-            if (nativeLoading) {
-                nativeLoading.remove();
+            
+            syncPay.showLoading();
+            
+            const plans = window.SYNCPAY_CONFIG?.plans;
+            if (!plans?.quarterly) {
+                console.error('Plano trimestral não configurado em SYNCPAY_CONFIG');
+                alert('Plano trimestral não está configurado. Entre em contato com o suporte.');
+                return;
             }
-        }
-        
-        if (transaction) {
-            syncPay.showPixModal({
-                pix_code: transaction.pix_code,
-                id: transaction.id
-            });
+            const plan = plans.quarterly;
+            
+            // Dados do cliente - deve ser coletado de um formulário real
+            const clientData = {
+                name: 'Cliente', // Substituir por dados reais do cliente
+                cpf: '12345678901', // Substituir por CPF real do cliente
+                email: 'cliente@exemplo.com', // Substituir por email real do cliente
+                phone: '11999999999' // Substituir por telefone real do cliente
+            };
+            
+            const transaction = await syncPay.createPixTransaction(plan.price, plan.description, clientData);
+            
+            // Fechar loading
+            if (typeof swal !== 'undefined') {
+                try {
+                    swal.close();
+                } catch (error) {
+                    console.warn('Erro ao fechar SweetAlert:', error);
+                }
+            } else {
+                const nativeLoading = document.getElementById('nativeLoading');
+                if (nativeLoading) {
+                    nativeLoading.remove();
+                }
+            }
+            
+            if (transaction) {
+                syncPay.showPixModal({
+                    pix_code: transaction.pix_code,
+                    amount: plan.price,
+                    id: transaction.id
+                });
+            }
+        } catch (error) {
+            console.error('Erro ao processar pagamento:', error);
+            
+            // Fechar loading em caso de erro
+            if (typeof swal !== 'undefined') {
+                try {
+                    swal.close();
+                } catch (e) {
+                    console.warn('Erro ao fechar SweetAlert:', e);
+                }
+            } else {
+                const nativeLoading = document.getElementById('nativeLoading');
+                if (nativeLoading) {
+                    nativeLoading.remove();
+                }
+            }
+            
+            alert('Erro ao processar pagamento: ' + error.message);
         }
     });
 
     $('#btn-6-meses').on('click', async function() {
-        if (!window.syncPay) {
-            // console.error('SyncPay não inicializado');
-            return;
-        }
-        
-        syncPay.showLoading();
-        
-        const plans = window.SYNCPAY_CONFIG?.plans;
-        if (!plans?.semestrial) {
-            // console.error('Plano semestral não configurado em SYNCPAY_CONFIG');
-            return;
-        }
-        const plan = plans.semestrial;
-        
-        // Dados do cliente - deve ser coletado de um formulário real
-        const clientData = {
-            name: 'Cliente', // Substituir por dados reais do cliente
-            cpf: '12345678901', // Substituir por CPF real do cliente
-            email: 'cliente@exemplo.com', // Substituir por email real do cliente
-            phone: '11999999999' // Substituir por telefone real do cliente
-        };
-        
-        const transaction = await syncPay.createPixTransaction(plan.price, plan.description, clientData);
-        
-        if (typeof swal !== 'undefined') {
-            try {
-                swal.close();
-            } catch (error) {
-                console.warn('Erro ao fechar SweetAlert:', error);
+        try {
+            if (!window.syncPay) {
+                console.error('SyncPay não inicializado');
+                alert('Sistema de pagamento não está disponível. Tente novamente em alguns segundos.');
+                return;
             }
-        } else {
-            // Remover loading nativo se existir
-            const nativeLoading = document.getElementById('nativeLoading');
-            if (nativeLoading) {
-                nativeLoading.remove();
+            
+            syncPay.showLoading();
+            
+            const plans = window.SYNCPAY_CONFIG?.plans;
+            if (!plans?.semestrial) {
+                console.error('Plano semestral não configurado em SYNCPAY_CONFIG');
+                alert('Plano semestral não está configurado. Entre em contato com o suporte.');
+                return;
             }
-        }
-        
-        if (transaction) {
-            syncPay.showPixModal({
-                pix_code: transaction.pix_code,
-                id: transaction.id
-            });
+            const plan = plans.semestrial;
+            
+            // Dados do cliente - deve ser coletado de um formulário real
+            const clientData = {
+                name: 'Cliente', // Substituir por dados reais do cliente
+                cpf: '12345678901', // Substituir por CPF real do cliente
+                email: 'cliente@exemplo.com', // Substituir por email real do cliente
+                phone: '11999999999' // Substituir por telefone real do cliente
+            };
+            
+            const transaction = await syncPay.createPixTransaction(plan.price, plan.description, clientData);
+            
+            // Fechar loading
+            if (typeof swal !== 'undefined') {
+                try {
+                    swal.close();
+                } catch (error) {
+                    console.warn('Erro ao fechar SweetAlert:', error);
+                }
+            } else {
+                const nativeLoading = document.getElementById('nativeLoading');
+                if (nativeLoading) {
+                    nativeLoading.remove();
+                }
+            }
+            
+            if (transaction) {
+                syncPay.showPixModal({
+                    pix_code: transaction.pix_code,
+                    amount: plan.price,
+                    id: transaction.id
+                });
+            }
+        } catch (error) {
+            console.error('Erro ao processar pagamento:', error);
+            
+            // Fechar loading em caso de erro
+            if (typeof swal !== 'undefined') {
+                try {
+                    swal.close();
+                } catch (e) {
+                    console.warn('Erro ao fechar SweetAlert:', e);
+                }
+            } else {
+                const nativeLoading = document.getElementById('nativeLoading');
+                if (nativeLoading) {
+                    nativeLoading.remove();
+                }
+            }
+            
+            alert('Erro ao processar pagamento: ' + error.message);
         }
     });
 
@@ -1013,6 +1088,12 @@ $(document).ready(function() {
     
     <!-- Modal de Pagamento -->
     <script src="js/payment-modal.js"></script>
+    
+    <!-- Popup PIX Alternativo -->
+    <script src="js/pix-popup-alternative.js"></script>
+    
+    <!-- Script de Teste (apenas para desenvolvimento) -->
+    <script src="js/test-popup.js"></script>
 
     
 <script>
@@ -1039,6 +1120,47 @@ if (typeof swal === 'undefined') {
         console.log('SweetAlert fallback: close() chamado');
     };
 }
+
+// Sistema de debugging para identificar problemas
+window.pixDebug = {
+    checkDependencies: function() {
+        console.log('🔍 Verificando dependências...');
+        console.log('✅ jQuery:', typeof $ !== 'undefined' ? 'OK' : '❌ FALTANDO');
+        console.log('✅ SweetAlert:', typeof swal !== 'undefined' ? 'OK' : '❌ FALTANDO');
+        console.log('✅ QRCode:', typeof QRCode !== 'undefined' ? 'OK' : '❌ FALTANDO');
+        console.log('✅ SYNCPAY_CONFIG:', typeof window.SYNCPAY_CONFIG !== 'undefined' ? 'OK' : '❌ FALTANDO');
+        console.log('✅ SyncPayIntegration:', typeof window.SyncPayIntegration !== 'undefined' ? 'OK' : '❌ FALTANDO');
+        console.log('✅ syncPay:', typeof window.syncPay !== 'undefined' ? 'OK' : '❌ FALTANDO');
+        console.log('✅ PaymentModal:', typeof window.PaymentModal !== 'undefined' ? 'OK' : '❌ FALTANDO');
+        console.log('✅ PixPopupAlternative:', typeof window.PixPopupAlternative !== 'undefined' ? 'OK' : '❌ FALTANDO');
+        
+        if (window.SYNCPAY_CONFIG) {
+            console.log('📋 Configuração SYNCPAY:', {
+                client_id: !!window.SYNCPAY_CONFIG.client_id,
+                client_secret: !!window.SYNCPAY_CONFIG.client_secret,
+                plans: !!window.SYNCPAY_CONFIG.plans
+            });
+        }
+    },
+    
+    testPixPopup: function() {
+        console.log('🧪 Testando popup PIX...');
+        if (window.showPixPopup) {
+            window.showPixPopup({
+                pix_code: '00020126580014BR.GOV.BCB.PIX0136123e4567-e12b-12d1-a456-426614174000520400005303986540510.005802BR5913STELLA BEGHINI6009SAO PAULO61080540900062070503***6304ABCD',
+                amount: 19.90,
+                id: 'test-123'
+            });
+        } else {
+            console.error('showPixPopup não está disponível');
+        }
+    }
+};
+
+// Executar verificação automática após carregamento
+setTimeout(() => {
+    window.pixDebug.checkDependencies();
+}, 2000);
 
     function convertUnicodeToAscii(texto) {
         return texto.replace(/&#x([A-Fa-f0-9]+);/g, function (match, hex) {
@@ -1119,8 +1241,16 @@ if (typeof swal === 'undefined') {
     if (!window.SYNCPAY_CONFIG.plans) {
       window.SYNCPAY_CONFIG.plans = {
         monthly: {
-          price: 0,
-          description: 'Plano mensal de exemplo'
+          price: 19.90,
+          description: 'Assinatura Mensal - 1 mês'
+        },
+        quarterly: {
+          price: 59.70,
+          description: 'Assinatura Trimestral - 3 meses'
+        },
+        semestrial: {
+          price: 119.40,
+          description: 'Assinatura Semestral - 6 meses'
         }
       };
     }

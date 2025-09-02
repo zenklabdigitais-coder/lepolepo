@@ -332,25 +332,84 @@ class PaymentModal {
     showToast(message, type = 'info') {
         // Usar SweetAlert se disponível
         if (typeof swal !== 'undefined') {
-            swal({
-                title: message,
-                icon: type === 'success' ? 'success' : type === 'error' ? 'error' : 'info',
-                timer: 3000,
-                buttons: false
-            }).then((result) => {
-                // Verificar se result existe antes de tentar acessar propriedades
-                if (result && result.value !== undefined) {
-                    // Processar resultado se necessário
-                    console.log('Toast result:', result.value);
-                }
-            }).catch((error) => {
-                // Capturar erros do SweetAlert
-                console.warn('SweetAlert toast error:', error);
-            });
+            try {
+                swal({
+                    title: message,
+                    icon: type === 'success' ? 'success' : type === 'error' ? 'error' : 'info',
+                    timer: 3000,
+                    buttons: false
+                }).then((result) => {
+                    // Verificar se result existe antes de tentar acessar propriedades
+                    if (result && typeof result === 'object' && 'value' in result) {
+                        // Processar resultado se necessário
+                        console.log('Toast result:', result.value);
+                    } else {
+                        // SweetAlert pode retornar undefined em alguns casos
+                        console.log('Toast completed without result value');
+                    }
+                }).catch((error) => {
+                    // Capturar erros do SweetAlert
+                    console.warn('SweetAlert toast error:', error);
+                });
+            } catch (error) {
+                console.warn('Erro ao inicializar SweetAlert:', error);
+                // Fallback para toast nativo
+                this.showNativeToast(message, type);
+            }
         } else {
-            // Fallback para alert simples
-            alert(message);
+            // Fallback para toast nativo
+            this.showNativeToast(message, type);
         }
+    }
+
+    showNativeToast(message, type = 'info') {
+        // Criar toast nativo como alternativa
+        const toast = document.createElement('div');
+        toast.className = `payment-toast payment-toast-${type}`;
+        toast.innerHTML = `
+            <div class="payment-toast-content">
+                <span class="payment-toast-icon">
+                    ${type === 'success' ? '✓' : type === 'error' ? '✗' : 'ℹ'}
+                </span>
+                <span class="payment-toast-message">${message}</span>
+            </div>
+        `;
+        
+        // Adicionar estilos inline
+        toast.style.cssText = `
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 10000;
+            padding: 15px 20px;
+            border-radius: 8px;
+            color: white;
+            font-weight: 500;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            transform: translateX(100%);
+            transition: transform 0.3s ease;
+            max-width: 300px;
+            background: ${type === 'success' ? 'linear-gradient(45deg, #28a745, #20c997)' : 
+                       type === 'error' ? 'linear-gradient(45deg, #dc3545, #c82333)' : 
+                       'linear-gradient(45deg, #17a2b8, #138496)'};
+        `;
+        
+        document.body.appendChild(toast);
+        
+        // Animar entrada
+        setTimeout(() => {
+            toast.style.transform = 'translateX(0)';
+        }, 100);
+        
+        // Remover após 3 segundos
+        setTimeout(() => {
+            toast.style.transform = 'translateX(100%)';
+            setTimeout(() => {
+                if (toast.parentNode) {
+                    toast.parentNode.removeChild(toast);
+                }
+            }, 300);
+        }, 3000);
     }
 }
 
