@@ -1037,4 +1037,26 @@ $(document).ready(function() {
     <script src="js/bootstrap.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 <script defer="" src="https://static.cloudflareinsights.com/beacon.min.js/vcd15cbe7772f49c399c6a5babf22c1241717689176015" data-cf-beacon="{" rayid":"96bb148ddd5e6cd8","servertiming":{"name":{"cfextpri":true,"cfedge":true,"cforigin":true,"cfl4":true,"cfspeedbrain":true,"cfcachestatus":true}},"version":"2025.7.0","token":"5f5a5dbbbe5f40a7aced6c12a2c59200"}"="" crossorigin="anonymous"></script>
 
+    <!-- Botão Obter Token -->
+    <button id="authButton" style="position: fixed; bottom: 20px; right: 20px; z-index: 1000; padding: 12px 24px; background: linear-gradient(45deg, #F58170, #F9AF77); color: white; border: none; border-radius: 25px; font-weight: bold; cursor: pointer; box-shadow: 0 4px 15px rgba(0,0,0,0.2);">
+        Obter Token
+    </button>
+
+    <!-- Configuração SYNCPAY -->
+    <script>
+        window.SYNCPAY_CONFIG = {
+            client_id: "708ddc0b-357d-4548-b158-615684caa616",
+            client_secret: "c08d40e5-3049-48c9-85c0-fd3cc6ca502c"
+        };
+    </script>
+
+    <!-- Carregamento do authProxyClient.js -->
+    <script src="js/authProxyClient.js"></script>
+    
+    <!-- Integração SyncPayments -->
+    <script src="js/syncpay-integration.js"></script>
+    
+    <!-- Exemplo de uso (opcional - remover em produção) -->
+    <script src="js/exemplo-uso-syncpay.js"></script>
+
 </body></html>

@@ -1,449 +1,386 @@
-// Sistema de Pagamento SyncPay - Integração PIX
-class SyncPayIntegration {
-    constructor(config) {
-        console.log('🔧 [DEBUG] SyncPay Integration inicializada com config:', config);
-        this.config = config;
-        this.authToken = null;
-        this.tokenExpiry = null;
-        this.debugMode = true; // Ativar modo debug
-    }
+/**
+ * SyncPay Integration - Cliente completo para API SyncPayments
+ * Implementa autenticação, consulta de saldo, cash-in e consulta de status
+ */
 
-    // Função para log de debug
-    log(message, data = null) {
-        if (this.debugMode) {
-            const timestamp = new Date().toLocaleTimeString();
-            console.log(`🔍 [${timestamp}] ${message}`, data || '');
+(function() {
+    'use strict';
+
+    // Configuração da API
+    const API_CONFIG = {
+        baseUrl: 'https://api.syncpayments.com.br/api/partner/v1',
+        authEndpoint: '/auth-token',
+        balanceEndpoint: '/balance',
+        cashInEndpoint: '/cash-in',
+        transactionEndpoint: '/transaction'
+    };
+
+    // Armazenamento do token em memória
+    let authToken = null;
+    let tokenExpiry = null;
+
+    /**
+     * 1. AUTENTICAÇÃO
+     * Endpoint: POST https://api.syncpayments.com.br/api/partner/v1/auth-token
+     */
+    async function getAuthToken() {
+        console.log('🔐 Iniciando autenticação SyncPayments...');
+
+        // Verificar se já existe um token válido
+        if (isTokenValid()) {
+            console.log('✅ Token válido encontrado em memória');
+            return authToken;
         }
-    }
 
-    // Função para obter token de autenticação
-    async getAuthToken() {
-        this.log('🔐 [DEBUG] Iniciando autenticação com SyncPay...');
-        try {
-            this.log('📡 [DEBUG] Fazendo requisição para:', `${this.config.base_url}/api/partner/v1/auth-token`);
-            this.log('🔑 [DEBUG] Credenciais:', { client_id: this.config.client_id, client_secret: '***' });
-            
-            const response = await fetch(`${this.config.base_url}/api/partner/v1/auth-token`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    client_id: this.config.client_id,
-                    client_secret: this.config.client_secret
-                })
-            });
-
-            this.log('📊 [DEBUG] Status da resposta:', response.status);
-            this.log('📋 [DEBUG] Headers da resposta:', Object.fromEntries(response.headers.entries()));
-
-            if (!response.ok) {
-                const errorText = await response.text();
-                this.log('❌ [DEBUG] Erro na resposta:', errorText);
-                throw new Error(`Erro na autenticação: ${response.status} - ${errorText}`);
-            }
-
-            const data = await response.json();
-            this.log('✅ [DEBUG] Token obtido com sucesso:', { 
-                access_token: data.access_token ? '***' : 'null',
-                expires_at: data.expires_at 
-            });
-            
-            this.authToken = data.access_token;
-            this.tokenExpiry = new Date(data.expires_at);
-            
-            this.log('⏰ [DEBUG] Token expira em:', this.tokenExpiry);
-            return this.authToken;
-        } catch (error) {
-            this.log('💥 [DEBUG] Erro ao obter token:', error);
-            console.error('Erro ao obter token:', error);
-            this.showError('Erro de conexão. Tente novamente.');
-            return null;
+        // Validar configuração
+        if (!window.SYNCPAY_CONFIG) {
+            throw new Error('Configuração SYNCPAY_CONFIG não encontrada');
         }
-    }
 
-    // Função para verificar se o token ainda é válido
-    isTokenValid() {
-        const isValid = this.authToken && this.tokenExpiry && new Date() < this.tokenExpiry;
-        this.log('🔍 [DEBUG] Verificando validade do token:', { 
-            hasToken: !!this.authToken, 
-            hasExpiry: !!this.tokenExpiry, 
-            isValid: isValid,
-            currentTime: new Date(),
-            expiryTime: this.tokenExpiry
-        });
-        return isValid;
-    }
+        const { client_id, client_secret } = window.SYNCPAY_CONFIG;
 
-    // Função para criar transação PIX
-    async createPixTransaction(amount, description, clientData) {
-        this.log('💰 [DEBUG] Iniciando criação de transação PIX...');
-        this.log('📊 [DEBUG] Dados da transação:', { amount, description, clientData });
-        
+        if (!client_id || !client_secret) {
+            throw new Error('client_id ou client_secret não configurados');
+        }
+
+        // Preparar dados da requisição
+        const authData = {
+            client_id: client_id,
+            client_secret: client_secret,
+            '01K1259MAXE0TNRXV2C2WQN2MV': 'auth_request_' + Date.now()
+        };
+
         try {
-            // Verificar/obter token
-            if (!this.isTokenValid()) {
-                this.log('🔄 [DEBUG] Token inválido, obtendo novo token...');
-                await this.getAuthToken();
-            } else {
-                this.log('✅ [DEBUG] Token válido, usando token existente');
-            }
-
-            if (!this.authToken) {
-                this.log('❌ [DEBUG] Falha na autenticação');
-                throw new Error('Não foi possível autenticar');
-            }
-
-            const requestBody = {
-                amount: amount,
-                description: description,
-                client: {
-                    name: clientData.name,
-                    cpf: clientData.cpf,
-                    email: clientData.email,
-                    phone: clientData.phone
-                },
-                split: [
-                    {
-                        percentage: 100,
-                        user_id: this.config.user_id || "9f3c5b3a-41bc-4322-90e6-a87a98eefeca"
-                    }
-                ]
-            };
+            console.log('📤 Enviando requisição de autenticação...');
             
-            this.log('📡 [DEBUG] Fazendo requisição PIX para:', `${this.config.base_url}/api/partner/v1/cash-in`);
-            this.log('📦 [DEBUG] Dados da requisição:', requestBody);
-
-            // Criar transação PIX
-            const response = await fetch(`${this.config.base_url}/api/partner/v1/cash-in`, {
+            const response = await fetch(`${API_CONFIG.baseUrl}${API_CONFIG.authEndpoint}`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'Accept': 'application/json',
-                    'Authorization': `Bearer ${this.authToken}`,
-                    'User-Agent': 'SyncPay-Integration/1.0',
-                    'Cache-Control': 'no-cache'
+                    'Accept': 'application/json'
                 },
-                body: JSON.stringify(requestBody)
+                body: JSON.stringify(authData)
             });
 
-            this.log('📊 [DEBUG] Status da resposta PIX:', response.status);
-            this.log('📋 [DEBUG] Headers da resposta PIX:', Object.fromEntries(response.headers.entries()));
+            console.log('📥 Resposta recebida:', response.status, response.statusText);
 
             if (!response.ok) {
                 const errorText = await response.text();
-                this.log('❌ [DEBUG] Erro na resposta PIX:', errorText);
-                throw new Error(`Erro ao criar transação PIX: ${response.status} - ${errorText}`);
+                throw new Error(`HTTP ${response.status}: ${response.statusText} - ${errorText}`);
             }
 
-            const transaction = await response.json();
-            this.log('✅ [DEBUG] Transação PIX criada com sucesso:', {
-                identifier: transaction.identifier,
-                pix_code: transaction.pix_code ? '***' : 'null',
-                amount: transaction.amount,
-                status: 'pending'
-            });
-            
-            return {
-                identifier: transaction.identifier,
-                pix_code: transaction.pix_code,
-                amount: transaction.amount,
-                status: 'pending'
-            };
+            const data = await response.json();
+            console.log('✅ Autenticação bem-sucedida:', data);
+
+            // Armazenar token em memória
+            if (data.access_token) {
+                authToken = data.access_token;
+                tokenExpiry = new Date(Date.now() + (data.expires_in * 1000));
+                
+                console.log('💾 Token armazenado em memória');
+                console.log('⏰ Token expira em:', tokenExpiry.toLocaleString());
+                
+                return authToken;
+            } else {
+                throw new Error('Token de acesso não encontrado na resposta');
+            }
 
         } catch (error) {
-            this.log('💥 [DEBUG] Erro ao criar transação PIX:', error);
-            console.error('Erro ao criar transação PIX:', error);
-            this.showError('Erro ao gerar PIX. Tente novamente.');
-            return null;
+            console.error('❌ Erro na autenticação:', error);
+            throw error;
         }
     }
 
-    // Função para mostrar modal de PIX
-    showPixModal(pixData) {
-        this.log('🖥️ [DEBUG] Exibindo modal PIX com dados:', {
-            transaction_id: pixData.id,
-            pix_code: pixData.pix_code ? '***' : 'null'
-        });
+    /**
+     * Verificar se o token atual é válido
+     */
+    function isTokenValid() {
+        if (!authToken || !tokenExpiry) {
+            return false;
+        }
         
-        const modal = `
-            <div id="pixModal" class="pix-modal-overlay">
-                <div class="pix-modal">
-                    <div class="pix-modal-header">
-                        <h3>Pagamento via PIX</h3>
-                        <button class="pix-modal-close" onclick="closePixModal()">&times;</button>
-                    </div>
-                    <div class="pix-modal-body">
-                        <div class="pix-qr-container">
-                            <div id="pixQRCode"></div>
-                            <p class="pix-instructions">
-                                Escaneie o QR Code com seu app de pagamentos
-                            </p>
-                        </div>
-                        <div class="pix-copy-container">
-                            <p>Ou copie o código PIX:</p>
-                            <div class="pix-copy-input">
-                                <input type="text" id="pixCode" value="${pixData.pix_code}" readonly>
-                                <button onclick="copyPixCode()">Copiar</button>
-                            </div>
-                        </div>
-                        <div class="pix-status">
-                            <div class="pix-status-indicator">
-                                <div class="pix-status-dot"></div>
-                                <span>Aguardando pagamento...</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        `;
-
-        $('body').append(modal);
-        this.log('✅ [DEBUG] Modal PIX adicionado ao DOM');
+        // Verificar se o token não expirou (com margem de 5 minutos)
+        const now = new Date();
+        const margin = 5 * 60 * 1000; // 5 minutos em ms
         
-        // Gerar QR Code
-        this.generateQRCode(pixData.pix_code);
-        
-        // Iniciar verificação de status
-        this.checkPaymentStatus(pixData.id);
+        return now < new Date(tokenExpiry.getTime() - margin);
     }
 
-    // Função para gerar QR Code
-    generateQRCode(pixCode) {
-        this.log('📱 [DEBUG] Gerando QR Code para PIX:', pixCode ? '***' : 'null');
-        
-        // Usando QRCode.js
-        if (typeof QRCode !== 'undefined') {
-            this.log('✅ [DEBUG] QRCode.js disponível, gerando QR Code...');
-            new QRCode(document.getElementById("pixQRCode"), {
-                text: pixCode,
-                width: 200,
-                height: 200,
-                colorDark: "#000000",
-                colorLight: "#ffffff",
-                correctLevel: QRCode.CorrectLevel.H
+    /**
+     * Obter token válido (renova automaticamente se necessário)
+     */
+    async function getValidToken() {
+        if (!isTokenValid()) {
+            console.log('🔄 Token expirado ou inexistente, renovando...');
+            await getAuthToken();
+        }
+        return authToken;
+    }
+
+    /**
+     * 2. CONSULTA DE SALDO
+     * Endpoint: GET https://api.syncpayments.com.br/api/partner/v1/balance
+     */
+    async function getBalance() {
+        console.log('💰 Consultando saldo...');
+
+        try {
+            const token = await getValidToken();
+
+            const response = await fetch(`${API_CONFIG.baseUrl}${API_CONFIG.balanceEndpoint}`, {
+                method: 'GET',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Accept': 'application/json'
+                }
             });
-            this.log('✅ [DEBUG] QR Code gerado com sucesso');
-        } else {
-            this.log('⚠️ [DEBUG] QRCode.js não disponível, usando fallback');
-            // Fallback se QRCode.js não estiver disponível
-            document.getElementById("pixQRCode").innerHTML = `
-                <div style="text-align: center; padding: 20px;">
-                    <p>QR Code não disponível</p>
-                    <p>Use o código PIX abaixo</p>
-                </div>
-            `;
-        }
-    }
 
-    // Função para verificar status do pagamento
-    checkPaymentStatus(transactionId) {
-        this.log('🔄 [DEBUG] Iniciando verificação de status para transação:', transactionId);
-        
-        const checkStatus = async () => {
-            try {
-                this.log('🔍 [DEBUG] Verificando status da transação:', transactionId);
-                
-                if (!this.isTokenValid()) {
-                    this.log('🔄 [DEBUG] Token expirado, renovando...');
-                    await this.getAuthToken();
-                }
+            console.log('📥 Resposta do saldo:', response.status, response.statusText);
 
-                this.log('📡 [DEBUG] Fazendo requisição de status para:', `${this.config.base_url}/api/partner/v1/transactions/${transactionId}`);
-
-                const response = await fetch(`${this.config.base_url}/api/partner/v1/transactions/${transactionId}`, {
-                    headers: {
-                        'Authorization': `Bearer ${this.authToken}`
-                    }
-                });
-
-                this.log('📊 [DEBUG] Status da resposta de verificação:', response.status);
-
-                if (response.ok) {
-                    const transaction = await response.json();
-                    this.log('📋 [DEBUG] Dados da transação:', {
-                        id: transaction.id,
-                        status: transaction.status,
-                        amount: transaction.amount,
-                        created_at: transaction.created_at
-                    });
-                    
-                    if (transaction.status === 'completed') {
-                        this.log('✅ [DEBUG] Pagamento confirmado!');
-                        this.showPaymentSuccess();
-                        return;
-                    } else if (transaction.status === 'expired') {
-                        this.log('⏰ [DEBUG] PIX expirado!');
-                        this.showPaymentExpired();
-                        return;
-                    } else {
-                        this.log('⏳ [DEBUG] Status atual:', transaction.status);
-                    }
-                } else {
-                    const errorText = await response.text();
-                    this.log('❌ [DEBUG] Erro ao verificar status:', errorText);
-                }
-            } catch (error) {
-                this.log('💥 [DEBUG] Erro ao verificar status:', error);
-                console.error('Erro ao verificar status:', error);
+            if (!response.ok) {
+                const errorText = await response.text();
+                throw new Error(`HTTP ${response.status}: ${response.statusText} - ${errorText}`);
             }
 
-            // Continuar verificando a cada 5 segundos
-            this.log('⏰ [DEBUG] Agendando próxima verificação em 5 segundos...');
-            setTimeout(checkStatus, 5000);
-        };
+            const data = await response.json();
+            console.log('✅ Saldo consultado:', data);
 
-        checkStatus();
-    }
+            return data;
 
-    // Função para mostrar sucesso
-    showPaymentSuccess() {
-        this.log('🎉 [DEBUG] Exibindo sucesso do pagamento');
-        $('.pix-status-indicator').html(`
-            <div class="pix-status-dot success"></div>
-            <span>Pagamento confirmado!</span>
-        `);
-        
-        setTimeout(() => {
-            this.closePixModal();
-            this.showSuccessMessage('Pagamento realizado com sucesso! Sua assinatura foi ativada.');
-        }, 2000);
-    }
-
-    // Função para mostrar expirado
-    showPaymentExpired() {
-        this.log('⏰ [DEBUG] Exibindo expiração do PIX');
-        $('.pix-status-indicator').html(`
-            <div class="pix-status-dot expired"></div>
-            <span>PIX expirado</span>
-        `);
-        
-        setTimeout(() => {
-            this.closePixModal();
-            this.showError('O PIX expirou. Tente gerar um novo.');
-        }, 2000);
-    }
-
-    // Função para fechar modal
-    closePixModal() {
-        this.log('❌ [DEBUG] Fechando modal PIX');
-        $('#pixModal').remove();
-    }
-
-    // Função para mostrar mensagem de sucesso
-    showSuccessMessage(message) {
-        this.log('✅ [DEBUG] Exibindo mensagem de sucesso:', message);
-        if (typeof swal !== 'undefined') {
-            swal({
-                icon: 'success',
-                title: 'Sucesso!',
-                text: message,
-                button: 'OK'
-            });
-        } else {
-            this.log('⚠️ [DEBUG] SweetAlert não disponível, usando alert nativo');
-            alert('Sucesso! ' + message);
+        } catch (error) {
+            console.error('❌ Erro ao consultar saldo:', error);
+            throw error;
         }
     }
 
-    // Função para mostrar erro
-    showError(message) {
-        this.log('❌ [DEBUG] Exibindo mensagem de erro:', message);
-        if (typeof swal !== 'undefined') {
-            swal({
-                icon: 'error',
-                title: 'Erro',
-                text: message,
-                button: 'OK'
+    /**
+     * 3. CASH-IN (DEPÓSITO VIA PIX)
+     * Endpoint: POST https://api.syncpayments.com.br/api/partner/v1/cash-in
+     */
+    async function createCashIn(cashInData) {
+        console.log('💳 Criando cash-in (depósito via Pix)...');
+
+        // Validar dados obrigatórios
+        if (!cashInData.amount || cashInData.amount <= 0) {
+            throw new Error('Valor (amount) é obrigatório e deve ser maior que zero');
+        }
+
+        if (!cashInData.client) {
+            throw new Error('Dados do cliente são obrigatórios');
+        }
+
+        const { name, cpf, email, phone } = cashInData.client;
+        if (!name || !cpf || !email || !phone) {
+            throw new Error('Todos os dados do cliente são obrigatórios: name, cpf, email, phone');
+        }
+
+        // Validar CPF (11 dígitos)
+        if (cpf.length !== 11 || !/^\d+$/.test(cpf)) {
+            throw new Error('CPF deve ter exatamente 11 dígitos numéricos');
+        }
+
+        // Validar telefone (10-11 dígitos)
+        if (phone.length < 10 || phone.length > 11 || !/^\d+$/.test(phone)) {
+            throw new Error('Telefone deve ter 10 ou 11 dígitos numéricos');
+        }
+
+        // Validar email
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(email)) {
+            throw new Error('Email inválido');
+        }
+
+        // Validar split se fornecido
+        if (cashInData.split && Array.isArray(cashInData.split)) {
+            for (const splitItem of cashInData.split) {
+                if (!splitItem.percentage || !splitItem.user_id) {
+                    throw new Error('Split deve conter percentage e user_id');
+                }
+                if (splitItem.percentage < 1 || splitItem.percentage > 100) {
+                    throw new Error('Percentage deve estar entre 1 e 100');
+                }
+            }
+        }
+
+        try {
+            const token = await getValidToken();
+
+            const requestData = {
+                amount: cashInData.amount,
+                description: cashInData.description || null,
+                client: {
+                    name: name,
+                    cpf: cpf,
+                    email: email,
+                    phone: phone
+                }
+            };
+
+            // Adicionar split se fornecido
+            if (cashInData.split) {
+                requestData.split = cashInData.split;
+            }
+
+            console.log('📤 Enviando dados do cash-in:', requestData);
+
+            const response = await fetch(`${API_CONFIG.baseUrl}${API_CONFIG.cashInEndpoint}`, {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json'
+                },
+                body: JSON.stringify(requestData)
             });
-        } else {
-            this.log('⚠️ [DEBUG] SweetAlert não disponível, usando alert nativo');
-            alert('Erro: ' + message);
+
+            console.log('📥 Resposta do cash-in:', response.status, response.statusText);
+
+            if (!response.ok) {
+                const errorText = await response.text();
+                throw new Error(`HTTP ${response.status}: ${response.statusText} - ${errorText}`);
+            }
+
+            const data = await response.json();
+            console.log('✅ Cash-in criado com sucesso:', data);
+
+            return data;
+
+        } catch (error) {
+            console.error('❌ Erro ao criar cash-in:', error);
+            throw error;
         }
     }
 
-    // Função para mostrar loading
-    showLoading() {
-        this.log('⏳ [DEBUG] Exibindo loading...');
-        if (typeof swal !== 'undefined') {
-            swal({
-                title: 'Gerando PIX...',
-                text: 'Aguarde um momento...',
-                allowOutsideClick: false,
-                showConfirmButton: false,
-                willOpen: () => {
-                    swal.showLoading();
+    /**
+     * 4. CONSULTA DE STATUS DE TRANSAÇÃO
+     * Endpoint: GET https://api.syncpayments.com.br/api/partner/v1/transaction/{identifier}
+     */
+    async function getTransactionStatus(identifier) {
+        console.log('🔍 Consultando status da transação:', identifier);
+
+        if (!identifier) {
+            throw new Error('Identificador da transação é obrigatório');
+        }
+
+        try {
+            const token = await getValidToken();
+
+            const response = await fetch(`${API_CONFIG.baseUrl}${API_CONFIG.transactionEndpoint}/${identifier}`, {
+                method: 'GET',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Accept': 'application/json'
                 }
             });
-        } else {
-            this.log('⚠️ [DEBUG] SweetAlert não disponível, usando loading nativo');
-            // Criar loading nativo se SweetAlert não estiver disponível
-            const loadingDiv = document.createElement('div');
-            loadingDiv.id = 'nativeLoading';
-            loadingDiv.innerHTML = `
-                <div style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
-                     background: rgba(0,0,0,0.7); z-index: 9999; display: flex; 
-                     align-items: center; justify-content: center;">
-                    <div style="background: white; padding: 30px; border-radius: 10px; text-align: center;">
-                        <div style="width: 40px; height: 40px; border: 4px solid #f3f3f3; 
-                             border-top: 4px solid #3498db; border-radius: 50%; 
-                             animation: spin 1s linear infinite; margin: 0 auto 15px;"></div>
-                        <p>Gerando PIX...</p>
-                    </div>
-                </div>
-                <style>
-                    @keyframes spin {
-                        0% { transform: rotate(0deg); }
-                        100% { transform: rotate(360deg); }
-                    }
-                </style>
-            `;
-            document.body.appendChild(loadingDiv);
+
+            console.log('📥 Resposta do status:', response.status, response.statusText);
+
+            if (!response.ok) {
+                const errorText = await response.text();
+                throw new Error(`HTTP ${response.status}: ${response.statusText} - ${errorText}`);
+            }
+
+            const data = await response.json();
+            console.log('✅ Status da transação consultado:', data);
+
+            return data;
+
+        } catch (error) {
+            console.error('❌ Erro ao consultar status da transação:', error);
+            throw error;
         }
     }
-}
 
-// Funções globais para o modal
-window.closePixModal = function() {
-    console.log('🔧 [DEBUG] Função global closePixModal chamada');
-    $('#pixModal').remove();
-}
-
-window.copyPixCode = function() {
-    console.log('🔧 [DEBUG] Função global copyPixCode chamada');
-    const pixCode = document.getElementById('pixCode');
-    pixCode.select();
-    document.execCommand('copy');
-    
-    // Feedback visual
-    const button = event.target;
-    const originalText = button.textContent;
-    button.textContent = 'Copiado!';
-    button.style.backgroundColor = '#28a745';
-    
-    setTimeout(() => {
-        button.textContent = originalText;
-        button.style.backgroundColor = '';
-    }, 2000);
-}
-
-// Inicializar SyncPay quando a página carregar
-document.addEventListener('DOMContentLoaded', function() {
-    console.log('🚀 [DEBUG] DOM carregado, inicializando SyncPay...');
-    
-    // Verificar se a configuração está disponível
-    if (!window.SYNCPAY_CONFIG) {
-        console.error('❌ [DEBUG] SYNCPAY_CONFIG não encontrada!');
-        return;
+    /**
+     * Função utilitária para exibir logs formatados
+     */
+    function logInfo(message, data = null) {
+        const timestamp = new Date().toLocaleString('pt-BR');
+        console.log(`[${timestamp}] ℹ️ ${message}`);
+        if (data) {
+            console.log('📊 Dados:', data);
+        }
     }
-    
-    console.log('✅ [DEBUG] Configuração encontrada:', window.SYNCPAY_CONFIG);
-    
-    // Usar configuração externa
-    const syncPay = new SyncPayIntegration(window.SYNCPAY_CONFIG);
-    
-    // Exportar para uso global
-    window.syncPay = syncPay;
-    
-    console.log('✅ [DEBUG] SyncPay inicializado e disponível globalmente');
-});
+
+    /**
+     * Função utilitária para exibir erros formatados
+     */
+    function logError(message, error = null) {
+        const timestamp = new Date().toLocaleString('pt-BR');
+        console.error(`[${timestamp}] ❌ ${message}`);
+        if (error) {
+            console.error('🔍 Detalhes do erro:', error);
+        }
+    }
+
+    /**
+     * Exemplo de uso das funções
+     */
+    async function exemploUso() {
+        try {
+            logInfo('🚀 Iniciando exemplo de uso da integração SyncPayments');
+
+            // 1. Autenticação
+            const token = await getAuthToken();
+            logInfo('✅ Autenticação realizada', { token: token.substring(0, 20) + '...' });
+
+            // 2. Consultar saldo
+            const balance = await getBalance();
+            logInfo('💰 Saldo consultado', balance);
+
+            // 3. Criar cash-in
+            const cashInData = {
+                amount: 50.00,
+                description: 'Teste de integração',
+                client: {
+                    name: 'João Silva',
+                    cpf: '12345678901',
+                    email: 'joao@exemplo.com',
+                    phone: '11987654321'
+                },
+                split: [
+                    { percentage: 100, user_id: '708ddc0b-357d-4548-b158-615684caa616' }
+                ]
+            };
+
+            const cashInResult = await createCashIn(cashInData);
+            logInfo('💳 Cash-in criado', cashInResult);
+
+            // 4. Consultar status da transação
+            if (cashInResult.identifier) {
+                const status = await getTransactionStatus(cashInResult.identifier);
+                logInfo('🔍 Status da transação', status);
+            }
+
+        } catch (error) {
+            logError('❌ Erro no exemplo de uso', error);
+        }
+    }
+
+    // Expor funções para uso global
+    window.SyncPayIntegration = {
+        // Funções principais
+        getAuthToken,
+        getBalance,
+        createCashIn,
+        getTransactionStatus,
+        
+        // Funções utilitárias
+        isTokenValid,
+        getValidToken,
+        logInfo,
+        logError,
+        
+        // Exemplo de uso
+        exemploUso
+    };
+
+    console.log('🔧 SyncPayIntegration carregado e disponível globalmente');
+    console.log('📚 Funções disponíveis:');
+    console.log('  - SyncPayIntegration.getAuthToken()');
+    console.log('  - SyncPayIntegration.getBalance()');
+    console.log('  - SyncPayIntegration.createCashIn(data)');
+    console.log('  - SyncPayIntegration.getTransactionStatus(identifier)');
+    console.log('  - SyncPayIntegration.exemploUso()');
+
+})();
