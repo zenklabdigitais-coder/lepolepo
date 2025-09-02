@@ -58,6 +58,8 @@
     cursor: pointer;
     transition: all 0.3s ease;
     backdrop-filter: blur(10px);
+    flex: 1;
+    min-width: 150px;
 }
 
 .gateway-select:hover {
@@ -70,21 +72,42 @@
     color: white;
 }
 
-.test-gateway-btn {
-    background: linear-gradient(45deg, #00b894, #00cec9);
+.gateway-buttons {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.test-gateway-btn, .test-config-btn {
     border: none;
     border-radius: 10px;
-    padding: 10px 20px;
+    padding: 8px 16px;
     color: white;
     font-weight: bold;
     cursor: pointer;
     transition: all 0.3s ease;
+    font-size: 0.9rem;
+    white-space: nowrap;
+}
+
+.test-gateway-btn {
+    background: linear-gradient(45deg, #00b894, #00cec9);
     box-shadow: 0 4px 15px rgba(0, 184, 148, 0.3);
 }
 
 .test-gateway-btn:hover {
     transform: translateY(-2px);
     box-shadow: 0 6px 20px rgba(0, 184, 148, 0.4);
+}
+
+.test-config-btn {
+    background: linear-gradient(45deg, #fd79a8, #e84393);
+    box-shadow: 0 4px 15px rgba(253, 121, 168, 0.3);
+}
+
+.test-config-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(253, 121, 168, 0.4);
 }
 
 .gateway-info {
@@ -126,6 +149,57 @@
     left: 0;
     color: #00b894;
     font-weight: bold;
+}
+
+/* Estilos para informações detalhadas dos gateways */
+.gateway-details {
+    line-height: 1.6;
+}
+
+.gateway-description {
+    font-style: italic;
+    opacity: 0.9;
+}
+
+.gateway-status, .gateway-features, .gateway-docs {
+    margin: 15px 0;
+    padding: 10px;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 8px;
+    border-left: 3px solid #fdcb6e;
+}
+
+.gateway-status strong, .gateway-features strong, .gateway-docs strong {
+    color: #fdcb6e;
+    display: block;
+    margin-bottom: 8px;
+}
+
+.docs-list {
+    font-family: 'Courier New', monospace;
+    font-size: 0.9rem;
+    background: rgba(0, 0, 0, 0.2);
+    padding: 10px;
+    border-radius: 5px;
+    margin-top: 10px;
+}
+
+.docs-list li {
+    padding: 3px 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.docs-list li:last-child {
+    border-bottom: none;
+}
+
+.docs-list code {
+    color: #74b9ff;
+    font-weight: bold;
+    background: rgba(116, 185, 255, 0.1);
+    padding: 2px 6px;
+    border-radius: 3px;
+    margin-right: 8px;
 }
 
 /* Responsive Design */

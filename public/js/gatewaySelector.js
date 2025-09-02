@@ -39,6 +39,14 @@ class GatewaySelector {
                 this.testCurrentGateway();
             });
         }
+
+        // Adicionar listener para botão de teste de configuração
+        const testConfigButton = document.getElementById('test-config');
+        if (testConfigButton) {
+            testConfigButton.addEventListener('click', () => {
+                this.testGatewayConfiguration();
+            });
+        }
     }
 
     async switchGateway(gateway) {
@@ -69,12 +77,14 @@ class GatewaySelector {
     async testCurrentGateway() {
         try {
             const testData = {
-                amount: 10.00,
-                description: 'Teste de pagamento',
+                amount: 1.00, // Valor mínimo para teste
+                description: `Teste ${this.currentGateway.toUpperCase()} - ${new Date().toISOString()}`,
                 customer_name: 'Cliente Teste',
                 customer_email: 'teste@exemplo.com',
                 customer_document: '12345678901'
             };
+
+            this.showNotification('Iniciando teste de pagamento...', 'info');
 
             const response = await fetch('/api/payments/pix/create', {
                 method: 'POST',
@@ -87,14 +97,59 @@ class GatewaySelector {
             const data = await response.json();
             
             if (data.success) {
-                this.showNotification(`Teste realizado com sucesso via ${this.currentGateway}`, 'success');
-                console.log('Resultado do teste:', data);
+                this.showNotification(`✅ Teste realizado com sucesso via ${this.currentGateway.toUpperCase()}!`, 'success');
+                console.log('✅ Resultado do teste:', data);
+                
+                // Mostrar detalhes do pagamento criado
+                if (data.data) {
+                    console.log('💰 Detalhes do pagamento:', {
+                        id: data.data.id || data.data.payment_id,
+                        gateway: data.gateway,
+                        qr_code: data.data.qr_code || data.data.pix_code,
+                        status: data.data.status
+                    });
+                }
             } else {
-                this.showNotification(`Erro no teste: ${data.error}`, 'error');
+                this.showNotification(`❌ Erro no teste ${this.currentGateway.toUpperCase()}: ${data.message || data.error}`, 'error');
+                console.error('❌ Erro no teste:', data);
             }
         } catch (error) {
-            console.error('Erro no teste:', error);
-            this.showNotification('Erro ao realizar teste', 'error');
+            console.error('❌ Erro no teste:', error);
+            this.showNotification(`❌ Erro ao testar ${this.currentGateway.toUpperCase()}: ${error.message}`, 'error');
+        }
+    }
+
+    async testGatewayConfiguration() {
+        try {
+            const response = await fetch('/api/gateways/test');
+            const data = await response.json();
+            
+            if (data.success) {
+                console.log('🔧 Configuração dos gateways:', data);
+                
+                // Mostrar informações detalhadas
+                let configInfo = `📊 CONFIGURAÇÃO DOS GATEWAYS\n\n`;
+                configInfo += `Gateway Atual: ${data.current_gateway.toUpperCase()}\n\n`;
+                
+                data.gateways.forEach(gateway => {
+                    configInfo += `${gateway.name}: ${gateway.status === 'active' ? '✅' : '⚠️'}\n`;
+                    configInfo += `  Ambiente: ${gateway.environment}\n`;
+                    configInfo += `  Token: ${gateway.token_status}\n\n`;
+                });
+                
+                configInfo += `VARIÁVEIS DE AMBIENTE:\n`;
+                Object.entries(data.environment_vars).forEach(([key, value]) => {
+                    configInfo += `${key}: ${value}\n`;
+                });
+                
+                console.log(configInfo);
+                this.showNotification('Configuração verificada - veja o console para detalhes', 'info');
+            } else {
+                this.showNotification('Erro ao verificar configuração', 'error');
+            }
+        } catch (error) {
+            console.error('Erro ao testar configuração:', error);
+            this.showNotification('Erro ao verificar configuração', 'error');
         }
     }
 
@@ -126,12 +181,41 @@ class GatewaySelector {
                 const gatewayInfo = document.getElementById('gateway-info');
                 
                 if (gatewayInfo && currentGatewayInfo) {
+                    const statusIcon = currentGatewayInfo.status === 'active' ? '✅' : 
+                                     currentGatewayInfo.status === 'needs_config' ? '⚠️' : '❌';
+                    
+                    const statusText = currentGatewayInfo.status === 'active' ? 'Ativo' : 
+                                     currentGatewayInfo.status === 'needs_config' ? 'Precisa Configuração' : 'Inativo';
+
                     gatewayInfo.innerHTML = `
-                        <h4>${currentGatewayInfo.name}</h4>
-                        <p>${currentGatewayInfo.description}</p>
-                        <ul>
-                            ${currentGatewayInfo.features.map(feature => `<li>${feature}</li>`).join('')}
-                        </ul>
+                        <div class="gateway-details">
+                            <h4>${currentGatewayInfo.name} ${statusIcon}</h4>
+                            <p class="gateway-description">${currentGatewayInfo.description}</p>
+                            
+                            <div class="gateway-status">
+                                <strong>Status:</strong> ${statusText}
+                                ${currentGatewayInfo.environment ? `<br><strong>Ambiente:</strong> ${currentGatewayInfo.environment}` : ''}
+                                ${currentGatewayInfo.token_status ? `<br><strong>Token:</strong> ${currentGatewayInfo.token_status}` : ''}
+                            </div>
+
+                            <div class="gateway-features">
+                                <strong>Recursos:</strong>
+                                <ul>
+                                    ${currentGatewayInfo.features.map(feature => `<li>${feature}</li>`).join('')}
+                                </ul>
+                            </div>
+
+                            ${currentGatewayInfo.docs ? `
+                                <div class="gateway-docs">
+                                    <strong>Endpoints:</strong>
+                                    <ul class="docs-list">
+                                        ${Object.entries(currentGatewayInfo.docs).map(([key, value]) => 
+                                            `<li><code>${key}:</code> ${value}</li>`
+                                        ).join('')}
+                                    </ul>
+                                </div>
+                            ` : ''}
+                        </div>
                     `;
                 }
             }

@@ -423,6 +423,34 @@ app.get('/api/gateways/current', (req, res) => {
     }
 });
 
+// Rota para testar configuração dos gateways
+app.get('/api/gateways/test', (req, res) => {
+    try {
+        const gateways = paymentGateway.getAvailableGateways();
+        const currentGateway = paymentGateway.getCurrentGateway();
+        
+        res.json({
+            success: true,
+            message: 'Configuração dos gateways',
+            current_gateway: currentGateway,
+            gateways: gateways,
+            environment_vars: {
+                pushinpay_token: process.env.PUSHINPAY_TOKEN ? 'Configurado' : 'Não configurado',
+                pushinpay_environment: process.env.PUSHINPAY_ENVIRONMENT || 'production (padrão)',
+                syncpay_client_id: process.env.SYNCPAY_CLIENT_ID ? 'Configurado' : 'Usando padrão',
+                syncpay_client_secret: process.env.SYNCPAY_CLIENT_SECRET ? 'Configurado' : 'Usando padrão'
+            }
+        });
+    } catch (error) {
+        console.error('[Gateways] Erro ao testar configuração:', error.message);
+        res.status(500).json({
+            success: false,
+            message: 'Erro ao testar configuração dos gateways',
+            error: error.message
+        });
+    }
+});
+
 // ===== ROTAS DE PAGAMENTO UNIFICADAS =====
 
 // Rota para criar pagamento PIX (funciona com ambos os gateways)
