@@ -1,7 +1,12 @@
 const axios = require('axios');
 
-const PUSHINPAY_TOKEN = '36250|MPvURHE0gE6lqsPN0PtwDOUVISoLjSyvqYUvuDPi47f09b29';
-const API_BASE = 'https://api.pushinpay.com.br';
+// Token deve ser configurado via variável de ambiente por segurança
+const PUSHINPAY_TOKEN = process.env.PUSHINPAY_TOKEN || '36250|MPvURHE0gE6lqsPN0PtwDOUVISoLjSyvqYUvuDPi47f09b29';
+
+// URLs conforme documentação oficial
+const API_BASE_PROD = 'https://api.pushinpay.com.br';
+const API_BASE_SANDBOX = 'https://api-sandbox.pushinpay.com.br';
+const API_BASE = process.env.PUSHINPAY_ENVIRONMENT === 'sandbox' ? API_BASE_SANDBOX : API_BASE_PROD;
 
 async function pushinpayGet(endpoint, config = {}) {
   return axios.get(`${API_BASE}${endpoint}`, {
@@ -30,33 +35,70 @@ async function pushinpayPost(endpoint, data, config = {}) {
 // Função para criar um pagamento PIX
 async function createPixPayment(paymentData) {
   try {
-    // Validar valor mínimo (50 centavos)
+    console.log('🚀 [PushinPay] Iniciando criação de pagamento PIX...');
+    console.log('📋 [PushinPay] Dados recebidos:', JSON.stringify(paymentData, null, 2));
+
+    // Validar valor mínimo (50 centavos conforme documentação)
     const valueInCents = Math.round(paymentData.amount * 100);
     if (valueInCents < 50) {
-      throw new Error('Valor mínimo é de 50 centavos (R$ 0,50)');
+      throw new Error('Valor mínimo é de 50 centavos (R$ 0,50) conforme documentação PushinPay');
     }
 
     // Estrutura de dados conforme documentação oficial da PushinPay
     const requestData = {
-      value: valueInCents,  // Valor em centavos
-      webhook_url: paymentData.webhook_url || undefined,  // Opcional
-      split_rules: paymentData.split_rules || []  // Array para divisão
+      value: valueInCents,  // Valor em centavos (obrigatório)
     };
 
-    // Remover campos undefined para não enviar na requisição
-    Object.keys(requestData).forEach(key => 
-      requestData[key] === undefined && delete requestData[key]
-    );
+    // Adicionar webhook_url se fornecido (opcional)
+    if (paymentData.webhook_url) {
+      requestData.webhook_url = paymentData.webhook_url;
+    }
 
-    console.log('📤 Enviando dados para PushinPay:', requestData);
+    // Adicionar split_rules se fornecido (opcional)
+    if (paymentData.split_rules && Array.isArray(paymentData.split_rules)) {
+      requestData.split_rules = paymentData.split_rules;
+    } else {
+      requestData.split_rules = []; // Array vazio por padrão
+    }
+
+    console.log('📤 [PushinPay] Enviando dados para API:', JSON.stringify(requestData, null, 2));
+    console.log('🌐 [PushinPay] Endpoint:', `${API_BASE}/api/pix/cashIn`);
 
     // Endpoint correto conforme documentação: POST /api/pix/cashIn
     const response = await pushinpayPost('/api/pix/cashIn', requestData);
     
-    console.log('📥 Resposta da PushinPay:', response.data);
-    return response.data;
+    console.log('📥 [PushinPay] Resposta recebida:', JSON.stringify(response.data, null, 2));
+    
+    // Validar resposta conforme documentação
+    if (!response.data.id || !response.data.qr_code) {
+      throw new Error('Resposta inválida da API PushinPay: faltam campos obrigatórios');
+    }
+
+    return {
+      ...response.data,
+      // Adicionar informações extras para compatibilidade
+      payment_id: response.data.id,
+      pix_code: response.data.qr_code,
+      qr_code_image: response.data.qr_code_base64,
+      gateway: 'pushinpay'
+    };
   } catch (error) {
-    console.error('❌ Erro ao criar pagamento PIX PushinPay:', error.response?.data || error.message);
+    console.error('❌ [PushinPay] Erro ao criar pagamento PIX:', {
+      message: error.message,
+      response: error.response?.data,
+      status: error.response?.status,
+      requestData: error.config?.data
+    });
+    
+    // Melhorar tratamento de erros conforme documentação
+    if (error.response?.status === 400) {
+      throw new Error(`Erro de validação PushinPay: ${error.response.data?.message || 'Dados inválidos'}`);
+    } else if (error.response?.status === 401) {
+      throw new Error('Token de autenticação PushinPay inválido');
+    } else if (error.response?.status === 429) {
+      throw new Error('Limite de requisições PushinPay excedido');
+    }
+    
     throw error;
   }
 }
@@ -64,19 +106,39 @@ async function createPixPayment(paymentData) {
 // Função para consultar status do pagamento
 async function getPaymentStatus(paymentId) {
   try {
-    console.log('🔍 Consultando status do pagamento:', paymentId);
+    console.log('🔍 [PushinPay] Consultando status do pagamento:', paymentId);
+    console.log('🌐 [PushinPay] Endpoint:', `${API_BASE}/api/transactions/${paymentId}`);
     
     // Endpoint correto conforme documentação: GET /api/transactions/{ID}
     const response = await pushinpayGet(`/api/transactions/${paymentId}`);
     
-    console.log('📥 Status recebido da PushinPay:', response.data);
-    return response.data;
+    console.log('📥 [PushinPay] Status recebido:', JSON.stringify(response.data, null, 2));
+    
+    // Adicionar informações extras para compatibilidade
+    return {
+      ...response.data,
+      payment_id: response.data.id,
+      gateway: 'pushinpay'
+    };
   } catch (error) {
-    console.error('❌ Erro ao consultar status do pagamento PushinPay:', error.response?.data || error.message);
+    console.error('❌ [PushinPay] Erro ao consultar status:', {
+      message: error.message,
+      response: error.response?.data,
+      status: error.response?.status,
+      paymentId
+    });
     
     // Se retornar 404, a documentação menciona que retorna null
     if (error.response?.status === 404) {
+      console.log('ℹ️ [PushinPay] Pagamento não encontrado (404) - retornando null');
       return null;
+    }
+    
+    // Tratamento de outros erros conforme documentação
+    if (error.response?.status === 401) {
+      throw new Error('Token de autenticação PushinPay inválido');
+    } else if (error.response?.status === 429) {
+      throw new Error('Limite de requisições PushinPay excedido - aguarde 1 minuto entre consultas');
     }
     
     throw error;
@@ -103,10 +165,46 @@ async function listPayments(filters = {}) {
   }
 }
 
+// Função para verificar configuração e ambiente
+function getEnvironmentInfo() {
+  return {
+    environment: process.env.PUSHINPAY_ENVIRONMENT || 'production',
+    api_base: API_BASE,
+    token_configured: !!PUSHINPAY_TOKEN,
+    token_preview: PUSHINPAY_TOKEN ? `${PUSHINPAY_TOKEN.substring(0, 10)}...` : 'Não configurado'
+  };
+}
+
+// Função para validar dados de split conforme documentação
+function validateSplitRules(splitRules, totalValue) {
+  if (!Array.isArray(splitRules)) {
+    throw new Error('split_rules deve ser um array');
+  }
+
+  for (const rule of splitRules) {
+    if (!rule.value || !rule.account_id) {
+      throw new Error('Cada split_rule deve ter value e account_id');
+    }
+    
+    if (rule.value > totalValue) {
+      throw new Error('Valor do split não pode ser maior que o valor total da transação');
+    }
+  }
+
+  const totalSplit = splitRules.reduce((sum, rule) => sum + rule.value, 0);
+  if (totalSplit > totalValue) {
+    throw new Error('Soma dos splits não pode exceder o valor total da transação');
+  }
+
+  return true;
+}
+
 module.exports = { 
   pushinpayGet, 
   pushinpayPost, 
   createPixPayment, 
   getPaymentStatus, 
-  listPayments 
+  listPayments,
+  getEnvironmentInfo,
+  validateSplitRules
 };

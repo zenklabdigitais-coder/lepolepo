@@ -1276,15 +1276,20 @@ setTimeout(() => {
             <span id="gateway-indicator" class="gateway-indicator syncpay">SYNCPAY</span>
         </div>
         
-        <div class="gateway-controls">
+                <div class="gateway-controls">
             <select id="gateway-select" class="gateway-select">
                 <option value="syncpay">SyncPay</option>
                 <option value="pushinpay">PushinPay</option>
             </select>
-            
-            <button id="test-gateway" class="test-gateway-btn">
-                🧪 Testar Gateway
-            </button>
+
+            <div class="gateway-buttons">
+                <button id="test-gateway" class="test-gateway-btn">
+                    🧪 Testar Pagamento
+                </button>
+                <button id="test-config" class="test-config-btn">
+                    🔧 Testar Config
+                </button>
+            </div>
         </div>
         
         <div id="gateway-info" class="gateway-info">

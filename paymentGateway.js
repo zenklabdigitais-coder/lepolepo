@@ -1,4 +1,4 @@
-const { createPixPayment, getPaymentStatus, listPayments } = require('./pushinpayApi');
+const { createPixPayment, getPaymentStatus, listPayments, validateSplitRules, getEnvironmentInfo } = require('./pushinpayApi');
 const { syncpayGet, syncpayPost } = require('./syncpayApi');
 const { getToken } = require('./authService');
 
@@ -23,6 +23,13 @@ class PaymentGateway {
     try {
       if (this.gateway === 'pushinpay') {
         console.log('🚀 Criando pagamento via PushinPay...');
+        
+        // Validar split_rules se fornecidas
+        if (paymentData.split_rules && paymentData.split_rules.length > 0) {
+          const valueInCents = Math.round(paymentData.amount * 100);
+          validateSplitRules(paymentData.split_rules, valueInCents);
+        }
+        
         return await createPixPayment(paymentData);
       } else if (this.gateway === 'syncpay') {
         console.log('🚀 Criando pagamento via SyncPay...');
@@ -119,20 +126,44 @@ class PaymentGateway {
 
   // Método para obter informações dos gateways disponíveis
   getAvailableGateways() {
+    const pushinpayInfo = getEnvironmentInfo();
+    
     return [
       {
         id: 'pushinpay',
         name: 'PushinPay',
-        description: 'Gateway de pagamento PushinPay (Configuração pendente)',
-        features: ['PIX', 'Cartão de Crédito', 'Boleto'],
-        status: 'configuring'
+        description: 'Gateway de pagamento PushinPay - PIX com Split Rules',
+        features: ['PIX', 'Split Rules', 'Webhooks', 'QR Code Base64'],
+        status: pushinpayInfo.token_configured ? 'active' : 'needs_config',
+        environment: pushinpayInfo.environment,
+        api_base: pushinpayInfo.api_base,
+        token_status: pushinpayInfo.token_configured ? 'configured' : 'missing',
+        docs: {
+          pix_create: 'POST /api/pix/cashIn',
+          pix_status: 'GET /api/transactions/{ID}',
+          min_value: '50 centavos (R$ 0,50)',
+          webhook_support: true,
+          split_support: true
+        }
       },
       {
         id: 'syncpay',
         name: 'SyncPay',
-        description: 'Gateway de pagamento SyncPay',
-        features: ['PIX', 'Cartão de Crédito', 'Boleto'],
-        status: 'active'
+        description: 'Gateway de pagamento SyncPay - Completo',
+        features: ['PIX', 'Cash-in', 'Cash-out', 'Webhooks', 'Split'],
+        status: 'active',
+        environment: 'production',
+        api_base: 'https://api.syncpayments.com.br/api/partner/v1',
+        token_status: 'configured',
+        docs: {
+          auth: 'POST /auth-token',
+          balance: 'GET /balance',
+          cash_in: 'POST /cash-in',
+          cash_out: 'POST /cash-out',
+          transaction: 'GET /transaction/{identifier}',
+          profile: 'GET /profile',
+          webhooks: 'CRUD /webhooks'
+        }
       }
     ];
   }
