@@ -189,14 +189,25 @@ class PaymentModal {
                 return;
             }
 
+            const isMobile = window.innerWidth <= 768;
+            if (qrContainer) {
+                if (isMobile) {
+                    qrContainer.style.display = 'none';
+                    return;
+                }
+                qrContainer.style.display = 'block';
+            }
+
             // Limpar QR Code anterior
             qrCodeElement.innerHTML = '';
+
+            const size = 300;
 
             if (typeof QRCode !== 'undefined') {
                 // Usar QRCode.js se disponível
                 await QRCode.toCanvas(qrCodeElement, pixCode, {
-                    width: 200,
-                    height: 200,
+                    width: size,
+                    height: size,
                     margin: 2,
                     color: {
                         dark: '#333333',
@@ -207,16 +218,12 @@ class PaymentModal {
             } else {
                 // Fallback para API online
                 const img = document.createElement('img');
-                img.src = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(pixCode)}`;
+                img.src = `https://api.qrserver.com/v1/create-qr-code/?size=${size}x${size}&data=${encodeURIComponent(pixCode)}`;
                 img.alt = 'QR Code PIX';
-                img.style.maxWidth = '200px';
+                img.style.maxWidth = `${size}px`;
                 img.style.height = 'auto';
                 qrCodeElement.appendChild(img);
                 console.log('✅ QR Code gerado com API fallback');
-            }
-
-            if (qrContainer) {
-                qrContainer.style.display = 'block';
             }
         } catch (error) {
             console.error('❌ Erro ao gerar QR Code:', error);
