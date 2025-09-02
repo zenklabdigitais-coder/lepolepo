@@ -50,8 +50,8 @@ app.use(express.static(path.join(__dirname, 'public')));
 // Rota para obter token de autenticação
 app.post('/api/auth-token', async (req, res) => {
     try {
-        console.log('🔐 [DEBUG] Gerando token de autenticação...');
-        console.log('📋 [DEBUG] Corpo da requisição:', JSON.stringify(req.body, null, 2));
+        // console.log('🔐 [DEBUG] Gerando token de autenticação...');
+        // console.log('📋 [DEBUG] Corpo da requisição:', JSON.stringify(req.body, null, 2));
         
         // Usar o valor do campo obrigatório da requisição ou um valor padrão
         const extraField = req.body['01K1259MAXE0TNRXV2C2WQN2MV'] || 'valor';
@@ -74,13 +74,13 @@ app.post('/api/auth-token', async (req, res) => {
             '01K1259MAXE0TNRXV2C2WQN2MV': extraField
         };
         
-        console.log('📤 [DEBUG] Dados de autenticação:', { 
-            client_id: authData.client_id,
-            client_secret: '***',
-            '01K1259MAXE0TNRXV2C2WQN2MV': extraField
-        });
+        // console.log('📤 [DEBUG] Dados de autenticação:', { 
+        //     client_id: authData.client_id,
+        //     client_secret: '***',
+        //     '01K1259MAXE0TNRXV2C2WQN2MV': extraField
+        // });
 
-        console.log('🌐 [DEBUG] Fazendo requisição para:', 'https://api.syncpayments.com.br/api/partner/v1/auth-token');
+        // console.log('🌐 [DEBUG] Fazendo requisição para:', 'https://api.syncpayments.com.br/api/partner/v1/auth-token');
 
         // Adicionar timeout e melhor tratamento de erro
         const controller = new AbortController();
@@ -100,8 +100,8 @@ app.post('/api/auth-token', async (req, res) => {
             
             clearTimeout(timeoutId);
             
-            console.log('📥 [DEBUG] Status da resposta:', response.status, response.statusText);
-            console.log('📋 [DEBUG] Headers da resposta:', Object.fromEntries(response.headers.entries()));
+            // console.log('📥 [DEBUG] Status da resposta:', response.status, response.statusText);
+            // console.log('📋 [DEBUG] Headers da resposta:', Object.fromEntries(response.headers.entries()));
 
             if (!response.ok) {
                 const errorText = await response.text();
@@ -124,8 +124,8 @@ app.post('/api/auth-token', async (req, res) => {
             }
 
             const data = await response.json();
-            console.log('✅ [DEBUG] Token gerado com sucesso');
-            console.log('📋 [DEBUG] Resposta da API:', JSON.stringify(data, null, 2));
+            // console.log('✅ [DEBUG] Token gerado com sucesso');
+            // console.log('📋 [DEBUG] Resposta da API:', JSON.stringify(data, null, 2));
             
             // Validar se a resposta contém os campos obrigatórios
             if (!data.access_token) {
@@ -157,8 +157,8 @@ app.post('/api/auth-token', async (req, res) => {
             });
         }
 
-        console.log('📥 [DEBUG] Status da resposta:', response.status, response.statusText);
-        console.log('📋 [DEBUG] Headers da resposta:', Object.fromEntries(response.headers.entries()));
+        // console.log('📥 [DEBUG] Status da resposta:', response.status, response.statusText);
+        // console.log('📋 [DEBUG] Headers da resposta:', Object.fromEntries(response.headers.entries()));
 
         if (!response.ok) {
             const errorText = await response.text();
@@ -181,8 +181,8 @@ app.post('/api/auth-token', async (req, res) => {
         }
 
         const data = await response.json();
-        console.log('✅ [DEBUG] Token gerado com sucesso');
-        console.log('📋 [DEBUG] Resposta da API:', JSON.stringify(data, null, 2));
+        // console.log('✅ [DEBUG] Token gerado com sucesso');
+        // console.log('📋 [DEBUG] Resposta da API:', JSON.stringify(data, null, 2));
         
         // Validar se a resposta contém os campos obrigatórios
         if (!data.access_token) {
@@ -223,9 +223,9 @@ app.get('/api/balance', async (req, res) => {
 // Rota para criação de transação (cash-in)
 app.post('/api/cash-in', async (req, res) => {
     try {
-        console.log('💰 [DEBUG] Criando transação PIX:', req.body);
+        // console.log('💰 [DEBUG] Criando transação PIX:', req.body);
         const response = await syncpayPost('/cash-in', req.body);
-        console.log('✅ [DEBUG] Transação criada com sucesso:', response.data);
+        // console.log('✅ [DEBUG] Transação criada com sucesso:', response.data);
         res.json(response.data);
     } catch (err) {
         console.error('[Cash-in] Erro ao criar transação:', err.response?.data || err.message);
@@ -239,9 +239,9 @@ app.post('/api/cash-in', async (req, res) => {
 // Rota para criação de transação de saque (cash-out)
 app.post('/api/cash-out', async (req, res) => {
     try {
-        console.log('💸 [DEBUG] Criando saque PIX:', req.body);
+        // console.log('💸 [DEBUG] Criando saque PIX:', req.body);
         const response = await syncpayPost('/cash-out', req.body);
-        console.log('✅ [DEBUG] Saque criado com sucesso:', response.data);
+        // console.log('✅ [DEBUG] Saque criado com sucesso:', response.data);
         res.json(response.data);
     } catch (err) {
         console.error('[Cash-out] Erro ao criar saque:', err.response?.data || err.message);
@@ -256,9 +256,9 @@ app.post('/api/cash-out', async (req, res) => {
 app.get('/api/transaction/:identifier', async (req, res) => {
     try {
         const { identifier } = req.params;
-        console.log('🔍 [DEBUG] Consultando status da transação:', identifier);
+        // console.log('🔍 [DEBUG] Consultando status da transação:', identifier);
         const response = await syncpayGet(`/transaction/${identifier}`);
-        console.log('✅ [DEBUG] Status obtido:', response.data);
+        // console.log('✅ [DEBUG] Status obtido:', response.data);
         res.json(response.data);
     } catch (err) {
         console.error('[Transaction] Erro ao consultar status:', err.response?.data || err.message);
@@ -272,9 +272,9 @@ app.get('/api/transaction/:identifier', async (req, res) => {
 // Rota para consultar dados do parceiro
 app.get('/api/profile', async (req, res) => {
     try {
-        console.log('👤 [DEBUG] Consultando dados do parceiro...');
+        // console.log('👤 [DEBUG] Consultando dados do parceiro...');
         const response = await syncpayGet('/profile');
-        console.log('✅ [DEBUG] Dados do parceiro obtidos:', response.data);
+        // console.log('✅ [DEBUG] Dados do parceiro obtidos:', response.data);
         res.json(response.data);
     } catch (err) {
         console.error('[Profile] Erro ao consultar perfil:', err.response?.data || err.message);
@@ -292,9 +292,9 @@ webhookHandler.setupRoutes(app);
 // Rota para gerenciar webhooks
 app.get('/api/webhooks', async (req, res) => {
     try {
-        console.log('🔗 [DEBUG] Listando webhooks...');
+        // console.log('🔗 [DEBUG] Listando webhooks...');
         const response = await syncpayGet('/webhooks');
-        console.log('✅ [DEBUG] Webhooks listados:', response.data);
+        // console.log('✅ [DEBUG] Webhooks listados:', response.data);
         res.json(response.data);
     } catch (err) {
         console.error('[Webhooks] Erro ao listar webhooks:', err.response?.data || err.message);
@@ -307,9 +307,9 @@ app.get('/api/webhooks', async (req, res) => {
 
 app.post('/api/webhooks', async (req, res) => {
     try {
-        console.log('🔗 [DEBUG] Criando webhook:', req.body);
+        // console.log('🔗 [DEBUG] Criando webhook:', req.body);
         const response = await syncpayPost('/webhooks', req.body);
-        console.log('✅ [DEBUG] Webhook criado:', response.data);
+        // console.log('✅ [DEBUG] Webhook criado:', response.data);
         res.json(response.data);
     } catch (err) {
         console.error('[Webhooks] Erro ao criar webhook:', err.response?.data || err.message);
@@ -323,9 +323,9 @@ app.post('/api/webhooks', async (req, res) => {
 app.put('/api/webhooks/:id', async (req, res) => {
     try {
         const { id } = req.params;
-        console.log('🔗 [DEBUG] Atualizando webhook:', id, req.body);
+        // console.log('🔗 [DEBUG] Atualizando webhook:', id, req.body);
         const response = await syncpayPost(`/webhooks/${id}`, req.body, { method: 'PUT' });
-        console.log('✅ [DEBUG] Webhook atualizado:', response.data);
+        // console.log('✅ [DEBUG] Webhook atualizado:', response.data);
         res.json(response.data);
     } catch (err) {
         console.error('[Webhooks] Erro ao atualizar webhook:', err.response?.data || err.message);
@@ -339,9 +339,9 @@ app.put('/api/webhooks/:id', async (req, res) => {
 app.delete('/api/webhooks/:id', async (req, res) => {
     try {
         const { id } = req.params;
-        console.log('🔗 [DEBUG] Deletando webhook:', id);
+        // console.log('🔗 [DEBUG] Deletando webhook:', id);
         const response = await syncpayPost(`/webhooks/${id}`, {}, { method: 'DELETE' });
-        console.log('✅ [DEBUG] Webhook deletado:', response.data);
+        // console.log('✅ [DEBUG] Webhook deletado:', response.data);
         res.json(response.data);
     } catch (err) {
         console.error('[Webhooks] Erro ao deletar webhook:', err.response?.data || err.message);

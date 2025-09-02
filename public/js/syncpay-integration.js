@@ -717,18 +717,75 @@
         exemploUso
     };
 
-    console.log('🔧 SyncPayIntegration carregado e disponível globalmente');
-    console.log('📚 Funções disponíveis:');
-    console.log('  - SyncPayIntegration.getAuthToken()');
-    console.log('  - SyncPayIntegration.getBalance()');
-    console.log('  - SyncPayIntegration.createCashIn(data)');
-    console.log('  - SyncPayIntegration.createCashOut(data)');
-    console.log('  - SyncPayIntegration.getTransactionStatus(identifier)');
-    console.log('  - SyncPayIntegration.getProfile()');
-    console.log('  - SyncPayIntegration.listWebhooks(search, per_page)');
-    console.log('  - SyncPayIntegration.createWebhook(data)');
-    console.log('  - SyncPayIntegration.updateWebhook(id, data)');
-    console.log('  - SyncPayIntegration.deleteWebhook(id)');
-    console.log('  - SyncPayIntegration.exemploUso()');
+    // console.log('🔧 SyncPayIntegration carregado e disponível globalmente');
+    // console.log('📚 Funções disponíveis:');
+    // console.log('  - SyncPayIntegration.getAuthToken()');
+    // console.log('  - SyncPayIntegration.getBalance()');
+    // console.log('  - SyncPayIntegration.createCashIn(data)');
+    // console.log('  - SyncPayIntegration.createCashOut(data)');
+    // console.log('  - SyncPayIntegration.getTransactionStatus(identifier)');
+    // console.log('  - SyncPayIntegration.getProfile()');
+    // console.log('  - SyncPayIntegration.listWebhooks(search, per_page)');
+    // console.log('  - SyncPayIntegration.createWebhook(data)');
+    // console.log('  - SyncPayIntegration.updateWebhook(id, data)');
+    // console.log('  - SyncPayIntegration.deleteWebhook(id)');
+    // console.log('  - SyncPayIntegration.exemploUso()');    
+
+    // Criar bridge para compatibilidade com botões existentes
+    window.syncPay = {
+        showLoading: function() {
+            // Implementar loading se necessário
+            console.log('🔄 Carregando...');
+        },
+        
+        showPixModal: function(data) {
+            // Implementar modal do PIX se necessário
+            console.log('💳 PIX gerado:', data);
+            alert('PIX gerado com sucesso! Código: ' + data.pix_code.substring(0, 50) + '...');
+        },
+        
+        createPixTransaction: async function(amount, description, clientData) {
+            try {
+                const cashInData = {
+                    amount: parseFloat(amount),
+                    description: description,
+                    client: {
+                        name: clientData?.name || 'Cliente',
+                        cpf: clientData?.cpf || '12345678901',
+                        email: clientData?.email || 'cliente@exemplo.com',
+                        phone: clientData?.phone || '11999999999'
+                    }
+                };
+                
+                const result = await createCashIn(cashInData);
+                return {
+                    id: result.identifier,
+                    pix_code: result.pix_code,
+                    message: result.message
+                };
+            } catch (error) {
+                console.error('Erro ao criar transação PIX:', error);
+                throw error;
+            }
+        }
+    };
 
 })();
+
+// Adicionar planos de exemplo se não existirem
+if (!window.SYNCPAY_CONFIG.plans) {
+    window.SYNCPAY_CONFIG.plans = {
+        monthly: {
+            price: 19.90,
+            description: 'Assinatura Mensal - 1 mês'
+        },
+        quarterly: {
+            price: 59.70,
+            description: 'Assinatura Trimestral - 3 meses'
+        },
+        semestrial: {
+            price: 119.40,
+            description: 'Assinatura Semestral - 6 meses'
+        }
+    };
+}

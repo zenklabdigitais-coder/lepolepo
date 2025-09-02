@@ -733,7 +733,7 @@ $(document).ready(function() {
     // NOVOS BOTÕES DE PAGAMENTO COM PIX
     $('#btn-1-mes').on('click', async function() {
         if (!window.syncPay) {
-            console.error('SyncPay não inicializado');
+            // console.error('SyncPay não inicializado');
             return;
         }
         
@@ -741,17 +741,17 @@ $(document).ready(function() {
         
         const plans = window.SYNCPAY_CONFIG?.plans;
         if (!plans?.monthly) {
-            console.error('Plano mensal não configurado em SYNCPAY_CONFIG');
+            // console.error('Plano mensal não configurado em SYNCPAY_CONFIG');
             return;
         }
         const plan = plans.monthly;
         
-        // Dados do cliente (pode ser coletado de um formulário)
+        // Dados do cliente - deve ser coletado de um formulário real
         const clientData = {
-            name: 'Cliente Teste',
-            cpf: '12345678900',
-            email: 'cliente@teste.com',
-            phone: '11999999999'
+            name: 'Cliente', // Substituir por dados reais do cliente
+            cpf: '12345678901', // Substituir por CPF real do cliente
+            email: 'cliente@exemplo.com', // Substituir por email real do cliente
+            phone: '11999999999' // Substituir por telefone real do cliente
         };
         
         const transaction = await syncPay.createPixTransaction(plan.price, plan.description, clientData);
@@ -776,7 +776,7 @@ $(document).ready(function() {
 
     $('#btn-3-meses').on('click', async function() {
         if (!window.syncPay) {
-            console.error('SyncPay não inicializado');
+            // console.error('SyncPay não inicializado');
             return;
         }
         
@@ -784,17 +784,17 @@ $(document).ready(function() {
         
         const plans = window.SYNCPAY_CONFIG?.plans;
         if (!plans?.quarterly) {
-            console.error('Plano trimestral não configurado em SYNCPAY_CONFIG');
+            // console.error('Plano trimestral não configurado em SYNCPAY_CONFIG');
             return;
         }
         const plan = plans.quarterly;
         
-        // Dados do cliente (pode ser coletado de um formulário)
+        // Dados do cliente - deve ser coletado de um formulário real
         const clientData = {
-            name: 'Cliente Teste',
-            cpf: '12345678900',
-            email: 'cliente@teste.com',
-            phone: '11999999999'
+            name: 'Cliente', // Substituir por dados reais do cliente
+            cpf: '12345678901', // Substituir por CPF real do cliente
+            email: 'cliente@exemplo.com', // Substituir por email real do cliente
+            phone: '11999999999' // Substituir por telefone real do cliente
         };
         
         const transaction = await syncPay.createPixTransaction(plan.price, plan.description, clientData);
@@ -819,7 +819,7 @@ $(document).ready(function() {
 
     $('#btn-6-meses').on('click', async function() {
         if (!window.syncPay) {
-            console.error('SyncPay não inicializado');
+            // console.error('SyncPay não inicializado');
             return;
         }
         
@@ -827,17 +827,17 @@ $(document).ready(function() {
         
         const plans = window.SYNCPAY_CONFIG?.plans;
         if (!plans?.semestrial) {
-            console.error('Plano semestral não configurado em SYNCPAY_CONFIG');
+            // console.error('Plano semestral não configurado em SYNCPAY_CONFIG');
             return;
         }
         const plan = plans.semestrial;
         
-        // Dados do cliente (pode ser coletado de um formulário)
+        // Dados do cliente - deve ser coletado de um formulário real
         const clientData = {
-            name: 'Cliente Teste',
-            cpf: '12345678900',
-            email: 'cliente@teste.com',
-            phone: '11999999999'
+            name: 'Cliente', // Substituir por dados reais do cliente
+            cpf: '12345678901', // Substituir por CPF real do cliente
+            email: 'cliente@exemplo.com', // Substituir por email real do cliente
+            phone: '11999999999' // Substituir por telefone real do cliente
         };
         
         const transaction = await syncPay.createPixTransaction(plan.price, plan.description, clientData);

@@ -16,10 +16,12 @@
             return;
         }
 
-        // Criar interface de exemplo
-        criarInterfaceExemplo();
+        // Criar interface de exemplo - COMENTADO PARA PRODUÇÃO
+        // criarInterfaceExemplo();
     });
 
+    // INTERFACE DE TESTE COMENTADA PARA PRODUÇÃO
+    /*
     function criarInterfaceExemplo() {
         const container = document.createElement('div');
         container.innerHTML = `
@@ -128,6 +130,7 @@
         document.getElementById('btnExemplo').addEventListener('click', executarExemploCompleto);
         document.getElementById('btnFechar').addEventListener('click', () => container.remove());
     }
+    */
 
     function logResultado(mensagem, dados = null) {
         const resultado = document.getElementById('resultado');
@@ -298,6 +301,6 @@
         executarExemploCompleto
     };
 
-    console.log('🧪 Exemplo de uso SyncPayments carregado e disponível globalmente');
+    // console.log('🧪 Exemplo de uso SyncPayments carregado e disponível globalmente');
 
 })();
