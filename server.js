@@ -67,7 +67,8 @@ app.get('/api/config', (req, res) => {
         plans: cfg.plans,
         gateway: cfg.gateway,
         syncpay: cfg.syncpay,
-        pushinpay: cfg.pushinpay
+        pushinpay: cfg.pushinpay,
+        redirectUrl: cfg.redirectUrl
     });
 });
 
