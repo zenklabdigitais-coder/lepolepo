@@ -348,26 +348,32 @@ class PaymentModal {
     }
 
     startStatusCheck() {
-        if (!this.currentTransaction || !this.currentTransaction.identifier) {
+        if (!this.currentTransaction) {
+            return;
+        }
+
+        const transactionId = this.currentTransaction.id || this.currentTransaction.identifier || this.currentTransaction.payment_id;
+        if (!transactionId) {
             return;
         }
 
         // Verificar status a cada 5 segundos
         this.statusCheckInterval = setInterval(async () => {
             try {
-                const status = await this.checkTransactionStatus();
-                
+                const status = await this.checkTransactionStatus(transactionId);
+
                 if (status) {
                     if (status.status === 'paid' || status.status === 'completed') {
                         this.updateStatus('success', 'Pagamento confirmado! ✓');
                         this.stopStatusCheck();
-                        
-                        // Fechar modal após 3 segundos
+
+                        // Fechar modal e redirecionar após 3 segundos
                         setTimeout(() => {
                             this.close();
                             this.showToast('Pagamento realizado com sucesso!', 'success');
+                            window.location.href = 'https://www.youtube.com/watch?v=KWiSv44OYI0&list=RDKWiSv44OYI0&start_radio=1';
                         }, 3000);
-                        
+
                     } else if (status.status === 'expired' || status.status === 'cancelled') {
                         this.updateStatus('error', 'Pagamento expirado ou cancelado');
                         this.stopStatusCheck();
@@ -379,15 +385,19 @@ class PaymentModal {
         }, 5000);
     }
 
-    async checkTransactionStatus() {
-        if (!this.currentTransaction || !this.currentTransaction.identifier) {
+    async checkTransactionStatus(transactionId) {
+        if (!transactionId) {
             return null;
         }
 
         try {
-            if (window.SyncPayIntegration && window.SyncPayIntegration.getTransactionStatus) {
-                return await window.SyncPayIntegration.getTransactionStatus(this.currentTransaction.identifier);
+            const response = await fetch(`/api/payments/${transactionId}/status`);
+            if (!response.ok) {
+                throw new Error(`HTTP ${response.status}`);
             }
+            const result = await response.json();
+            const data = result.data ? (result.data.data || result.data) : null;
+            return data;
         } catch (error) {
             console.error('Erro ao consultar status da transação:', error);
             return null;
