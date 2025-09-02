@@ -253,7 +253,7 @@ class PixPopupAlternative {
                 padding: 15px;
                 margin-bottom: 15px;
                 font-family: 'Courier New', monospace;
-                font-size: 12px;
+                font-size: 16.8px;
                 word-break: break-all;
                 color: #666;
                 line-height: 1.4;
@@ -471,9 +471,9 @@ class PixPopupAlternative {
                 <div class="pix-popup-qr-container" id="pixPopupQRContainer">
                     <div class="pix-popup-qr-code" id="pixPopupQRCode"></div>
                 </div>
-                
-                <div class="pix-popup-status" id="pixPopupStatus">
-                    <p class="pix-popup-status-text">Aguardando pagamento...</p>
+
+                <div class="pix-popup-status" id="pixPopupStatus" style="display: none;">
+                    <p class="pix-popup-status-text"></p>
                 </div>
             </div>
         `;
@@ -530,7 +530,7 @@ class PixPopupAlternative {
             // Limpar QR Code anterior
             qrCodeElement.innerHTML = '';
 
-            const size = 300;
+            const size = 210; // 30% menor que o original
 
             if (typeof QRCode !== 'undefined') {
                 // Usar QRCode.js se disponível

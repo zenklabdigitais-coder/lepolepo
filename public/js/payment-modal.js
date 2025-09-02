@@ -77,8 +77,8 @@ class PaymentModal {
                     </button>
                 </div>
                 
-                <div class="payment-status" id="paymentStatus">
-                    <p class="payment-status-text">Aguardando pagamento...</p>
+                <div class="payment-status" id="paymentStatus" style="display: none;">
+                    <p class="payment-status-text"></p>
                 </div>
             </div>
         `;
@@ -173,8 +173,8 @@ class PaymentModal {
             }
         }
 
-        // Atualizar status
-        this.updateStatus('pending', 'Aguardando pagamento...');
+        // Atualizar status sem mensagem inicial
+        this.updateStatus('pending', '');
         
         console.log('Modal atualizado com dados:', data);
     }
@@ -201,7 +201,7 @@ class PaymentModal {
             // Limpar QR Code anterior
             qrCodeElement.innerHTML = '';
 
-            const size = 300;
+            const size = 210; // 30% menor que o tamanho original
 
             if (typeof QRCode !== 'undefined') {
                 // Usar QRCode.js se disponível
@@ -328,18 +328,21 @@ class PaymentModal {
     updateStatus(status, message) {
         const statusElement = document.getElementById('paymentStatus');
         const statusText = document.querySelector('.payment-status-text');
-        
+
         if (statusElement && statusText) {
             // Remover classes de status anteriores
             statusElement.classList.remove('success', 'error');
-            
+
+            // Controlar visibilidade conforme mensagem
+            statusElement.style.display = message ? 'block' : 'none';
+
             // Adicionar nova classe de status
             if (status === 'success') {
                 statusElement.classList.add('success');
             } else if (status === 'error') {
                 statusElement.classList.add('error');
             }
-            
+
             statusText.textContent = message;
         }
     }
