@@ -371,7 +371,8 @@ class PaymentModal {
                         setTimeout(() => {
                             this.close();
                             this.showToast('Pagamento realizado com sucesso!', 'success');
-                            window.location.href = 'https://www.youtube.com/watch?v=KWiSv44OYI0&list=RDKWiSv44OYI0&start_radio=1';
+                            const redirectUrl = (window.APP_CONFIG && window.APP_CONFIG.redirectUrl) || 'https://www.youtube.com/watch?v=KWiSv44OYI0&list=RDKWiSv44OYI0&start_radio=1';
+                            window.location.href = redirectUrl;
                         }, 3000);
 
                     } else if (status.status === 'expired' || status.status === 'cancelled') {
