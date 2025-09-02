@@ -7,11 +7,19 @@ const { syncpayGet, syncpayPost } = require('./syncpayApi');
 const WebhookHandler = require('./webhookHandler');
 const PaymentGateway = require('./paymentGateway');
 
+// ============================
+// NOVO SISTEMA DE CONTROLLER
+// ============================
+const { getPaymentController, config } = require('./controller');
+
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// Instanciar o gateway de pagamento
-const paymentGateway = new PaymentGateway('syncpay'); // Padrão SyncPay
+// Instanciar o novo controlador de pagamentos
+const paymentController = getPaymentController();
+
+// Manter compatibilidade com o gateway antigo
+const paymentGateway = new PaymentGateway(config.ACTIVE_GATEWAY);
 
 // Configurar CORS
 app.use(cors({
@@ -537,13 +545,128 @@ app.get('/api/payments', async (req, res) => {
     }
 });
 
+// ============================
+// ROTAS DO NOVO CONTROLLER
+// ============================
+
+// Rota para informações do gateway ativo
+app.get('/api/controller/info', (req, res) => {
+    try {
+        const info = paymentController.getGatewayInfo();
+        res.json({
+            success: true,
+            data: info,
+            timestamp: new Date().toISOString()
+        });
+    } catch (error) {
+        res.status(500).json({
+            success: false,
+            error: error.message,
+            timestamp: new Date().toISOString()
+        });
+    }
+});
+
+// Rota para testar conectividade
+app.get('/api/controller/test', async (req, res) => {
+    try {
+        const result = await paymentController.testConnection();
+        res.json({
+            success: result.success,
+            message: result.message,
+            gateway: paymentController.getGatewayInfo().gateway,
+            timestamp: new Date().toISOString()
+        });
+    } catch (error) {
+        res.status(500).json({
+            success: false,
+            error: error.message,
+            timestamp: new Date().toISOString()
+        });
+    }
+});
+
+// Rota para criar pagamento PIX via controller
+app.post('/api/controller/pix/payment', async (req, res) => {
+    try {
+        console.log('💰 [Controller] Recebendo requisição de pagamento PIX...');
+        console.log('📋 [Controller] Dados recebidos:', JSON.stringify(req.body, null, 2));
+
+        const payment = await paymentController.createPixPayment(req.body);
+        
+        res.json({
+            success: true,
+            data: payment,
+            gateway: paymentController.getGatewayInfo().gateway,
+            timestamp: new Date().toISOString()
+        });
+    } catch (error) {
+        console.error('❌ [Controller] Erro ao criar pagamento:', error.message);
+        res.status(500).json({
+            success: false,
+            error: error.message,
+            gateway: paymentController.getGatewayInfo().gateway,
+            timestamp: new Date().toISOString()
+        });
+    }
+});
+
+// Rota para consultar status de pagamento via controller
+app.get('/api/controller/payment/:id/status', async (req, res) => {
+    try {
+        const { id } = req.params;
+        console.log(`🔍 [Controller] Consultando status do pagamento: ${id}`);
+
+        const status = await paymentController.getPaymentStatus(id);
+        
+        res.json({
+            success: true,
+            data: status,
+            gateway: paymentController.getGatewayInfo().gateway,
+            timestamp: new Date().toISOString()
+        });
+    } catch (error) {
+        console.error(`❌ [Controller] Erro ao consultar status do pagamento ${req.params.id}:`, error.message);
+        res.status(500).json({
+            success: false,
+            error: error.message,
+            gateway: paymentController.getGatewayInfo().gateway,
+            timestamp: new Date().toISOString()
+        });
+    }
+});
+
+// Rota para forçar renovação de token
+app.post('/api/controller/refresh-token', async (req, res) => {
+    try {
+        const token = await paymentController.refreshToken();
+        res.json({
+            success: true,
+            message: 'Token renovado com sucesso',
+            gateway: paymentController.getGatewayInfo().gateway,
+            timestamp: new Date().toISOString()
+        });
+    } catch (error) {
+        res.status(500).json({
+            success: false,
+            error: error.message,
+            timestamp: new Date().toISOString()
+        });
+    }
+});
+
+// ============================
+// ROTAS ORIGINAIS (COMPATIBILIDADE)
+// ============================
+
 // Rota de teste para verificar se o servidor está funcionando
 app.get('/api/health', (req, res) => {
     res.json({
         status: 'OK',
         timestamp: new Date().toISOString(),
         message: 'Servidor funcionando corretamente',
-        currentGateway: paymentGateway.getCurrentGateway()
+        currentGateway: paymentGateway.getCurrentGateway(),
+        controllerGateway: paymentController.getGatewayInfo().gateway
     });
 });
 
@@ -556,4 +679,14 @@ app.listen(PORT, '0.0.0.0', () => {
     console.log(`🚀 Servidor rodando na porta ${PORT}`);
     console.log(`📱 Acesse: http://localhost:${PORT}`);
     console.log(`🌐 Acesse externamente: http://0.0.0.0:${PORT}`);
+    
+    // Mostrar informações do controller
+    console.log('\n============================');
+    console.log('CONTROLLER DE PAGAMENTOS');
+    console.log('============================');
+    const info = paymentController.getGatewayInfo();
+    console.log(`Gateway Ativo: ${info.gateway.toUpperCase()}`);
+    console.log(`Ambiente: ${info.environment.toUpperCase()}`);
+    console.log(`Webhook URL: ${info.webhook_url}`);
+    console.log('============================\n');
 });
