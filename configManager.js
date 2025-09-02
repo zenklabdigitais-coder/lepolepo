@@ -16,6 +16,8 @@ async function main() {
 
   cfg.gateway = await ask('Gateway (syncpay/pushinpay)', cfg.gateway);
   cfg.environment = await ask('Environment (production/sandbox)', cfg.environment);
+  const defaultMobileQR = cfg.generateQRCodeOnMobile ? 'true' : 'false';
+  cfg.generateQRCodeOnMobile = (await ask('Generate QR Code on mobile? (true/false)', defaultMobileQR)).toLowerCase() === 'true';
   cfg.syncpay.clientId = await ask('SyncPay Client ID', cfg.syncpay.clientId);
   cfg.syncpay.clientSecret = await ask('SyncPay Client Secret', cfg.syncpay.clientSecret);
   cfg.pushinpay.token = await ask('PushinPay Token', cfg.pushinpay.token);
