@@ -292,6 +292,328 @@
     }
 
     /**
+     * 5. CASH-OUT (SAQUE VIA PIX)
+     * Endpoint: POST https://api.syncpayments.com.br/api/partner/v1/cash-out
+     */
+    async function createCashOut(cashOutData) {
+        console.log('💸 Criando cash-out (saque via Pix)...');
+
+        // Validar dados obrigatórios
+        if (!cashOutData.amount || cashOutData.amount <= 0) {
+            throw new Error('Valor (amount) é obrigatório e deve ser maior que zero');
+        }
+
+        if (!cashOutData.pix_key_type || !cashOutData.pix_key) {
+            throw new Error('pix_key_type e pix_key são obrigatórios');
+        }
+
+        if (!cashOutData.document || !cashOutData.document.type || !cashOutData.document.number) {
+            throw new Error('document com type e number são obrigatórios');
+        }
+
+        // Validar pix_key_type
+        const validPixKeyTypes = ['CPF', 'CNPJ', 'EMAIL', 'PHONE', 'EVP'];
+        if (!validPixKeyTypes.includes(cashOutData.pix_key_type)) {
+            throw new Error('pix_key_type deve ser: CPF, CNPJ, EMAIL, PHONE ou EVP');
+        }
+
+        // Validar document.type
+        const validDocumentTypes = ['cpf', 'cnpj'];
+        if (!validDocumentTypes.includes(cashOutData.document.type)) {
+            throw new Error('document.type deve ser: cpf ou cnpj');
+        }
+
+        try {
+            const token = await getValidToken();
+
+            const requestData = {
+                amount: cashOutData.amount,
+                description: cashOutData.description || null,
+                pix_key_type: cashOutData.pix_key_type,
+                pix_key: cashOutData.pix_key,
+                document: {
+                    type: cashOutData.document.type,
+                    number: cashOutData.document.number
+                }
+            };
+
+            console.log('📤 Enviando dados do cash-out:', requestData);
+
+            const response = await fetch(`${API_CONFIG.baseUrl}/cash-out`, {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json'
+                },
+                body: JSON.stringify(requestData)
+            });
+
+            console.log('📥 Resposta do cash-out:', response.status, response.statusText);
+
+            if (!response.ok) {
+                const errorText = await response.text();
+                throw new Error(`HTTP ${response.status}: ${response.statusText} - ${errorText}`);
+            }
+
+            const data = await response.json();
+            console.log('✅ Cash-out criado com sucesso:', data);
+
+            return data;
+
+        } catch (error) {
+            console.error('❌ Erro ao criar cash-out:', error);
+            throw error;
+        }
+    }
+
+    /**
+     * 6. CONSULTA DE DADOS DO PARCEIRO
+     * Endpoint: GET https://api.syncpayments.com.br/api/partner/v1/profile
+     */
+    async function getProfile() {
+        console.log('👤 Consultando dados do parceiro...');
+
+        try {
+            const token = await getValidToken();
+
+            const response = await fetch(`${API_CONFIG.baseUrl}/profile`, {
+                method: 'GET',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Accept': 'application/json'
+                }
+            });
+
+            console.log('📥 Resposta do perfil:', response.status, response.statusText);
+
+            if (!response.ok) {
+                const errorText = await response.text();
+                throw new Error(`HTTP ${response.status}: ${response.statusText} - ${errorText}`);
+            }
+
+            const data = await response.json();
+            console.log('✅ Dados do parceiro consultados:', data);
+
+            return data;
+
+        } catch (error) {
+            console.error('❌ Erro ao consultar dados do parceiro:', error);
+            throw error;
+        }
+    }
+
+    /**
+     * 7. GERENCIAMENTO DE WEBHOOKS
+     */
+
+    /**
+     * Listar webhooks
+     * Endpoint: GET https://api.syncpayments.com.br/api/partner/v1/webhooks
+     */
+    async function listWebhooks(search = null, per_page = null) {
+        console.log('🔗 Listando webhooks...');
+
+        try {
+            const token = await getValidToken();
+
+            let url = `${API_CONFIG.baseUrl}/webhooks`;
+            const params = new URLSearchParams();
+            
+            if (search) params.append('search', search);
+            if (per_page) params.append('per_page', per_page);
+            
+            if (params.toString()) {
+                url += '?' + params.toString();
+            }
+
+            const response = await fetch(url, {
+                method: 'GET',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Accept': 'application/json'
+                }
+            });
+
+            console.log('📥 Resposta da listagem de webhooks:', response.status, response.statusText);
+
+            if (!response.ok) {
+                const errorText = await response.text();
+                throw new Error(`HTTP ${response.status}: ${response.statusText} - ${errorText}`);
+            }
+
+            const data = await response.json();
+            console.log('✅ Webhooks listados:', data);
+
+            return data;
+
+        } catch (error) {
+            console.error('❌ Erro ao listar webhooks:', error);
+            throw error;
+        }
+    }
+
+    /**
+     * Criar webhook
+     * Endpoint: POST https://api.syncpayments.com.br/api/partner/v1/webhooks
+     */
+    async function createWebhook(webhookData) {
+        console.log('🔗 Criando webhook...');
+
+        // Validar dados obrigatórios
+        if (!webhookData.title || !webhookData.url || !webhookData.event) {
+            throw new Error('title, url e event são obrigatórios');
+        }
+
+        // Validar event
+        const validEvents = ['cashin', 'cashout', 'infraction'];
+        if (!validEvents.includes(webhookData.event)) {
+            throw new Error('event deve ser: cashin, cashout ou infraction');
+        }
+
+        try {
+            const token = await getValidToken();
+
+            const requestData = {
+                title: webhookData.title,
+                url: webhookData.url,
+                event: webhookData.event,
+                trigger_all_products: webhookData.trigger_all_products || false
+            };
+
+            console.log('📤 Enviando dados do webhook:', requestData);
+
+            const response = await fetch(`${API_CONFIG.baseUrl}/webhooks`, {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json'
+                },
+                body: JSON.stringify(requestData)
+            });
+
+            console.log('📥 Resposta da criação do webhook:', response.status, response.statusText);
+
+            if (!response.ok) {
+                const errorText = await response.text();
+                throw new Error(`HTTP ${response.status}: ${response.statusText} - ${errorText}`);
+            }
+
+            const data = await response.json();
+            console.log('✅ Webhook criado com sucesso:', data);
+
+            return data;
+
+        } catch (error) {
+            console.error('❌ Erro ao criar webhook:', error);
+            throw error;
+        }
+    }
+
+    /**
+     * Atualizar webhook
+     * Endpoint: PUT https://api.syncpayments.com.br/api/partner/v1/webhooks/{id}
+     */
+    async function updateWebhook(id, webhookData) {
+        console.log('🔗 Atualizando webhook:', id);
+
+        if (!id) {
+            throw new Error('ID do webhook é obrigatório');
+        }
+
+        // Validar dados obrigatórios
+        if (!webhookData.title || !webhookData.url || !webhookData.event) {
+            throw new Error('title, url e event são obrigatórios');
+        }
+
+        // Validar event
+        const validEvents = ['cashin', 'cashout', 'infraction'];
+        if (!validEvents.includes(webhookData.event)) {
+            throw new Error('event deve ser: cashin, cashout ou infraction');
+        }
+
+        try {
+            const token = await getValidToken();
+
+            const requestData = {
+                title: webhookData.title,
+                url: webhookData.url,
+                event: webhookData.event,
+                trigger_all_products: webhookData.trigger_all_products || false
+            };
+
+            console.log('📤 Enviando dados de atualização do webhook:', requestData);
+
+            const response = await fetch(`${API_CONFIG.baseUrl}/webhooks/${id}`, {
+                method: 'PUT',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json'
+                },
+                body: JSON.stringify(requestData)
+            });
+
+            console.log('📥 Resposta da atualização do webhook:', response.status, response.statusText);
+
+            if (!response.ok) {
+                const errorText = await response.text();
+                throw new Error(`HTTP ${response.status}: ${response.statusText} - ${errorText}`);
+            }
+
+            const data = await response.json();
+            console.log('✅ Webhook atualizado com sucesso:', data);
+
+            return data;
+
+        } catch (error) {
+            console.error('❌ Erro ao atualizar webhook:', error);
+            throw error;
+        }
+    }
+
+    /**
+     * Deletar webhook
+     * Endpoint: DELETE https://api.syncpayments.com.br/api/partner/v1/webhooks/{id}
+     */
+    async function deleteWebhook(id) {
+        console.log('🔗 Deletando webhook:', id);
+
+        if (!id) {
+            throw new Error('ID do webhook é obrigatório');
+        }
+
+        try {
+            const token = await getValidToken();
+
+            const response = await fetch(`${API_CONFIG.baseUrl}/webhooks/${id}`, {
+                method: 'DELETE',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Accept': 'application/json'
+                }
+            });
+
+            console.log('📥 Resposta da exclusão do webhook:', response.status, response.statusText);
+
+            if (!response.ok) {
+                const errorText = await response.text();
+                throw new Error(`HTTP ${response.status}: ${response.statusText} - ${errorText}`);
+            }
+
+            const data = await response.json();
+            console.log('✅ Webhook deletado com sucesso:', data);
+
+            return data;
+
+        } catch (error) {
+            console.error('❌ Erro ao deletar webhook:', error);
+            throw error;
+        }
+    }
+
+    /**
      * Função utilitária para exibir logs formatados
      */
     function logInfo(message, data = null) {
@@ -328,7 +650,11 @@
             const balance = await getBalance();
             logInfo('💰 Saldo consultado', balance);
 
-            // 3. Criar cash-in
+            // 3. Consultar dados do parceiro
+            const profile = await getProfile();
+            logInfo('👤 Dados do parceiro', profile);
+
+            // 4. Criar cash-in
             const cashInData = {
                 amount: 50.00,
                 description: 'Teste de integração',
@@ -346,11 +672,41 @@
             const cashInResult = await createCashIn(cashInData);
             logInfo('💳 Cash-in criado', cashInResult);
 
-            // 4. Consultar status da transação
+            // 5. Consultar status da transação
             if (cashInResult.identifier) {
                 const status = await getTransactionStatus(cashInResult.identifier);
                 logInfo('🔍 Status da transação', status);
             }
+
+            // 6. Criar cash-out (exemplo)
+            const cashOutData = {
+                amount: 25.00,
+                description: 'Teste de saque',
+                pix_key_type: 'CPF',
+                pix_key: '12345678901',
+                document: {
+                    type: 'cpf',
+                    number: '12345678901'
+                }
+            };
+
+            const cashOutResult = await createCashOut(cashOutData);
+            logInfo('💸 Cash-out criado', cashOutResult);
+
+            // 7. Gerenciar webhooks
+            const webhooks = await listWebhooks();
+            logInfo('🔗 Webhooks existentes', webhooks);
+
+            // 8. Criar webhook (exemplo)
+            const webhookData = {
+                title: 'Webhook de Teste',
+                url: 'https://exemplo.com/webhook',
+                event: 'cashin',
+                trigger_all_products: true
+            };
+
+            const webhookResult = await createWebhook(webhookData);
+            logInfo('🔗 Webhook criado', webhookResult);
 
         } catch (error) {
             logError('❌ Erro no exemplo de uso', error);
@@ -364,6 +720,12 @@
         getBalance,
         createCashIn,
         getTransactionStatus,
+        createCashOut,
+        getProfile,
+        listWebhooks,
+        createWebhook,
+        updateWebhook,
+        deleteWebhook,
         
         // Funções utilitárias
         isTokenValid,
@@ -380,7 +742,13 @@
     console.log('  - SyncPayIntegration.getAuthToken()');
     console.log('  - SyncPayIntegration.getBalance()');
     console.log('  - SyncPayIntegration.createCashIn(data)');
+    console.log('  - SyncPayIntegration.createCashOut(data)');
     console.log('  - SyncPayIntegration.getTransactionStatus(identifier)');
+    console.log('  - SyncPayIntegration.getProfile()');
+    console.log('  - SyncPayIntegration.listWebhooks(search, per_page)');
+    console.log('  - SyncPayIntegration.createWebhook(data)');
+    console.log('  - SyncPayIntegration.updateWebhook(id, data)');
+    console.log('  - SyncPayIntegration.deleteWebhook(id)');
     console.log('  - SyncPayIntegration.exemploUso()');
 
 })();

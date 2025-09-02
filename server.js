@@ -4,6 +4,7 @@ const cors = require('cors');
 const path = require('path');
 const fetch = require('node-fetch');
 const { syncpayGet, syncpayPost } = require('./syncpayApi');
+const WebhookHandler = require('./webhookHandler');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -132,6 +133,73 @@ app.get('/api/profile', async (req, res) => {
         console.error('[Profile] Erro ao consultar perfil:', err.response?.data || err.message);
         res.status(err.response?.status || 500).json({
             message: 'Não foi possível consultar dados do parceiro',
+            details: err.response?.data || err.message
+        });
+    }
+});
+
+// Configurar webhooks
+const webhookHandler = new WebhookHandler();
+webhookHandler.setupRoutes(app);
+
+// Rota para gerenciar webhooks
+app.get('/api/webhooks', async (req, res) => {
+    try {
+        console.log('🔗 [DEBUG] Listando webhooks...');
+        const response = await syncpayGet('/webhooks');
+        console.log('✅ [DEBUG] Webhooks listados:', response.data);
+        res.json(response.data);
+    } catch (err) {
+        console.error('[Webhooks] Erro ao listar webhooks:', err.response?.data || err.message);
+        res.status(err.response?.status || 500).json({
+            message: 'Não foi possível listar os webhooks',
+            details: err.response?.data || err.message
+        });
+    }
+});
+
+app.post('/api/webhooks', async (req, res) => {
+    try {
+        console.log('🔗 [DEBUG] Criando webhook:', req.body);
+        const response = await syncpayPost('/webhooks', req.body);
+        console.log('✅ [DEBUG] Webhook criado:', response.data);
+        res.json(response.data);
+    } catch (err) {
+        console.error('[Webhooks] Erro ao criar webhook:', err.response?.data || err.message);
+        res.status(err.response?.status || 500).json({
+            message: 'Não foi possível criar o webhook',
+            details: err.response?.data || err.message
+        });
+    }
+});
+
+app.put('/api/webhooks/:id', async (req, res) => {
+    try {
+        const { id } = req.params;
+        console.log('🔗 [DEBUG] Atualizando webhook:', id, req.body);
+        const response = await syncpayPost(`/webhooks/${id}`, req.body, { method: 'PUT' });
+        console.log('✅ [DEBUG] Webhook atualizado:', response.data);
+        res.json(response.data);
+    } catch (err) {
+        console.error('[Webhooks] Erro ao atualizar webhook:', err.response?.data || err.message);
+        res.status(err.response?.status || 500).json({
+            message: 'Não foi possível atualizar o webhook',
+            details: err.response?.data || err.message
+        });
+    }
+});
+
+app.delete('/api/webhooks/:id', async (req, res) => {
+    try {
+        const { id } = req.params;
+        console.log('🔗 [DEBUG] Deletando webhook:', id);
+        const response = await syncpayPost(`/webhooks/${id}`, {}, { method: 'DELETE' });
+        console.log('✅ [DEBUG] Webhook deletado:', response.data);
+        res.json(response.data);
+    } catch (err) {
+        console.error('[Webhooks] Erro ao deletar webhook:', err.response?.data || err.message);
+        res.status(err.response?.status || 500).json({
+            message: 'Não foi possível deletar o webhook',
             details: err.response?.data || err.message
         });
     }
