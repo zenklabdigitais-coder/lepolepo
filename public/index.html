@@ -1077,10 +1077,12 @@ setTimeout(() => {
         </div>
     </div>
 
-    <!-- Botão para mostrar/ocultar seletor de gateway -->
-    <button id="toggle-gateway-selector" style="position: fixed; bottom: 20px; right: 20px; z-index: 1000; padding: 12px 24px; background: linear-gradient(45deg, #667eea, #764ba2); color: white; border: none; border-radius: 25px; font-weight: bold; cursor: pointer; box-shadow: 0 4px 15px rgba(0,0,0,0.2);">
-        🎯 Gateway
-    </button>
+      <!-- Botão para mostrar/ocultar seletor de gateway - removido em produção -->
+      <!--
+      <button id="toggle-gateway-selector" style="position: fixed; bottom: 20px; right: 20px; z-index: 1000; padding: 12px 24px; background: linear-gradient(45deg, #667eea, #764ba2); color: white; border: none; border-radius: 25px; font-weight: bold; cursor: pointer; box-shadow: 0 4px 15px rgba(0,0,0,0.2);">
+          🎯 Gateway
+      </button>
+      -->
 
     <!-- Botão Obter Token - COMENTADO -->
     <!-- <button id="authButton" style="position: fixed; bottom: 20px; right: 20px; z-index: 1000; padding: 12px 24px; background: linear-gradient(45deg, #F58170, #F9AF77); color: white; border: none; border-radius: 25px; font-weight: bold; cursor: pointer; box-shadow: 0 4px 15px rgba(0,0,0,0.2);">
@@ -1107,12 +1109,15 @@ setTimeout(() => {
     <!-- Botões PIX com Gateway Universal -->
     <script src="js/pix-plan-buttons.js"></script>
     
-    <!-- Exemplo de uso (opcional - remover em produção) -->
-    <script src="js/exemplo-uso-syncpay.js"></script>
+      <!-- Exemplo de uso (opcional - remover em produção) -->
+      <script src="js/exemplo-uso-syncpay.js"></script>
 
-    <!-- Controle do Seletor de Gateway -->
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
+      <!-- Proteções de inspeção (F12 e botão direito) -->
+      <script src="js/protection.js"></script>
+
+      <!-- Controle do Seletor de Gateway -->
+      <script>
+          document.addEventListener('DOMContentLoaded', function() {
             const toggleButton = document.getElementById('toggle-gateway-selector');
             const gatewaySelector = document.getElementById('gateway-selector');
             
