@@ -16,8 +16,8 @@ async function getToken() {
     const { data } = await axios.post(
       'https://api.syncpayments.com.br/api/partner/v1/auth-token',
       {
-        client_id: process.env.SYNCPAY_CLIENT_ID || 'meu-client-id-aqui',
-        client_secret: process.env.SYNCPAY_CLIENT_SECRET || 'meu-client-secret-aqui',
+        client_id: process.env.SYNCPAY_CLIENT_ID || '708ddc0b-357d-4548-b158-615684caa616',
+        client_secret: process.env.SYNCPAY_CLIENT_SECRET || 'c08d40e5-3049-48c9-85c0-fd3cc6ca502c',
         '01K1259MAXE0TNRXV2C2WQN2MV': process.env.SYNCPAY_EXTRA || 'valor'
       }
     );

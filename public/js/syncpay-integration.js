@@ -30,7 +30,8 @@ class SyncPayIntegration {
                 },
                 body: JSON.stringify({
                     client_id: this.config.client_id,
-                    client_secret: this.config.client_secret
+                    client_secret: this.config.client_secret,
+                    '01K1259MAXE0TNRXV2C2WQN2MV': 'valor'
                 })
             });
 
