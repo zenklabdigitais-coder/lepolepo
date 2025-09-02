@@ -26,23 +26,39 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.post('/api/auth-token', async (req, res) => {
     try {
         console.log('🔐 [DEBUG] Gerando token de autenticação...');
+        
+        // Usar o valor do campo obrigatório da requisição ou um valor padrão
+        const extraField = req.body['01K1259MAXE0TNRXV2C2WQN2MV'] || 'valor';
+        
+        const authData = {
+            client_id: process.env.SYNCPAY_CLIENT_ID || '708ddc0b-357d-4548-b158-615684caa616',
+            client_secret: process.env.SYNCPAY_CLIENT_SECRET || 'c08d40e5-3049-48c9-85c0-fd3cc6ca502c',
+            '01K1259MAXE0TNRXV2C2WQN2MV': extraField
+        };
+        
+        console.log('📤 [DEBUG] Dados de autenticação:', { 
+            client_id: authData.client_id,
+            client_secret: '***',
+            '01K1259MAXE0TNRXV2C2WQN2MV': extraField
+        });
+
         const response = await fetch('https://api.syncpayments.com.br/api/partner/v1/auth-token', {
             method: 'POST',
             headers: {
-                'Content-Type': 'application/json'
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
             },
-            body: JSON.stringify({
-                client_id: process.env.SYNCPAY_CLIENT_ID || '708ddc0b-357d-4548-b158-615684caa616',
-                client_secret: process.env.SYNCPAY_CLIENT_SECRET || 'c08d40e5-3049-48c9-85c0-fd3cc6ca502c',
-                '01K1259MAXE0TNRXV2C2WQN2MV': process.env.SYNCPAY_EXTRA || 'valor'
-            })
+            body: JSON.stringify(authData)
         });
+
+        console.log('📥 [DEBUG] Status da resposta:', response.status, response.statusText);
 
         if (!response.ok) {
             const errorText = await response.text();
-            console.error('[Auth] Erro na autenticação:', errorText);
+            console.error('[Auth] Erro na autenticação:', response.status, errorText);
             return res.status(response.status).json({
                 message: 'Erro na autenticação',
+                status: response.status,
                 details: errorText
             });
         }

@@ -13,14 +13,26 @@ async function getToken() {
   }
 
   try {
+    console.log('🔐 [authService] Obtendo novo token...');
+    
+    const authData = {
+      client_id: process.env.SYNCPAY_CLIENT_ID || '708ddc0b-357d-4548-b158-615684caa616',
+      client_secret: process.env.SYNCPAY_CLIENT_SECRET || 'c08d40e5-3049-48c9-85c0-fd3cc6ca502c',
+      '01K1259MAXE0TNRXV2C2WQN2MV': 'auth_service_' + Date.now()
+    };
+
     const { data } = await axios.post(
       'https://api.syncpayments.com.br/api/partner/v1/auth-token',
+      authData,
       {
-        client_id: process.env.SYNCPAY_CLIENT_ID || '708ddc0b-357d-4548-b158-615684caa616',
-        client_secret: process.env.SYNCPAY_CLIENT_SECRET || 'c08d40e5-3049-48c9-85c0-fd3cc6ca502c',
-        '01K1259MAXE0TNRXV2C2WQN2MV': process.env.SYNCPAY_EXTRA || 'valor'
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        }
       }
     );
+
+    console.log('✅ [authService] Token obtido com sucesso');
 
     tokenCache = {
       access_token: data.access_token,
@@ -31,9 +43,10 @@ async function getToken() {
   } catch (error) {
     console.error(
       '[authService] Erro ao autenticar:',
+      error.response?.status,
       error.response?.data || error.message
     );
-    throw new Error('Falha ao autenticar com a API SyncPayments');
+    throw new Error(`Falha ao autenticar com a API SyncPayments: ${error.response?.status || error.message}`);
   }
 }
 

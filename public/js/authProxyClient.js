@@ -6,14 +6,24 @@
 (function() {
     'use strict';
 
+    let isAuthenticating = false; // Flag para evitar requisições simultâneas
+
     // Função principal de autenticação
     function authenticateSyncPay() {
+        // Evitar múltiplas requisições simultâneas
+        if (isAuthenticating) {
+            console.log('⏳ Autenticação já em andamento, aguardando...');
+            return;
+        }
+
+        isAuthenticating = true;
         console.log('🔐 Iniciando autenticação SyncPay...');
 
         // 1. Validar se as credenciais existem
         if (!window.SYNCPAY_CONFIG) {
             alert('❌ ERRO: Configuração SYNCPAY_CONFIG não encontrada!');
             console.error('SYNCPAY_CONFIG não está definida');
+            isAuthenticating = false;
             return;
         }
 
@@ -22,6 +32,7 @@
         if (!client_id || !client_secret) {
             alert('❌ ERRO: client_id ou client_secret não configurados!\n\nVerifique o arquivo config.js');
             console.error('Credenciais ausentes:', { client_id: !!client_id, client_secret: !!client_secret });
+            isAuthenticating = false;
             return;
         }
 
@@ -70,6 +81,9 @@
         .catch(error => {
             console.error('❌ Erro na autenticação:', error);
             alert('❌ ERRO na autenticação:\n\n' + error.message);
+        })
+        .finally(() => {
+            isAuthenticating = false; // Reset da flag
         });
     }
 
