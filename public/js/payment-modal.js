@@ -337,6 +337,15 @@ class PaymentModal {
                 icon: type === 'success' ? 'success' : type === 'error' ? 'error' : 'info',
                 timer: 3000,
                 buttons: false
+            }).then((result) => {
+                // Verificar se result existe antes de tentar acessar propriedades
+                if (result && result.value !== undefined) {
+                    // Processar resultado se necessário
+                    console.log('Toast result:', result.value);
+                }
+            }).catch((error) => {
+                // Capturar erros do SweetAlert
+                console.warn('SweetAlert toast error:', error);
             });
         } else {
             // Fallback para alert simples
