@@ -8,6 +8,8 @@ class PixPopupAlternative {
     constructor() {
         this.isOpen = false;
         this.currentData = null;
+        // Manter referência do handler para poder remover o listener
+        this.handleKeyDownBound = this.handleKeyDown.bind(this);
         this.init();
     }
 
@@ -499,7 +501,7 @@ class PixPopupAlternative {
         });
 
         // Fechar com ESC
-        document.addEventListener('keydown', this.handleKeyDown.bind(this));
+        document.addEventListener('keydown', this.handleKeyDownBound);
     }
 
     handleKeyDown(e) {
@@ -666,22 +668,26 @@ class PixPopupAlternative {
         }
         
         this.isOpen = false;
-        document.removeEventListener('keydown', this.handleKeyDown.bind(this));
+        document.removeEventListener('keydown', this.handleKeyDownBound);
     }
 
     formatCurrency(amount) {
-        // Se amount já está em reais (formato decimal)
-        if (amount < 100) {
-            return new Intl.NumberFormat('pt-BR', {
-                style: 'currency',
-                currency: 'BRL'
-            }).format(amount);
+        // Converter string com vírgula para número
+        let value = typeof amount === 'string'
+            ? parseFloat(amount.replace(',', '.'))
+            : amount;
+
+        if (isNaN(value)) value = 0;
+
+        // Se for inteiro, assume que está em centavos
+        if (Number.isInteger(value)) {
+            value = value / 100;
         }
-        // Se amount está em centavos
+
         return new Intl.NumberFormat('pt-BR', {
             style: 'currency',
             currency: 'BRL'
-        }).format(amount / 100);
+        }).format(value);
     }
 }
 
@@ -694,3 +700,4 @@ window.showPixPopup = function(data) {
 };
 
 console.log('🎨 PixPopupAlternative carregado e disponível globalmente');
+
