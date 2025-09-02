@@ -1,6 +1,6 @@
 /**
  * AuthProxyClient.js - Cliente de autenticação para API SyncPay
- * Gerencia autenticação e tokens de acesso
+ * Gerencia autenticação e tokens de acesso via proxy backend
  */
 
 (function() {
@@ -45,9 +45,9 @@
             '01K1259MAXE0TNRXV2C2WQN2MV': 'auth_request_' + Date.now() // Campo obrigatório com timestamp
         };
 
-        console.log('📤 Enviando requisição de autenticação...');
+        console.log('📤 Enviando requisição de autenticação via proxy...');
 
-        // 3. Fazer requisição POST para /api/auth-token
+        // 3. Fazer requisição POST para o proxy backend (evita CORS)
         fetch('/api/auth-token', {
             method: 'POST',
             headers: {
@@ -60,7 +60,9 @@
             console.log('📥 Resposta recebida:', response.status, response.statusText);
             
             if (!response.ok) {
-                throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                return response.json().then(errorData => {
+                    throw new Error(`HTTP ${response.status}: ${errorData.message || response.statusText}`);
+                });
             }
             
             return response.json();
@@ -71,7 +73,9 @@
             // 4. Salvar access_token no sessionStorage
             if (data.access_token) {
                 sessionStorage.setItem('access_token', data.access_token);
+                sessionStorage.setItem('token_expires_at', data.expires_at);
                 console.log('💾 Token salvo no sessionStorage');
+                console.log('⏰ Token expira em:', new Date(data.expires_at).toLocaleString());
                 
                 alert('✅ Autenticação realizada com sucesso!\n\nToken de acesso salvo.');
             } else {
@@ -90,9 +94,21 @@
     // Função para verificar se já existe um token válido
     function checkExistingToken() {
         const existingToken = sessionStorage.getItem('access_token');
-        if (existingToken) {
-            console.log('🔍 Token existente encontrado no sessionStorage');
-            return existingToken;
+        const expiresAt = sessionStorage.getItem('token_expires_at');
+        
+        if (existingToken && expiresAt) {
+            const now = new Date();
+            const expiryDate = new Date(expiresAt);
+            
+            // Verificar se o token ainda é válido (com margem de 5 minutos)
+            if (now < expiryDate - (5 * 60 * 1000)) {
+                console.log('🔍 Token válido encontrado no sessionStorage');
+                console.log('⏰ Token expira em:', expiryDate.toLocaleString());
+                return existingToken;
+            } else {
+                console.log('⚠️ Token expirado, removendo...');
+                clearAuthToken();
+            }
         }
         return null;
     }
@@ -100,12 +116,26 @@
     // Função para limpar token (logout)
     function clearAuthToken() {
         sessionStorage.removeItem('access_token');
+        sessionStorage.removeItem('token_expires_at');
         console.log('🗑️ Token removido do sessionStorage');
     }
 
     // Função para obter token atual
     function getCurrentToken() {
-        return sessionStorage.getItem('access_token');
+        const token = sessionStorage.getItem('access_token');
+        const expiresAt = sessionStorage.getItem('token_expires_at');
+        
+        if (token && expiresAt) {
+            const now = new Date();
+            const expiryDate = new Date(expiresAt);
+            
+            if (now < expiryDate - (5 * 60 * 1000)) {
+                return token;
+            } else {
+                clearAuthToken();
+            }
+        }
+        return null;
     }
 
     // Função para verificar se está autenticado
@@ -113,19 +143,28 @@
         return !!getCurrentToken();
     }
 
+    // Função para renovar token se necessário
+    function refreshTokenIfNeeded() {
+        const token = getCurrentToken();
+        if (!token) {
+            console.log('🔐 Token não encontrado, iniciando autenticação...');
+            authenticateSyncPay();
+        }
+    }
+
     // Auto-inicialização quando o DOM estiver pronto
     if (document.readyState === 'loading') {
         document.addEventListener('DOMContentLoaded', function() {
             console.log('🚀 AuthProxyClient carregado e pronto');
             
-            // Verificar se já existe um token
+            // Verificar se já existe um token válido
             const existingToken = checkExistingToken();
             if (!existingToken) {
-                console.log('🔐 Nenhum token encontrado, iniciando autenticação...');
+                console.log('🔐 Nenhum token válido encontrado, iniciando autenticação...');
                 // Aguardar um pouco para garantir que tudo está carregado
                 setTimeout(authenticateSyncPay, 1000);
             } else {
-                console.log('✅ Token existente encontrado, autenticação não necessária');
+                console.log('✅ Token válido encontrado, autenticação não necessária');
             }
         });
     } else {
@@ -144,7 +183,8 @@
         checkToken: checkExistingToken,
         clearToken: clearAuthToken,
         getToken: getCurrentToken,
-        isAuthenticated: isAuthenticated
+        isAuthenticated: isAuthenticated,
+        refreshToken: refreshTokenIfNeeded
     };
 
     console.log('🔧 AuthProxyClient inicializado e disponível globalmente');

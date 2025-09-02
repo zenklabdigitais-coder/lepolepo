@@ -21,7 +21,7 @@
 
     /**
      * 1. AUTENTICAÇÃO
-     * Endpoint: POST https://api.syncpayments.com.br/api/partner/v1/auth-token
+     * Endpoint: POST /api/auth-token (via proxy backend)
      */
     async function getAuthToken() {
         console.log('🔐 Iniciando autenticação SyncPayments...');
@@ -51,9 +51,10 @@
         };
 
         try {
-            console.log('📤 Enviando requisição de autenticação...');
+            console.log('📤 Enviando requisição de autenticação via proxy...');
             
-            const response = await fetch(`${API_CONFIG.baseUrl}${API_CONFIG.authEndpoint}`, {
+            // Usar o proxy backend para evitar CORS
+            const response = await fetch('/api/auth-token', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -65,8 +66,8 @@
             console.log('📥 Resposta recebida:', response.status, response.statusText);
 
             if (!response.ok) {
-                const errorText = await response.text();
-                throw new Error(`HTTP ${response.status}: ${response.statusText} - ${errorText}`);
+                const errorData = await response.json();
+                throw new Error(`HTTP ${response.status}: ${errorData.message || response.statusText}`);
             }
 
             const data = await response.json();
@@ -75,7 +76,7 @@
             // Armazenar token em memória
             if (data.access_token) {
                 authToken = data.access_token;
-                tokenExpiry = new Date(Date.now() + (data.expires_in * 1000));
+                tokenExpiry = new Date(data.expires_at);
                 
                 console.log('💾 Token armazenado em memória');
                 console.log('⏰ Token expira em:', tokenExpiry.toLocaleString());

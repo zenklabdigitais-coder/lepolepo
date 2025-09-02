@@ -26,13 +26,26 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.post('/api/auth-token', async (req, res) => {
     try {
         console.log('🔐 [DEBUG] Gerando token de autenticação...');
+        console.log('📋 [DEBUG] Corpo da requisição:', JSON.stringify(req.body, null, 2));
         
         // Usar o valor do campo obrigatório da requisição ou um valor padrão
         const extraField = req.body['01K1259MAXE0TNRXV2C2WQN2MV'] || 'valor';
         
+        // Verificar se as credenciais estão disponíveis
+        const clientId = process.env.SYNCPAY_CLIENT_ID || '708ddc0b-357d-4548-b158-615684caa616';
+        const clientSecret = process.env.SYNCPAY_CLIENT_SECRET || 'c08d40e5-3049-48c9-85c0-fd3cc6ca502c';
+        
+        if (!clientId || !clientSecret) {
+            console.error('[Auth] Credenciais não configuradas');
+            return res.status(500).json({
+                message: 'Credenciais da API não configuradas',
+                error: 'SYNCPAY_CLIENT_ID ou SYNCPAY_CLIENT_SECRET não definidos'
+            });
+        }
+        
         const authData = {
-            client_id: process.env.SYNCPAY_CLIENT_ID || '708ddc0b-357d-4548-b158-615684caa616',
-            client_secret: process.env.SYNCPAY_CLIENT_SECRET || 'c08d40e5-3049-48c9-85c0-fd3cc6ca502c',
+            client_id: clientId,
+            client_secret: clientSecret,
             '01K1259MAXE0TNRXV2C2WQN2MV': extraField
         };
         
@@ -42,35 +55,63 @@ app.post('/api/auth-token', async (req, res) => {
             '01K1259MAXE0TNRXV2C2WQN2MV': extraField
         });
 
+        console.log('🌐 [DEBUG] Fazendo requisição para:', 'https://api.syncpayments.com.br/api/partner/v1/auth-token');
+
         const response = await fetch('https://api.syncpayments.com.br/api/partner/v1/auth-token', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-                'Accept': 'application/json'
+                'Accept': 'application/json',
+                'User-Agent': 'SyncPay-Integration/1.0'
             },
             body: JSON.stringify(authData)
         });
 
         console.log('📥 [DEBUG] Status da resposta:', response.status, response.statusText);
+        console.log('📋 [DEBUG] Headers da resposta:', Object.fromEntries(response.headers.entries()));
 
         if (!response.ok) {
             const errorText = await response.text();
             console.error('[Auth] Erro na autenticação:', response.status, errorText);
+            
+            // Tentar parsear como JSON se possível
+            let errorData;
+            try {
+                errorData = JSON.parse(errorText);
+            } catch (e) {
+                errorData = { message: errorText };
+            }
+            
             return res.status(response.status).json({
-                message: 'Erro na autenticação',
+                message: 'Erro na autenticação com a API SyncPayments',
                 status: response.status,
-                details: errorText
+                statusText: response.statusText,
+                details: errorData
             });
         }
 
         const data = await response.json();
         console.log('✅ [DEBUG] Token gerado com sucesso');
+        console.log('📋 [DEBUG] Resposta da API:', JSON.stringify(data, null, 2));
+        
+        // Validar se a resposta contém os campos obrigatórios
+        if (!data.access_token) {
+            console.error('[Auth] Token não encontrado na resposta');
+            return res.status(500).json({
+                message: 'Resposta inválida da API',
+                error: 'access_token não encontrado na resposta'
+            });
+        }
+        
         res.json(data);
     } catch (err) {
         console.error('[Auth] Erro ao obter token:', err.message);
+        console.error('[Auth] Stack trace:', err.stack);
+        
         res.status(500).json({
-            message: 'Não foi possível autenticar',
-            details: err.message
+            message: 'Erro interno do servidor',
+            error: err.message,
+            type: err.name
         });
     }
 });
