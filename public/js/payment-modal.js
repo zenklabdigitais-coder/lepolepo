@@ -56,8 +56,8 @@ class PaymentModal {
                 </div>
                 
                 <div class="payment-plan">
-                    <p class="payment-plan-label">PLANO</p>
-                    <p class="payment-plan-duration">1 mês</p>
+                    <p class="payment-plan-label">Formas de pagamento</p>
+                    <p class="payment-plan-duration">Valor</p>
                     <p class="payment-plan-price" id="paymentPlanPrice">R$ 15,00</p>
                 </div>
                 
@@ -71,7 +71,7 @@ class PaymentModal {
                     </button>
                 </div>
                 
-                <div class="payment-qr-container" id="paymentQRContainer" style="display: none;">
+                <div class="payment-qr-container" id="paymentQRContainer">
                     <div class="payment-qr-code" id="paymentQRCode">
                         <!-- QR Code será inserido aqui -->
                     </div>

@@ -166,7 +166,7 @@
 
 /* SEÇÃO DO PLANO */
 .payment-plan {
-    text-align: center;
+    text-align: left;
     margin-bottom: 25px;
     padding: 20px;
     background: #f8f9fa;
@@ -175,11 +175,11 @@
 
 .payment-plan-label {
     color: #333;
-    font-size: 14px;
+    font-size: 16px;
     font-weight: 600;
     margin: 0 0 5px 0;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
+    text-transform: none;
+    letter-spacing: normal;
 }
 
 .payment-plan-duration {
@@ -197,7 +197,7 @@
 
 /* SEÇÃO PIX */
 .payment-pix {
-    text-align: center;
+    text-align: left;
 }
 
 .payment-pix-label {
@@ -207,6 +207,7 @@
     margin: 0 0 15px 0;
     text-transform: uppercase;
     letter-spacing: 0.5px;
+    text-align: left;
 }
 
 .payment-pix-code {
@@ -262,6 +263,7 @@
 .payment-qr-container {
     margin: 20px 0;
     text-align: center;
+    display: block;
 }
 
 .payment-qr-code {
