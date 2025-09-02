@@ -125,7 +125,6 @@
                 try {
                     swal({
                         title: 'Processando pagamento...',
-                        text: `Aguarde enquanto geramos seu código PIX via ${this.currentGateway.toUpperCase()}`,
                         icon: 'info',
                         buttons: false,
                         closeOnClickOutside: false,
@@ -170,8 +169,7 @@
                     <div style="margin-bottom: 15px;">
                         <div style="border: 4px solid #f3f3f3; border-top: 4px solid #F58170; border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; margin: 0 auto;"></div>
                     </div>
-                    <div>Processando pagamento via ${this.currentGateway.toUpperCase()}...</div>
-                    <div style="font-size: 14px; margin-top: 5px; opacity: 0.8;">Aguarde enquanto geramos seu código PIX</div>
+                    <div>Processando pagamento...</div>
                 </div>
                 <style>
                     @keyframes spin {
