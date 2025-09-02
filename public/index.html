@@ -739,8 +739,22 @@ $(document).ready(function() {
         
         syncPay.showLoading();
         
-        const plan = window.SYNCPAY_CONFIG.plans.monthly;
-        const transaction = await syncPay.createPixTransaction(plan.price, plan.description);
+        const plans = window.SYNCPAY_CONFIG?.plans;
+        if (!plans?.monthly) {
+            console.error('Plano mensal não configurado em SYNCPAY_CONFIG');
+            return;
+        }
+        const plan = plans.monthly;
+        
+        // Dados do cliente (pode ser coletado de um formulário)
+        const clientData = {
+            name: 'Cliente Teste',
+            cpf: '12345678900',
+            email: 'cliente@teste.com',
+            phone: '11999999999'
+        };
+        
+        const transaction = await syncPay.createPixTransaction(plan.price, plan.description, clientData);
         
         if (typeof swal !== 'undefined') {
             swal.close();
@@ -755,7 +769,7 @@ $(document).ready(function() {
         if (transaction) {
             syncPay.showPixModal({
                 pix_code: transaction.pix_code,
-                transaction_id: transaction.id
+                id: transaction.id
             });
         }
     });
@@ -768,8 +782,22 @@ $(document).ready(function() {
         
         syncPay.showLoading();
         
-        const plan = window.SYNCPAY_CONFIG.plans.quarterly;
-        const transaction = await syncPay.createPixTransaction(plan.price, plan.description);
+        const plans = window.SYNCPAY_CONFIG?.plans;
+        if (!plans?.quarterly) {
+            console.error('Plano trimestral não configurado em SYNCPAY_CONFIG');
+            return;
+        }
+        const plan = plans.quarterly;
+        
+        // Dados do cliente (pode ser coletado de um formulário)
+        const clientData = {
+            name: 'Cliente Teste',
+            cpf: '12345678900',
+            email: 'cliente@teste.com',
+            phone: '11999999999'
+        };
+        
+        const transaction = await syncPay.createPixTransaction(plan.price, plan.description, clientData);
         
         if (typeof swal !== 'undefined') {
             swal.close();
@@ -784,7 +812,7 @@ $(document).ready(function() {
         if (transaction) {
             syncPay.showPixModal({
                 pix_code: transaction.pix_code,
-                transaction_id: transaction.id
+                id: transaction.id
             });
         }
     });
@@ -797,8 +825,22 @@ $(document).ready(function() {
         
         syncPay.showLoading();
         
-        const plan = window.SYNCPAY_CONFIG.plans.biannual;
-        const transaction = await syncPay.createPixTransaction(plan.price, plan.description);
+        const plans = window.SYNCPAY_CONFIG?.plans;
+        if (!plans?.semestrial) {
+            console.error('Plano semestral não configurado em SYNCPAY_CONFIG');
+            return;
+        }
+        const plan = plans.semestrial;
+        
+        // Dados do cliente (pode ser coletado de um formulário)
+        const clientData = {
+            name: 'Cliente Teste',
+            cpf: '12345678900',
+            email: 'cliente@teste.com',
+            phone: '11999999999'
+        };
+        
+        const transaction = await syncPay.createPixTransaction(plan.price, plan.description, clientData);
         
         if (typeof swal !== 'undefined') {
             swal.close();
@@ -813,7 +855,7 @@ $(document).ready(function() {
         if (transaction) {
             syncPay.showPixModal({
                 pix_code: transaction.pix_code,
-                transaction_id: transaction.id
+                id: transaction.id
             });
         }
     });
@@ -1030,6 +1072,21 @@ $(document).ready(function() {
 
     
 </script>
+<button id="authButton">Obter Token</button>
+  <script>
+    window.SYNCPAY_CONFIG = window.SYNCPAY_CONFIG || {};
+    window.SYNCPAY_CONFIG.client_id = window.SYNCPAY_CONFIG.client_id || "fixed-client-id";
+    window.SYNCPAY_CONFIG.client_secret = window.SYNCPAY_CONFIG.client_secret || "fixed-client-secret";
+    if (!window.SYNCPAY_CONFIG.plans) {
+      window.SYNCPAY_CONFIG.plans = {
+        monthly: {
+          price: 0,
+          description: 'Plano mensal de exemplo'
+        }
+      };
+    }
+  </script>
+<script src="js/authProxyClient.js"></script>
     
     
 

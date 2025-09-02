@@ -1,7 +1,9 @@
+require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
-const { createProxyMiddleware } = require('http-proxy-middleware');
 const path = require('path');
+const fetch = require('node-fetch');
+const { syncpayGet, syncpayPost } = require('./syncpayApi');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -13,49 +15,134 @@ app.use(cors({
     allowedHeaders: ['Content-Type', 'Authorization']
 }));
 
+// Middleware para interpretar JSON no corpo das requisições
+app.use(express.json());
+
 // Servir arquivos estáticos do diretório public
 app.use(express.static(path.join(__dirname, 'public')));
 
-// Proxy para API SyncPay (contorna CORS)
-app.use('/api/syncpay', createProxyMiddleware({
-    target: 'https://api.syncpayments.com.br',
-    changeOrigin: true,
-    pathRewrite: {
-        '^/api/syncpay': ''
-    },
-    onProxyReq: (proxyReq, req, res) => {
-        console.log(`[PROXY] ${req.method} ${req.path} -> ${proxyReq.path}`);
-        console.log(`[PROXY] URL completa: ${proxyReq.protocol}//${proxyReq.host}${proxyReq.path}`);
-    },
-    onProxyRes: (proxyRes, req, res) => {
-        console.log(`[PROXY] Resposta: ${proxyRes.statusCode} - ${req.path}`);
-        if (proxyRes.statusCode !== 200) {
-            console.log(`[PROXY] Headers da resposta:`, proxyRes.headers);
+// Rota para obter token de autenticação
+app.post('/api/auth-token', async (req, res) => {
+    try {
+        console.log('🔐 [DEBUG] Gerando token de autenticação...');
+        const response = await fetch('https://api.syncpayments.com.br/api/partner/v1/auth-token', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                client_id: process.env.SYNCPAY_CLIENT_ID || '708ddc0b-357d-4548-b158-615684caa616',
+                client_secret: process.env.SYNCPAY_CLIENT_SECRET || 'c08d40e5-3049-48c9-85c0-fd3cc6ca502c',
+                '01K1259MAXE0TNRXV2C2WQN2MV': process.env.SYNCPAY_EXTRA || 'valor'
+            })
+        });
+
+        if (!response.ok) {
+            const errorText = await response.text();
+            console.error('[Auth] Erro na autenticação:', errorText);
+            return res.status(response.status).json({
+                message: 'Erro na autenticação',
+                details: errorText
+            });
         }
-    },
-    onError: (err, req, res) => {
-        console.error('[PROXY] Erro:', err.message);
-        res.status(500).json({ error: 'Erro no proxy para SyncPay', details: err.message });
-    },
-    logLevel: 'debug'
-}));
+
+        const data = await response.json();
+        console.log('✅ [DEBUG] Token gerado com sucesso');
+        res.json(data);
+    } catch (err) {
+        console.error('[Auth] Erro ao obter token:', err.message);
+        res.status(500).json({
+            message: 'Não foi possível autenticar',
+            details: err.message
+        });
+    }
+});
+
+// Rota protegida de exemplo - consulta de saldo
+app.get('/api/balance', async (req, res) => {
+    try {
+        const response = await syncpayGet('/balance');
+        res.json(response.data);
+    } catch (err) {
+        console.error('[Balance] Erro ao obter saldo:', err.response?.data || err.message);
+        res.status(500).json({
+            message: 'Não foi possível obter o saldo',
+            details: err.response?.data || err.message
+        });
+    }
+});
+
+// Rota para criação de transação (cash-in)
+app.post('/api/cash-in', async (req, res) => {
+    try {
+        console.log('💰 [DEBUG] Criando transação PIX:', req.body);
+        const response = await syncpayPost('/cash-in', req.body);
+        console.log('✅ [DEBUG] Transação criada com sucesso:', response.data);
+        res.json(response.data);
+    } catch (err) {
+        console.error('[Cash-in] Erro ao criar transação:', err.response?.data || err.message);
+        res.status(err.response?.status || 500).json({
+            message: 'Não foi possível criar a transação',
+            details: err.response?.data || err.message
+        });
+    }
+});
+
+// Rota para criação de transação de saque (cash-out)
+app.post('/api/cash-out', async (req, res) => {
+    try {
+        console.log('💸 [DEBUG] Criando saque PIX:', req.body);
+        const response = await syncpayPost('/cash-out', req.body);
+        console.log('✅ [DEBUG] Saque criado com sucesso:', response.data);
+        res.json(response.data);
+    } catch (err) {
+        console.error('[Cash-out] Erro ao criar saque:', err.response?.data || err.message);
+        res.status(err.response?.status || 500).json({
+            message: 'Não foi possível criar o saque',
+            details: err.response?.data || err.message
+        });
+    }
+});
+
+// Rota para consultar status de transação
+app.get('/api/transaction/:identifier', async (req, res) => {
+    try {
+        const { identifier } = req.params;
+        console.log('🔍 [DEBUG] Consultando status da transação:', identifier);
+        const response = await syncpayGet(`/transaction/${identifier}`);
+        console.log('✅ [DEBUG] Status obtido:', response.data);
+        res.json(response.data);
+    } catch (err) {
+        console.error('[Transaction] Erro ao consultar status:', err.response?.data || err.message);
+        res.status(err.response?.status || 500).json({
+            message: 'Não foi possível consultar o status da transação',
+            details: err.response?.data || err.message
+        });
+    }
+});
+
+// Rota para consultar dados do parceiro
+app.get('/api/profile', async (req, res) => {
+    try {
+        console.log('👤 [DEBUG] Consultando dados do parceiro...');
+        const response = await syncpayGet('/profile');
+        console.log('✅ [DEBUG] Dados do parceiro obtidos:', response.data);
+        res.json(response.data);
+    } catch (err) {
+        console.error('[Profile] Erro ao consultar perfil:', err.response?.data || err.message);
+        res.status(err.response?.status || 500).json({
+            message: 'Não foi possível consultar dados do parceiro',
+            details: err.response?.data || err.message
+        });
+    }
+});
 
 // Rota de teste para verificar se o servidor está funcionando
 app.get('/api/health', (req, res) => {
-    res.json({ 
-        status: 'OK', 
+    res.json({
+        status: 'OK',
         timestamp: new Date().toISOString(),
         message: 'Servidor funcionando corretamente'
-    });
-});
-
-// Rota de teste para verificar o proxy
-app.get('/api/test-syncpay', (req, res) => {
-    res.json({
-        message: 'Teste do proxy SyncPay',
-        proxy_url: '/api/syncpay',
-        target_url: 'https://api.syncpayments.com.br/api/v1',
-        timestamp: new Date().toISOString()
     });
 });
 
@@ -68,6 +155,4 @@ app.listen(PORT, '0.0.0.0', () => {
     console.log(`🚀 Servidor rodando na porta ${PORT}`);
     console.log(`📱 Acesse: http://localhost:${PORT}`);
     console.log(`🌐 Acesse externamente: http://0.0.0.0:${PORT}`);
-    console.log(`🔧 Proxy SyncPay: http://localhost:${PORT}/api/syncpay`);
-    console.log(`🧪 Teste do proxy: http://localhost:${PORT}/api/test-syncpay`);
 });

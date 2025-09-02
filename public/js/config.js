@@ -2,8 +2,8 @@
 // ✅ CREDENCIAIS REAIS CONFIGURADAS PARA API DE PRODUÇÃO
 
 const SYNCPAY_CONFIG = {
-    // URL base da API SyncPay (usando proxy local para contornar CORS)
-    base_url: window.location.origin + '/api/syncpay',
+    // URL base da API SyncPay
+    base_url: 'https://api.syncpayments.com.br/api',
     
     // ✅ CREDENCIAIS REAIS DA SYNCPAY
     client_id: '708ddc0b-357d-4548-b158-615684caa616',        // Client ID (público)
@@ -19,7 +19,7 @@ const SYNCPAY_CONFIG = {
             price: 59.70,
             description: 'Assinatura 3 meses - Stella Beghini'
         },
-        biannual: {
+        semestrial: {
             price: 119.40,
             description: 'Assinatura 6 meses - Stella Beghini'
         }

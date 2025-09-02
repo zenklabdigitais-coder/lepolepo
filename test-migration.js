@@ -40,18 +40,19 @@ async function testEndpoints() {
     console.log('🌐 Testando endpoints...');
     
     const endpoints = [
-        '/api/syncpay/auth/token',
-        '/api/syncpay/pix/cobranca'
+        { url: '/balance', method: 'GET' },
+        { url: '/cash-in', method: 'POST', body: { test: true } }
     ];
-    
-    for (const endpoint of endpoints) {
+
+    for (const ep of endpoints) {
         try {
-            console.log(`🔍 Testando endpoint: ${endpoint}`);
-            const response = await fetch(endpoint, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ test: true })
-            });
+            console.log(`🔍 Testando endpoint: ${ep.url}`);
+            const options = {
+                method: ep.method,
+                headers: { 'Content-Type': 'application/json' }
+            };
+            if (ep.body) options.body = JSON.stringify(ep.body);
+            const response = await fetch(ep.url, options);
             
             console.log(`📊 Status: ${response.status}`);
             
@@ -63,28 +64,8 @@ async function testEndpoints() {
                 console.log(`✅ Endpoint responde com status: ${response.status}`);
             }
         } catch (error) {
-            console.error(`❌ Erro ao testar ${endpoint}:`, error.message);
+            console.error(`❌ Erro ao testar ${ep.url}:`, error.message);
         }
-    }
-}
-
-// Função para testar proxy
-async function testProxy() {
-    console.log('🔄 Testando proxy...');
-    
-    try {
-        const response = await fetch('/api/test-syncpay');
-        const data = await response.json();
-        
-        console.log('✅ Proxy funcionando:', data);
-        
-        if (data.target_url.includes('api.syncpayments.com.br')) {
-            console.log('✅ Target URL atualizada para produção');
-        } else {
-            console.log('❌ Target URL ainda aponta para mock');
-        }
-    } catch (error) {
-        console.error('❌ Erro ao testar proxy:', error.message);
     }
 }
 
@@ -100,19 +81,14 @@ async function runTests() {
     const integrationOk = testIntegration();
     console.log('');
     
-    // Teste 3: Proxy
-    await testProxy();
-    console.log('');
-    
-    // Teste 4: Endpoints
+    // Teste 3: Endpoints do servidor
     await testEndpoints();
     console.log('');
-    
+
     // Resumo
     console.log('📊 Resumo dos testes:');
     console.log(`✅ Configuração: ${configOk ? 'OK' : 'FALHOU'}`);
     console.log(`✅ Integração: ${integrationOk ? 'OK' : 'FALHOU'}`);
-    console.log('✅ Proxy: Testado');
     console.log('✅ Endpoints: Testados');
     
     if (configOk && integrationOk) {
