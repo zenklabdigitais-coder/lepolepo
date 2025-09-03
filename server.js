@@ -701,6 +701,10 @@ app.get('/privacy', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
+app.get('/oferta-premiada', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'oferta-premiada', 'index.html'));
+});
+
 // Rota raiz redireciona para /links (página principal)
 app.get('/', (req, res) => {
     res.redirect('/links');
