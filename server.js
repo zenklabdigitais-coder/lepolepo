@@ -708,13 +708,7 @@ app.get('/', (req, res) => {
     res.redirect('/links');
 });
 
-// Servir arquivos estáticos de cada diretório (APÓS as rotas principais)
-app.use('/links', express.static(path.join(__dirname, 'links')));
-app.use('/compra-aprovada', express.static(path.join(__dirname, 'compra-aprovada')));
-app.use('/redirect', express.static(path.join(__dirname, 'redirect')));
-app.use(express.static(path.join(__dirname, 'public')));
-
-// Middleware para debug de arquivos estáticos
+// Middleware para debug de arquivos estáticos (ANTES dos middlewares estáticos)
 app.use((req, res, next) => {
     if (req.path.includes('images/') || req.path.includes('icons/')) {
         console.log(`🔍 [Static] Tentando servir: ${req.path}`);
@@ -723,6 +717,12 @@ app.use((req, res, next) => {
     }
     next();
 });
+
+// Servir arquivos estáticos de cada diretório (APÓS o debug)
+app.use('/links', express.static(path.join(__dirname, 'links')));
+app.use('/compra-aprovada', express.static(path.join(__dirname, 'compra-aprovada')));
+app.use('/redirect', express.static(path.join(__dirname, 'redirect')));
+app.use(express.static(path.join(__dirname, 'public')));
 
 app.listen(PORT, '0.0.0.0', () => {
     console.log(`🚀 Servidor rodando na porta ${PORT}`);
