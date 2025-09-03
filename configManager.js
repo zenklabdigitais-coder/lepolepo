@@ -1,5 +1,6 @@
 const readline = require('readline');
-const { getConfig, saveConfig } = require('./loadConfig');
+const fs = require('fs');
+const { getConfig } = require('./loadConfig');
 
 const rl = readline.createInterface({ input: process.stdin, output: process.stdout });
 
@@ -9,6 +10,54 @@ function ask(question, defaultValue) {
       resolve(answer.trim() === '' ? defaultValue : answer.trim());
     });
   });
+}
+
+function generateEnvContent(cfg) {
+  return `# Configurações do Gateway de Pagamento
+GATEWAY=${cfg.gateway}
+ENVIRONMENT=${cfg.environment}
+GENERATE_QR_CODE_ON_MOBILE=${cfg.generateQRCodeOnMobile}
+
+# Configurações do SyncPay
+SYNCPAY_CLIENT_ID=${cfg.syncpay.clientId}
+SYNCPAY_CLIENT_SECRET=${cfg.syncpay.clientSecret}
+
+# Configurações do PushinPay
+PUSHINPAY_TOKEN=${cfg.pushinpay.token}
+
+# Configurações do Webhook
+WEBHOOK_BASE_URL=${cfg.webhook.baseUrl}
+WEBHOOK_SECRET=${cfg.webhook.secret}
+
+# Informações do Modelo
+MODEL_NAME=${cfg.model.name}
+MODEL_HANDLE=${cfg.model.handle}
+MODEL_BIO=${cfg.model.bio}
+
+# Configurações dos Planos - Mensal
+PLAN_MONTHLY_BUTTON_ID=${cfg.plans.monthly.buttonId}
+PLAN_MONTHLY_LABEL=${cfg.plans.monthly.label}
+PLAN_MONTHLY_PRICE_LABEL=${cfg.plans.monthly.priceLabel}
+PLAN_MONTHLY_PRICE=${cfg.plans.monthly.price}
+PLAN_MONTHLY_DESCRIPTION=${cfg.plans.monthly.description}
+
+# Configurações dos Planos - Trimestral
+PLAN_QUARTERLY_BUTTON_ID=${cfg.plans.quarterly.buttonId}
+PLAN_QUARTERLY_LABEL=${cfg.plans.quarterly.label}
+PLAN_QUARTERLY_PRICE_LABEL=${cfg.plans.quarterly.priceLabel}
+PLAN_QUARTERLY_PRICE=${cfg.plans.quarterly.price}
+PLAN_QUARTERLY_DESCRIPTION=${cfg.plans.quarterly.description}
+
+# Configurações dos Planos - Semestral
+PLAN_SEMESTRIAL_BUTTON_ID=${cfg.plans.semestrial.buttonId}
+PLAN_SEMESTRIAL_LABEL=${cfg.plans.semestrial.label}
+PLAN_SEMESTRIAL_PRICE_LABEL=${cfg.plans.semestrial.priceLabel}
+PLAN_SEMESTRIAL_PRICE=${cfg.plans.semestrial.price}
+PLAN_SEMESTRIAL_DESCRIPTION=${cfg.plans.semestrial.description}
+
+# URL de Redirecionamento
+REDIRECT_URL=${cfg.redirectUrl}
+`;
 }
 
 async function main() {
@@ -39,8 +88,12 @@ async function main() {
     plan.price = parseFloat(await ask(`Plan ${key} amount`, plan.price));
   }
 
-  saveConfig(cfg);
-  console.log('Configuration saved to app-config.json');
+  // Gerar arquivo .env
+  const envContent = generateEnvContent(cfg);
+  fs.writeFileSync('.env', envContent);
+  
+  console.log('✅ Configuração salva no arquivo .env');
+  console.log('⚠️ Lembre-se de adicionar .env ao .gitignore para proteger suas credenciais');
   rl.close();
 }
 
