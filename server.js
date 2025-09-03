@@ -678,6 +678,24 @@ app.get('/test-image', (req, res) => {
     }
 });
 
+// Rota de teste adicional para verificar o middleware de redirecionamento
+app.get('/test-redirect-image', (req, res) => {
+    const imagePath = path.join(__dirname, 'redirect', 'images', 'foto.jpg');
+    console.log(`🖼️ [Test Redirect] Verificando imagem em: ${imagePath}`);
+    
+    if (require('fs').existsSync(imagePath)) {
+        console.log(`✅ [Test Redirect] Imagem encontrada: ${imagePath}`);
+        res.sendFile(imagePath);
+    } else {
+        console.log(`❌ [Test Redirect] Imagem não encontrada: ${imagePath}`);
+        res.status(404).json({
+            error: 'Imagem não encontrada',
+            path: imagePath,
+            exists: false
+        });
+    }
+});
+
 // Rota para a página privacy (checkout)
 app.get('/privacy', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'index.html'));
@@ -701,21 +719,27 @@ app.use((req, res, next) => {
 // Servir arquivos estáticos de cada diretório (APÓS o debug)
 app.use('/links', express.static(path.join(__dirname, 'links')));
 app.use('/compra-aprovada', express.static(path.join(__dirname, 'compra-aprovada')));
-app.use('/redirect', express.static(path.join(__dirname, 'redirect')));
 app.use('/public', express.static(path.join(__dirname, 'public')));
 
 // Middleware para servir arquivos estáticos de forma mais flexível
 app.use('/images', express.static(path.join(__dirname, 'links/images')));
 app.use('/icons', express.static(path.join(__dirname, 'links/icons')));
-app.use('/redirect/images', express.static(path.join(__dirname, 'redirect/images')));
 app.use('/compra-aprovada/images', express.static(path.join(__dirname, 'compra-aprovada/images')));
 
-// Middleware adicional para garantir que imagens sejam servidas corretamente
-app.use('/redirect/images', (req, res, next) => {
-    console.log(`🖼️ [Images] Tentando servir imagem: ${req.path}`);
-    console.log(`🖼️ [Images] Caminho completo: ${req.url}`);
+// Middleware específico para redirecionamento com debug
+app.use('/redirect', (req, res, next) => {
+    console.log(`🔄 [Redirect] Requisição para: ${req.path}`);
+    console.log(`🔄 [Redirect] URL completa: ${req.url}`);
     next();
-});
+}, express.static(path.join(__dirname, 'redirect')));
+
+// Middleware específico para imagens de redirecionamento
+app.use('/redirect/images', (req, res, next) => {
+    console.log(`🖼️ [Redirect Images] Tentando servir: ${req.path}`);
+    console.log(`🖼️ [Redirect Images] URL completa: ${req.url}`);
+    console.log(`🖼️ [Redirect Images] Caminho físico: ${path.join(__dirname, 'redirect/images', req.path.replace('/redirect/images/', ''))}`);
+    next();
+}, express.static(path.join(__dirname, 'redirect/images')));
 
 app.use(express.static(path.join(__dirname, 'public')));
 

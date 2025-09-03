@@ -62,8 +62,28 @@
       font-size: 12px;
       color: #6b7280;
     }
+    .debug-info {
+      font-size: 10px;
+      color: #9ca3af;
+      margin-top: 10px;
+      padding: 5px;
+      background: #f3f4f6;
+      border-radius: 4px;
+    }
   </style>
   <script>
+    // Debug: verificar se a imagem carregou
+    window.addEventListener('load', function() {
+      const img = document.querySelector('.container img');
+      if (img.complete && img.naturalHeight !== 0) {
+        console.log('✅ Imagem carregada com sucesso');
+      } else {
+        console.log('❌ Imagem não carregou');
+        // Tentar caminho alternativo
+        img.src = '/redirect/images/foto.jpg';
+      }
+    });
+
     // Redireciona após 3 segundos
     setTimeout(function(){
       window.location.href = "https://t.me/stellabeghinivipbot?start=CH";
@@ -72,14 +92,17 @@
 </head>
 <body>
   <div class="container">
-    <!-- Foto dentro da pasta /images -->
-    <img src="images/foto.jpg" alt="Foto de redirecionamento">
+    <!-- Foto com caminho absoluto e fallback -->
+    <img src="/redirect/images/foto.jpg" alt="Foto de redirecionamento" onerror="this.src='images/foto.jpg'">
     <h2>Preparando seu acesso…</h2>
     <p>Você será redirecionado ao bot em instantes.</p>
     <div class="progress-bar">
       <div class="progress"></div>
     </div>
     <footer>© 2025 • Redirecionamento seguro</footer>
+    <div class="debug-info">
+      Debug: Imagem carregada de /redirect/images/foto.jpg
+    </div>
   </div>
 </body>
 </html>
