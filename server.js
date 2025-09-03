@@ -56,9 +56,6 @@ app.use((req, res, next) => {
     }
 });
 
-// Servir arquivos estáticos do diretório public
-app.use(express.static(path.join(__dirname, 'public')));
-
 // Rota para fornecer configurações públicas ao frontend
 app.get('/api/config', (req, res) => {
     const cfg = getConfig();
@@ -710,6 +707,9 @@ app.get('/privacy', (req, res) => {
 app.get('/', (req, res) => {
     res.redirect('/links');
 });
+
+// Servir arquivos estáticos do diretório public (APÓS as rotas principais)
+app.use(express.static(path.join(__dirname, 'public')));
 
 app.listen(PORT, '0.0.0.0', () => {
     console.log(`🚀 Servidor rodando na porta ${PORT}`);
