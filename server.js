@@ -822,7 +822,7 @@ app.listen(PORT, '0.0.0.0', () => {
     console.log(`🚀 Servidor rodando na porta ${PORT}`);
     console.log(`📱 Página Principal: http://localhost:${PORT}/links`);
     console.log(`💳 Checkout Privacy: http://localhost:${PORT}/privacy`);
-    console.log(`🎁 Oferta Premiada: http://localhost:${PORT}/oferta-premiada`);
+    console.log(`✅ Compra Aprovada: http://localhost:${PORT}/compra-aprovada`);
     console.log(`🔄 Redirecionamento: http://localhost:${PORT}/redirect`);
     console.log(`🌐 Acesse externamente: http://0.0.0.0:${PORT}/links`);
     
