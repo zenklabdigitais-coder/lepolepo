@@ -686,15 +686,20 @@ app.get('/api/health', (req, res) => {
     });
 });
 
-// Rota principal
-app.get('/', (req, res) => {
+// Rota principal - agora acessível via /privacy
+app.get('/privacy', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'index.html'));
+});
+
+// Rota raiz redireciona para /privacy
+app.get('/', (req, res) => {
+    res.redirect('/privacy');
 });
 
 app.listen(PORT, '0.0.0.0', () => {
     console.log(`🚀 Servidor rodando na porta ${PORT}`);
-    console.log(`📱 Acesse: http://localhost:${PORT}`);
-    console.log(`🌐 Acesse externamente: http://0.0.0.0:${PORT}`);
+    console.log(`📱 Acesse: http://localhost:${PORT}/privacy`);
+    console.log(`🌐 Acesse externamente: http://0.0.0.0:${PORT}/privacy`);
     
     // Mostrar informações do controller
     console.log('\n============================');
