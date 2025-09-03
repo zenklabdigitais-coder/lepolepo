@@ -93,8 +93,6 @@
 
 ## 🔗 Integrações
 
-- **UTMify** - Tracking de campanhas
-- **Meta Pixel** - Analytics do Facebook
 - **SyncPayments** - Gateway de pagamentos
 - **PushinPay** - Gateway alternativo
 
