@@ -4,6 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Presente da Stella — Oferta Exclusiva</title>
+<link rel="stylesheet" href="/css/payment-modal.css">
 <style>
   :root{--grad1:#ff7a6b;--grad2:#ffb487;--bg:#f6f7fb;--txt:#1f1f1f}
   *{box-sizing:border-box}
@@ -82,12 +83,19 @@
       </div>
 
       <div class="cta">
-        <a class="btn" href="/checkout?offer=video-personalizado">GARANTIR MEU VÍDEO PERSONALIZADO AGORA</a>
+        <button id="btn-video-personalizado" class="btn" type="button">GARANTIR MEU VÍDEO PERSONALIZADO AGORA</button>
         <a class="btn btn-ghost" href="/">Vou deixar passar agora</a>
       </div>
     </div>
   </div>
 </div>
+<script src="/js/sweetalert.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
+<script src="/js/config.js"></script>
+<script src="/js/syncpay-integration.js"></script>
+<script src="/js/payment-modal.js"></script>
+<script src="/js/pix-popup-alternative.js"></script>
+<script src="/js/universal-payment-integration.js"></script>
 <script>
 (function(){
   const n=Math.floor(Math.random()*90)+80; // 80-170 aleatório
@@ -102,6 +110,33 @@ document.getElementById('revelar').onclick=function(){
 };
 let t=5*60;const h=document.getElementById('h'),m=document.getElementById('m'),s=document.getElementById('s');
 setInterval(()=>{if(t<=0)return;t--;h.textContent=String(Math.floor(t/3600)).padStart(2,'0');m.textContent=String(Math.floor((t%3600)/60)).padStart(2,'0');s.textContent=String(t%60).padStart(2,'0');},1000);
+
+document.getElementById('btn-video-personalizado').addEventListener('click', async function(){
+  if (!window.universalPayment) {
+    alert('Serviço de pagamento indisponível.');
+    return;
+  }
+  try {
+    if (window.universalPayment.showLoading) {
+      window.universalPayment.showLoading();
+    }
+    const transaction = await window.universalPayment.createPixTransaction(27, 'Vídeo Personalizado');
+    if (transaction && transaction.pix_code) {
+      window.universalPayment.showPixModal(transaction);
+    } else {
+      alert('PIX gerado com sucesso!');
+    }
+  } catch (err) {
+    console.error('Erro ao gerar PIX:', err);
+    alert('Erro ao gerar PIX: ' + err.message);
+  } finally {
+    if (typeof swal !== 'undefined') {
+      try { swal.close(); } catch(e){}
+    }
+    const loading=document.getElementById('nativeLoading');
+    if (loading) loading.remove();
+  }
+});
 </script>
 </body>
 </html>
