@@ -180,44 +180,6 @@ app.post('/api/auth-token', async (req, res) => {
                 type: 'NETWORK_ERROR'
             });
         }
-
-        // console.log('📥 [DEBUG] Status da resposta:', response.status, response.statusText);
-        // console.log('📋 [DEBUG] Headers da resposta:', Object.fromEntries(response.headers.entries()));
-
-        if (!response.ok) {
-            const errorText = await response.text();
-            console.error('[Auth] Erro na autenticação:', response.status, errorText);
-            
-            // Tentar parsear como JSON se possível
-            let errorData;
-            try {
-                errorData = JSON.parse(errorText);
-            } catch (e) {
-                errorData = { message: errorText };
-            }
-            
-            return res.status(response.status).json({
-                message: 'Erro na autenticação com a API SyncPayments',
-                status: response.status,
-                statusText: response.statusText,
-                details: errorData
-            });
-        }
-
-        const data = await response.json();
-        // console.log('✅ [DEBUG] Token gerado com sucesso');
-        // console.log('📋 [DEBUG] Resposta da API:', JSON.stringify(data, null, 2));
-        
-        // Validar se a resposta contém os campos obrigatórios
-        if (!data.access_token) {
-            console.error('[Auth] Token não encontrado na resposta');
-            return res.status(500).json({
-                message: 'Resposta inválida da API',
-                error: 'access_token não encontrado na resposta'
-            });
-        }
-        
-        res.json(data);
     } catch (err) {
         console.error('[Auth] Erro ao obter token:', err.message);
         console.error('[Auth] Stack trace:', err.stack);
@@ -698,6 +660,24 @@ app.get('/redirect', (req, res) => {
     res.sendFile(path.join(__dirname, 'redirect', 'index.html'));
 });
 
+// Rota de teste para verificar se a imagem está sendo servida
+app.get('/test-image', (req, res) => {
+    const imagePath = path.join(__dirname, 'redirect', 'images', 'foto.jpg');
+    console.log(`🖼️ [Test] Verificando imagem em: ${imagePath}`);
+    
+    if (require('fs').existsSync(imagePath)) {
+        console.log(`✅ [Test] Imagem encontrada: ${imagePath}`);
+        res.sendFile(imagePath);
+    } else {
+        console.log(`❌ [Test] Imagem não encontrada: ${imagePath}`);
+        res.status(404).json({
+            error: 'Imagem não encontrada',
+            path: imagePath,
+            exists: false
+        });
+    }
+});
+
 // Rota para a página privacy (checkout)
 app.get('/privacy', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'index.html'));
@@ -730,7 +710,85 @@ app.use('/icons', express.static(path.join(__dirname, 'links/icons')));
 app.use('/redirect/images', express.static(path.join(__dirname, 'redirect/images')));
 app.use('/compra-aprovada/images', express.static(path.join(__dirname, 'compra-aprovada/images')));
 
+// Middleware adicional para garantir que imagens sejam servidas corretamente
+app.use('/redirect/images', (req, res, next) => {
+    console.log(`🖼️ [Images] Tentando servir imagem: ${req.path}`);
+    console.log(`🖼️ [Images] Caminho completo: ${req.url}`);
+    next();
+});
+
 app.use(express.static(path.join(__dirname, 'public')));
+
+// ============================
+// MIDDLEWARE DE TRATAMENTO DE ERROS
+// ============================
+
+// Middleware para capturar rotas não encontradas (404)
+app.use('*', (req, res) => {
+    // Se a requisição é para uma API, retornar JSON
+    if (req.path.startsWith('/api/')) {
+        return res.status(404).json({
+            success: false,
+            error: 'Endpoint não encontrado',
+            path: req.path,
+            method: req.method,
+            timestamp: new Date().toISOString()
+        });
+    }
+    
+    // Para outras rotas, retornar página 404 HTML
+    res.status(404).send(`
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <title>Página não encontrada</title>
+            <style>
+                body { font-family: Arial, sans-serif; text-align: center; padding: 50px; }
+                .error { color: #e74c3c; font-size: 24px; }
+            </style>
+        </head>
+        <body>
+            <div class="error">404 - Página não encontrada</div>
+            <p>A página <strong>${req.path}</strong> não existe.</p>
+            <a href="/links">Voltar ao início</a>
+        </body>
+        </html>
+    `);
+});
+
+// Middleware para tratamento de erros globais
+app.use((err, req, res, next) => {
+    console.error('❌ [Global Error] Erro não tratado:', err);
+    
+    // Se a requisição é para uma API, retornar JSON
+    if (req.path.startsWith('/api/')) {
+        return res.status(500).json({
+            success: false,
+            error: 'Erro interno do servidor',
+            message: err.message,
+            timestamp: new Date().toISOString()
+        });
+    }
+    
+    // Para outras rotas, retornar página de erro HTML
+    res.status(500).send(`
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <title>Erro interno</title>
+            <style>
+                body { font-family: Arial, sans-serif; text-align: center; padding: 50px; }
+                .error { color: #e74c3c; font-size: 24px; }
+            </style>
+        </head>
+        <body>
+            <div class="error">500 - Erro interno</div>
+            <p>Ocorreu um erro inesperado no servidor.</p>
+            <a href="/links">Voltar ao início</a>
+        </body>
+        </html>
+    `);
+});
 
 app.listen(PORT, '0.0.0.0', () => {
     console.log(`🚀 Servidor rodando na porta ${PORT}`);
