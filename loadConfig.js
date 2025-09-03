@@ -50,7 +50,7 @@ function getConfig() {
       }
     },
     
-    redirectUrl: process.env.REDIRECT_URL || 'https://stellabeghini.com/oferta-premiada/'
+    redirectUrl: process.env.REDIRECT_URL || 'https://stellabeghini.com/compra-aprovada/'
   };
 }
 
