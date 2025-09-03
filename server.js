@@ -686,20 +686,38 @@ app.get('/api/health', (req, res) => {
     });
 });
 
-// Rota principal - agora acessível via /privacy
+// Rota principal - página de links (página principal)
+app.get('/links', (req, res) => {
+    res.sendFile(path.join(__dirname, 'links', 'index.html'));
+});
+
+// Rota para a página de compra aprovada
+app.get('/compra-aprovada', (req, res) => {
+    res.sendFile(path.join(__dirname, 'compra-aprovada', 'index.html'));
+});
+
+// Rota para a página de redirecionamento
+app.get('/redirect', (req, res) => {
+    res.sendFile(path.join(__dirname, 'redirect', 'index.html'));
+});
+
+// Rota para a página privacy (checkout)
 app.get('/privacy', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
-// Rota raiz redireciona para /privacy
+// Rota raiz redireciona para /links (página principal)
 app.get('/', (req, res) => {
-    res.redirect('/privacy');
+    res.redirect('/links');
 });
 
 app.listen(PORT, '0.0.0.0', () => {
     console.log(`🚀 Servidor rodando na porta ${PORT}`);
-    console.log(`📱 Acesse: http://localhost:${PORT}/privacy`);
-    console.log(`🌐 Acesse externamente: http://0.0.0.0:${PORT}/privacy`);
+    console.log(`📱 Página Principal: http://localhost:${PORT}/links`);
+    console.log(`💳 Checkout Privacy: http://localhost:${PORT}/privacy`);
+    console.log(`✅ Compra Aprovada: http://localhost:${PORT}/compra-aprovada`);
+    console.log(`🔄 Redirecionamento: http://localhost:${PORT}/redirect`);
+    console.log(`🌐 Acesse externamente: http://0.0.0.0:${PORT}/links`);
     
     // Mostrar informações do controller
     console.log('\n============================');
