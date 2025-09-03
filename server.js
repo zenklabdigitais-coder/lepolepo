@@ -714,6 +714,16 @@ app.use('/compra-aprovada', express.static(path.join(__dirname, 'compra-aprovada
 app.use('/redirect', express.static(path.join(__dirname, 'redirect')));
 app.use(express.static(path.join(__dirname, 'public')));
 
+// Middleware para debug de arquivos estáticos
+app.use((req, res, next) => {
+    if (req.path.includes('images/') || req.path.includes('icons/')) {
+        console.log(`🔍 [Static] Tentando servir: ${req.path}`);
+        console.log(`🔍 [Static] URL completa: ${req.url}`);
+        console.log(`🔍 [Static] Método: ${req.method}`);
+    }
+    next();
+});
+
 app.listen(PORT, '0.0.0.0', () => {
     console.log(`🚀 Servidor rodando na porta ${PORT}`);
     console.log(`📱 Página Principal: http://localhost:${PORT}/links`);

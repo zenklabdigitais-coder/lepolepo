@@ -12,7 +12,7 @@ img {
     -moz-user-drag: none;
     -o-user-drag: none;
     user-drag: none;
-    pointer-events: none;
+    /* Removido pointer-events: none para não interferir na exibição das imagens */
 }
 
 /* Desabilitar menu de contexto */
