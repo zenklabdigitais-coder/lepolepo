@@ -7,7 +7,7 @@
 - **`/` (raiz)** → Redireciona para `/links`
 - **`/links`** → Página principal com botões de acesso
 - **`/privacy`** → Página de checkout e pagamentos
-- **`/compra-aprovada`** → Página de confirmação de compra
+- **`/oferta-premiada`** → Página de oferta premiada
 - **`/redirect`** → Página de redirecionamento para Telegram
 
 ### Diretórios
@@ -17,14 +17,12 @@
 │   ├── index.html        # Landing page com botões
 │   ├── images/           # Imagens da página
 │   └── icons/            # Ícones dos botões
-├── compra-aprovada/      # Página de compra aprovada
-│   ├── index.html        # Confirmação de pagamento
-│   └── images/           # Imagens da página
 ├── redirect/             # Página de redirecionamento
 │   ├── index.html        # Loading para Telegram
 │   └── images/           # Imagens da página
-├── public/               # Página de checkout (Privacy)
+├── public/               # Páginas públicas (checkout e oferta)
 │   ├── index.html        # Sistema de pagamentos
+│   ├── oferta-premiada/  # Página de oferta após pagamento
 │   ├── css/              # Estilos
 │   ├── js/               # Scripts
 │   └── images/           # Imagens
@@ -48,7 +46,7 @@
 3. **Acessar páginas:**
    - Página Principal: http://localhost:3000/links
    - Checkout: http://localhost:3000/privacy
-   - Compra Aprovada: http://localhost:3000/compra-aprovada
+   - Oferta Premiada: http://localhost:3000/oferta-premiada
    - Redirecionamento: http://localhost:3000/redirect
 
 ## 🔧 Configuração
@@ -75,10 +73,10 @@
 - Suporte a PIX, cartão e boleto
 - Webhooks automáticos
 
-### Página de Compra Aprovada (`/compra-aprovada`)
-- Confirmação de pagamento
-- Link para grupo VIP
-- Tracking de conversão
+### Página de Oferta Premiada (`/oferta-premiada`)
+- Oferta exclusiva após o pagamento
+- Geração de PIX integrada
+- Contagem regressiva de urgência
 
 ### Página de Redirecionamento (`/redirect`)
 - Loading automático
