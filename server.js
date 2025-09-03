@@ -722,6 +722,14 @@ app.use((req, res, next) => {
 app.use('/links', express.static(path.join(__dirname, 'links')));
 app.use('/compra-aprovada', express.static(path.join(__dirname, 'compra-aprovada')));
 app.use('/redirect', express.static(path.join(__dirname, 'redirect')));
+app.use('/public', express.static(path.join(__dirname, 'public')));
+
+// Middleware para servir arquivos estáticos de forma mais flexível
+app.use('/images', express.static(path.join(__dirname, 'links/images')));
+app.use('/icons', express.static(path.join(__dirname, 'links/icons')));
+app.use('/redirect/images', express.static(path.join(__dirname, 'redirect/images')));
+app.use('/compra-aprovada/images', express.static(path.join(__dirname, 'compra-aprovada/images')));
+
 app.use(express.static(path.join(__dirname, 'public')));
 
 app.listen(PORT, '0.0.0.0', () => {
