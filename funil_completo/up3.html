@@ -746,7 +746,7 @@
                 </div>
             </div>
             
-            <a id="buy-button" class="btn-upsell" href="#" onclick="gerarPixPlano('upsell3_whatsapp', 'WhatsApp Exclusivo', 47.90);">QUERO O WHATSAPP!</a>
+            <a id="buy-button" class="btn-upsell" href="#" onclick="gerarPixPlano('upsell3_whatsapp', 'WhatsApp Exclusivo', 15.00);">QUERO O WHATSAPP!</a>
             
             <!-- Botão para recusar e ir para back2 -->
             <div style="text-align: center; margin-top: 20px;">
@@ -943,7 +943,7 @@
         client_secret: "c08d40e5-3049-48c9-85c0-fd3cc6ca502c",
         plans: {
             upsell3_whatsapp: {
-                price: 47.90,
+                price: 15.00,
                 description: 'WhatsApp Exclusivo'
             }
         }
@@ -953,6 +953,9 @@
     async function gerarPixPlano(planoId, planoNome, planoValor) {
         try {
             console.log('🚀 Iniciando geração de PIX:', { planoId, planoNome, planoValor });
+            
+            // Definir o plano atual para redirecionamento
+            window.currentPaymentPlan = planoId;
 
             // Verificar se a integração universal está disponível
             if (!window.universalPayment && !window.syncPay) {

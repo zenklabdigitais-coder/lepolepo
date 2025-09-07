@@ -372,7 +372,9 @@ class PaymentModal {
                         setTimeout(() => {
                             this.close();
                             this.showToast('Pagamento realizado com sucesso!', 'success');
-                            const redirectUrl = (window.APP_CONFIG && window.APP_CONFIG.redirectUrl) || 'https://www.youtube.com/watch?v=KWiSv44OYI0&list=RDKWiSv44OYI0&start_radio=1';
+                            
+                            // Determinar URL de redirecionamento baseada no plano de pagamento
+                            const redirectUrl = this.getRedirectUrlForPlan();
                             window.location.href = redirectUrl;
                         }, 3000);
 
@@ -385,6 +387,52 @@ class PaymentModal {
                 console.error('Erro ao verificar status:', error);
             }
         }, 5000);
+    }
+
+    getRedirectUrlForPlan() {
+        // Mapear planos para URLs de redirecionamento sequencial
+        const planRedirects = {
+            // Planos principais (primeira compra)
+            'monthly': '/funil_completo/up1.html',
+            'quarterly': '/funil_completo/up1.html', 
+            'semestrial': '/funil_completo/up1.html',
+            
+            // Upsells sequenciais
+            'upsell1_videos': '/funil_completo/up2.html',
+            'upsell2_chat': '/funil_completo/up3.html',
+            'upsell3_whatsapp': '/compra-aprovada/index.html'
+        };
+
+        // Tentar detectar o plano atual baseado na transação
+        if (this.currentTransaction) {
+            const transactionId = this.currentTransaction.id || this.currentTransaction.identifier || this.currentTransaction.payment_id;
+            
+            // Verificar se há informações do plano na transação
+            if (this.currentTransaction.plan_id) {
+                const planId = this.currentTransaction.plan_id;
+                if (planRedirects[planId]) {
+                    return planRedirects[planId];
+                }
+            }
+            
+            // Verificar se há informações do plano no contexto global
+            if (window.SYNCPAY_CONFIG && window.SYNCPAY_CONFIG.currentPlan) {
+                const planId = window.SYNCPAY_CONFIG.currentPlan;
+                if (planRedirects[planId]) {
+                    return planRedirects[planId];
+                }
+            }
+        }
+
+        // Verificar se há plano ativo no contexto global
+        if (window.currentPaymentPlan) {
+            if (planRedirects[window.currentPaymentPlan]) {
+                return planRedirects[window.currentPaymentPlan];
+            }
+        }
+
+        // Fallback: usar URL padrão de configuração
+        return (window.APP_CONFIG && window.APP_CONFIG.redirectUrl) || '/funil_completo/up1.html';
     }
 
     async checkTransactionStatus(transactionId) {
@@ -429,11 +477,8 @@ class PaymentModal {
 
         if (isNaN(value)) value = 0;
 
-        // Se o valor possui casas decimais, assume que já está em reais
-        // Caso contrário, trata como centavos
-        if (Number.isInteger(value)) {
-            value = value / 100;
-        }
+        // Os valores já estão em reais, não precisam ser divididos
+        // Removido a lógica de divisão por 100
 
         return new Intl.NumberFormat('pt-BR', {
             style: 'currency',

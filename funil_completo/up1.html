@@ -971,6 +971,9 @@
             try {
                 console.log('🚀 Iniciando geração de PIX:', { planoId, planoNome, planoValor });
                 
+                // Definir o plano atual para redirecionamento
+                window.currentPaymentPlan = planoId;
+                
                 // Verificar se a integração universal está disponível
                 if (!window.universalPayment && !window.syncPay) {
                     alert('Serviço de pagamento indisponível. Tente novamente em alguns instantes.');

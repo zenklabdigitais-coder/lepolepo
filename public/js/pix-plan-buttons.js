@@ -15,6 +15,9 @@
             }
 
             try {
+                // Definir o plano atual para redirecionamento
+                window.currentPaymentPlan = planKey;
+                
                 // Usar a integração universal que detecta o gateway automaticamente
                 const paymentService = window.universalPayment || window.syncPay;
                 

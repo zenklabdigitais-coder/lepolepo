@@ -679,10 +679,8 @@ class PixPopupAlternative {
 
         if (isNaN(value)) value = 0;
 
-        // Se for inteiro, assume que está em centavos
-        if (Number.isInteger(value)) {
-            value = value / 100;
-        }
+        // Os valores já estão em reais, não precisam ser divididos
+        // Removido a lógica de divisão por 100
 
         return new Intl.NumberFormat('pt-BR', {
             style: 'currency',
