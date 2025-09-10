@@ -717,6 +717,16 @@ app.get('/oferta-premiada', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'oferta-premiada', 'index.html'));
 });
 
+// Rota para assinatura premiada
+app.get('/assinatura-premiada', (req, res) => {
+    res.sendFile(path.join(__dirname, 'funil_completo', 'assinatura-premiada.html'));
+});
+
+// Página de agradecimento
+app.get('/obrigado', (req, res) => {
+    res.sendFile(path.join(__dirname, 'funil_completo', 'obrigado.html'));
+});
+
 // ============================
 // ROTAS DO FUNIL COMPLETO
 // ============================
@@ -782,6 +792,7 @@ app.use('/public', express.static(path.join(__dirname, 'public')));
 
 // Servir arquivos estáticos do funil completo
 app.use('/funil_completo', express.static(path.join(__dirname, 'funil_completo')));
+
 // Permitir acesso direto aos assets do funil
 app.use('/assets', express.static(path.join(__dirname, 'funil_completo/assets')));
 
@@ -869,6 +880,7 @@ app.listen(PORT, '0.0.0.0', () => {
     console.log(`📱 Página Principal: http://localhost:${PORT}/links`);
     console.log(`💳 Checkout Privacy: http://localhost:${PORT}/privacy`);
     console.log(`🎁 Oferta Premiada: http://localhost:${PORT}/oferta-premiada`);
+    console.log(`🏆 Assinatura Premiada: http://localhost:${PORT}/assinatura-premiada`);
     console.log(`🔄 Redirecionamento: http://localhost:${PORT}/redirect`);
     console.log(`\n🎯 FUNIL COMPLETO:`);
     console.log(`   📈 Upsells: http://localhost:${PORT}/up1 | /up2 | /up3`);

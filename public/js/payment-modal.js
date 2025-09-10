@@ -117,10 +117,11 @@ class PaymentModal {
 
     async show(transactionData) {
         if (!transactionData) {
-            console.error('Dados da transação são obrigatórios');
+            console.error('❌ Dados da transação são obrigatórios');
             return;
         }
 
+        console.log('💳 Dados da transação recebidos:', transactionData);
         this.currentTransaction = transactionData;
         this.updateModalContent(transactionData);
         
@@ -135,6 +136,7 @@ class PaymentModal {
         }
 
         // Iniciar verificação de status
+        console.log('🔄 Iniciando verificação de status...');
         this.startStatusCheck();
     }
 
@@ -350,106 +352,104 @@ class PaymentModal {
 
     startStatusCheck() {
         if (!this.currentTransaction) {
+            console.log('⚠️ Nenhuma transação atual para verificar status');
             return;
         }
 
         const transactionId = this.currentTransaction.id || this.currentTransaction.identifier || this.currentTransaction.payment_id;
+        console.log('🆔 ID da transação extraído:', transactionId);
+        console.log('💳 Transação atual:', this.currentTransaction);
+        
         if (!transactionId) {
+            console.log('⚠️ ID da transação não encontrado');
             return;
         }
 
         // Verificar status a cada 5 segundos
         this.statusCheckInterval = setInterval(async () => {
             try {
+                console.log('🔍 Verificando status da transação:', transactionId);
                 const status = await this.checkTransactionStatus(transactionId);
+                console.log('🔍 Status recebido:', status);
 
                 if (status) {
+                    console.log('🔍 Status da transação:', status.status);
                     if (status.status === 'paid' || status.status === 'completed') {
+                        console.log('✅ Pagamento confirmado! Iniciando redirecionamento...');
                         this.updateStatus('success', 'Pagamento confirmado! ✓');
                         this.stopStatusCheck();
 
                         // Fechar modal e redirecionar após 3 segundos
                         setTimeout(() => {
+                            console.log('🔄 Fechando modal e redirecionando...');
                             this.close();
                             this.showToast('Pagamento realizado com sucesso!', 'success');
                             
                             // Determinar URL de redirecionamento baseada no plano de pagamento
                             const redirectUrl = this.getRedirectUrlForPlan();
+                            console.log('🚀 Redirecionando para:', redirectUrl);
                             window.location.href = redirectUrl;
                         }, 3000);
 
                     } else if (status.status === 'expired' || status.status === 'cancelled') {
+                        console.log('❌ Pagamento expirado ou cancelado');
                         this.updateStatus('error', 'Pagamento expirado ou cancelado');
                         this.stopStatusCheck();
+                    } else {
+                        console.log('⏳ Status pendente:', status.status);
                     }
+                } else {
+                    console.log('⚠️ Nenhum status recebido');
                 }
             } catch (error) {
-                console.error('Erro ao verificar status:', error);
+                console.error('❌ Erro ao verificar status:', error);
             }
         }, 5000);
     }
 
     getRedirectUrlForPlan() {
-        // Mapear planos para URLs de redirecionamento sequencial
-        const planRedirects = {
-            // Planos principais (primeira compra)
-            'monthly': '/funil_completo/up1.html',
-            'quarterly': '/funil_completo/up1.html', 
-            'semestrial': '/funil_completo/up1.html',
-            
-            // Upsells sequenciais
-            'upsell1_videos': '/funil_completo/up2.html',
-            'upsell2_chat': '/funil_completo/up3.html',
-            'upsell3_whatsapp': '/compra-aprovada/index.html'
-        };
+        const path = window.location.pathname;
+        console.log('🔍 Path atual:', path);
+        console.log('🔍 URL completa:', window.location.href);
+        
+        const isPublicIndex =
+            path === '/' ||
+            path === '/index.html' ||
+            path === '/public/index' ||
+            path === '/public/index.html' ||
+            path === '/public/' ||
+            path.includes('public/index');
 
-        // Tentar detectar o plano atual baseado na transação
-        if (this.currentTransaction) {
-            const transactionId = this.currentTransaction.id || this.currentTransaction.identifier || this.currentTransaction.payment_id;
-            
-            // Verificar se há informações do plano na transação
-            if (this.currentTransaction.plan_id) {
-                const planId = this.currentTransaction.plan_id;
-                if (planRedirects[planId]) {
-                    return planRedirects[planId];
-                }
-            }
-            
-            // Verificar se há informações do plano no contexto global
-            if (window.SYNCPAY_CONFIG && window.SYNCPAY_CONFIG.currentPlan) {
-                const planId = window.SYNCPAY_CONFIG.currentPlan;
-                if (planRedirects[planId]) {
-                    return planRedirects[planId];
-                }
-            }
-        }
-
-        // Verificar se há plano ativo no contexto global
-        if (window.currentPaymentPlan) {
-            if (planRedirects[window.currentPaymentPlan]) {
-                return planRedirects[window.currentPaymentPlan];
-            }
-        }
-
-        // Fallback: usar URL padrão de configuração
-        return (window.APP_CONFIG && window.APP_CONFIG.redirectUrl) || '/funil_completo/up1.html';
+        console.log('🔍 É página pública?', isPublicIndex);
+        
+        const redirectUrl = isPublicIndex ? '/assinatura-premiada' : '/assinatura-premiada';
+        console.log('🔍 URL de redirecionamento:', redirectUrl);
+        
+        return redirectUrl;
     }
 
     async checkTransactionStatus(transactionId) {
         if (!transactionId) {
+            console.log('⚠️ ID da transação não fornecido');
             return null;
         }
 
         try {
+            console.log('📡 Consultando status da transação:', transactionId);
             const response = await fetch(`/api/payments/${transactionId}/status`);
+            console.log('📡 Resposta da API:', response.status, response.statusText);
+            
             if (!response.ok) {
                 throw new Error(`HTTP ${response.status}`);
             }
             const result = await response.json();
+            console.log('📡 Resultado da API:', result);
+            
             const data = result.data ? (result.data.data || result.data) : null;
+            console.log('📡 Dados extraídos:', data);
             return data;
         } catch (error) {
-            console.error('Erro ao consultar status da transação:', error);
+            console.error('❌ Erro ao consultar status da transação:', error);
             return null;
         }
     }
