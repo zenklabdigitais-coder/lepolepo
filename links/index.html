@@ -6,6 +6,25 @@
   <meta name="robots" content="noarchive,noimageindex,nosnippet">
   <title>Stella Beghini</title>
 
+  <!-- UTMify Pixel Script -->
+  <script>
+    window.pixelId = "68c5b096c8404930979eef91";
+    var a = document.createElement("script");
+    a.setAttribute("async", "");
+    a.setAttribute("defer", "");
+    a.setAttribute("src", "https://cdn.utmify.com.br/scripts/pixel/pixel.js");
+    document.head.appendChild(a);
+  </script>
+
+  <!-- UTMify Script -->
+  <script
+    src="https://cdn.utmify.com.br/scripts/utms/latest.js"
+    data-utmify-prevent-xcod-sck
+    data-utmify-prevent-subids
+    async
+    defer
+  ></script>
+
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="../assets/protect.css">
 
@@ -42,15 +61,6 @@
     @media (max-width:420px){.name{font-size:24px}.button{max-width:92vw}}
   </style>
 
-  <!-- ===== Meta Pixel ===== -->
-  <script>
-  !function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n.callMethod?
-  n.callMethod.apply(n,arguments):n.queue.push(arguments)};if(!f._fbq)f._fbq=n;
-  n.push=n;n.loaded=!0;n.version='2.0';n.queue=[];t=b.createElement(e);t.async=!0;
-  t.src=v;s=b.getElementsByTagName(e)[0];s.parentNode.insertBefore(t,s)}(window,document,'script','https://connect.facebook.net/en_US/fbevents.js');
-  fbq('init','916142607046004'); fbq('track','PageView');
-  </script>
-  <noscript><img height="1" width="1" style="display:none" src="https://www.facebook.com/tr?id=916142607046004&ev=PageView&noscript=1"/></noscript>
 
 </head>
 <body>
@@ -86,6 +96,10 @@
   <div class="footer">Todos os direitos reservados a Stella Beghini. Qualquer vazamento de imagem é crime — Código Penal (Decreto-Lei 2.848/1940).</div>
 
   <script src="../assets/protect.js"></script>
+  
+  <!-- UTMify Tracking Integration -->
+  <script src="../public/js/utmify-tracking.js"></script>
+  
   <script>
     const cityEl=document.getElementById("city");
     async function detectCity(){

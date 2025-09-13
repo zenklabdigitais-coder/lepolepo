@@ -4,9 +4,11 @@
  */
 
 const express = require('express');
+const UTMifyIntegration = require('./utmifyIntegration');
 
 class PushinPayWebhookHandler {
     constructor() {
+        this.utmify = new UTMifyIntegration();
         console.log('🔔 PushinPay Webhook Handler inicializado');
     }
 
@@ -80,12 +82,20 @@ class PushinPayWebhookHandler {
     /**
      * Processar status 'created'
      */
-    handleCreatedStatus(webhookData) {
+    async handleCreatedStatus(webhookData) {
         console.log('✅ PIX criado:', {
             id: webhookData.id,
             value: webhookData.value,
             qr_code: webhookData.qr_code ? 'Presente' : 'Ausente'
         });
+
+        try {
+            // Enviar evento initiate_checkout para UTMify
+            await this.utmify.handlePixCreated(webhookData);
+            console.log('📊 Evento initiate_checkout enviado para UTMify');
+        } catch (error) {
+            console.error('❌ Erro ao enviar evento para UTMify:', error.message);
+        }
 
         // Aqui você pode:
         // - Atualizar banco de dados local
@@ -97,7 +107,7 @@ class PushinPayWebhookHandler {
     /**
      * Processar status 'paid'
      */
-    handlePaidStatus(webhookData) {
+    async handlePaidStatus(webhookData) {
         console.log('💰 PIX pago:', {
             id: webhookData.id,
             value: webhookData.value,
@@ -105,6 +115,14 @@ class PushinPayWebhookHandler {
             payer_document: webhookData.payer_national_registration,
             end_to_end_id: webhookData.end_to_end_id
         });
+
+        try {
+            // Enviar evento purchase para UTMify
+            await this.utmify.handlePixPaid(webhookData);
+            console.log('🎯 Evento purchase enviado para UTMify');
+        } catch (error) {
+            console.error('❌ Erro ao enviar evento purchase para UTMify:', error.message);
+        }
 
         // Aqui você pode:
         // - Confirmar pagamento no sistema

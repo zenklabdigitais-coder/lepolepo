@@ -37,6 +37,21 @@
                 const transaction = await paymentService.createPixTransaction(plan.price, plan.description, clientData);
                 $(this).data('pixTransaction', transaction);
                 
+                // Enviar evento initiate_checkout para UTMify
+                if (window.trackInitiateCheckout) {
+                    const orderData = {
+                        orderId: transaction.id,
+                        amount: plan.price,
+                        productId: 'assinatura-premium',
+                        productName: plan.description,
+                        planId: planKey,
+                        planName: plan.description,
+                        customer: clientData
+                    };
+                    
+                    window.trackInitiateCheckout(orderData);
+                }
+                
                 // Mostrar modal com o PIX gerado
                 if (paymentService.showPixModal && transaction.pix_code) {
                     paymentService.showPixModal(transaction);

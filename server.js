@@ -6,6 +6,7 @@ const { syncpayGet, syncpayPost } = require('./syncpayApi');
 const WebhookHandler = require('./webhookHandler');
 const PaymentGateway = require('./paymentGateway');
 const { getConfig } = require('./loadConfig');
+const UTMifyIntegration = require('./utmifyIntegration');
 
 // ============================
 // NOVO SISTEMA DE CONTROLLER
@@ -20,6 +21,9 @@ const paymentController = getPaymentController();
 
 // Manter compatibilidade com o gateway antigo
 const paymentGateway = new PaymentGateway(config.ACTIVE_GATEWAY);
+
+// Instanciar UTMify Integration
+const utmifyIntegration = new UTMifyIntegration();
 
 // Configurar CORS
 app.use(cors({
@@ -836,6 +840,74 @@ app.use('/redirect/images', (req, res, next) => {
 }, express.static(path.join(__dirname, 'redirect/images')));
 
 app.use(express.static(path.join(__dirname, 'public')));
+
+// ===== ROTAS DA API UTMIFY =====
+
+// Rota para receber eventos initiate_checkout do frontend
+app.post('/api/utmify/initiate-checkout', async (req, res) => {
+    try {
+        console.log('🛒 Recebendo evento initiate_checkout do frontend...');
+        console.log('📋 Dados recebidos:', JSON.stringify(req.body, null, 2));
+        
+        const result = await utmifyIntegration.handlePixCreated(req.body, req.body.utmParams);
+        
+        res.json({
+            success: true,
+            message: 'Evento initiate_checkout enviado para UTMify',
+            data: result
+        });
+        
+    } catch (error) {
+        console.error('❌ Erro ao processar initiate_checkout:', error.message);
+        res.status(500).json({
+            success: false,
+            error: error.message
+        });
+    }
+});
+
+// Rota para receber eventos purchase do frontend
+app.post('/api/utmify/purchase', async (req, res) => {
+    try {
+        console.log('💰 Recebendo evento purchase do frontend...');
+        console.log('📋 Dados recebidos:', JSON.stringify(req.body, null, 2));
+        
+        const result = await utmifyIntegration.handlePixPaid(req.body, req.body.utmParams);
+        
+        res.json({
+            success: true,
+            message: 'Evento purchase enviado para UTMify',
+            data: result
+        });
+        
+    } catch (error) {
+        console.error('❌ Erro ao processar purchase:', error.message);
+        res.status(500).json({
+            success: false,
+            error: error.message
+        });
+    }
+});
+
+// Rota para testar integração UTMify
+app.post('/api/utmify/test', async (req, res) => {
+    try {
+        console.log('🧪 Testando integração UTMify...');
+        await utmifyIntegration.testIntegration();
+        
+        res.json({
+            success: true,
+            message: 'Teste de integração UTMify executado com sucesso'
+        });
+        
+    } catch (error) {
+        console.error('❌ Erro no teste de integração:', error.message);
+        res.status(500).json({
+            success: false,
+            error: error.message
+        });
+    }
+});
 
 // ============================
 // MIDDLEWARE DE TRATAMENTO DE ERROS
