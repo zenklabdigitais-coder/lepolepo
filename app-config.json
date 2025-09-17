@@ -10,7 +10,7 @@
     "token": "45135|XFE5jjzsKTBY4PN1RXFIe7EISDX2DEHFukqMfii897180772"
   },
   "webhook": {
-    "baseUrl": "https://privacy-sync.vercel.app",
+    "baseUrl": "https://stellabeghini.com",
     "secret": "sua-chave-secreta-aqui"
   },
   "model": {
