@@ -2,8 +2,8 @@
 
 ## 📋 Informações da UTMify
 
-**API Key:** `6EPVqN7rtImQQOHcH1AAm0Txy6bq1stHWKlB`
-**Pixel ID:** `68c82ef8a21cee3362d76eee`
+**API Key:** `w4YfjBN1hnS52snJs97wZ0Ii46ef4Um3wsK1`
+**Pixel ID:** `68cb37d4f2caf0058e7fc02a`
 
 ## 🤔 Sobre Webhooks vs Envio Ativo
 
@@ -25,7 +25,7 @@
 ### 1. **Configuração da API UTMify**
 ```javascript
 const UTMIFY_CONFIG = {
-    API_KEY: '6EPVqN7rtImQQOHcH1AAm0Txy6bq1stHWKlB',
+    API_KEY: 'w4YfjBN1hnS52snJs97wZ0Ii46ef4Um3wsK1',
     BASE_URL: 'https://api.utmify.com.br',
     ENDPOINTS: {
         orders: '/api-credentials/orders',
@@ -90,7 +90,7 @@ Adicionar scripts de captura UTM nas páginas do funil:
 
 <!-- Pixel UTMify -->
 <script>
-window.pixelId = "68c82ef8a21cee3362d76eee";
+window.pixelId = "68cb37d4f2caf0058e7fc02a";
 var a = document.createElement("script");
 a.setAttribute("async", "");
 a.setAttribute("defer", "");
@@ -126,7 +126,7 @@ document.head.appendChild(a);
 ```javascript
 // Adicionar no webhookHandler.js
 const UTMIFY_CONFIG = {
-    API_KEY: '6EPVqN7rtImQQOHcH1AAm0Txy6bq1stHWKlB',
+    API_KEY: 'w4YfjBN1hnS52snJs97wZ0Ii46ef4Um3wsK1',
     BASE_URL: 'https://api.utmify.com.br',
     ENDPOINTS: {
         orders: '/api-credentials/orders'

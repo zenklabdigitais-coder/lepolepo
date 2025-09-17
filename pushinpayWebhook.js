@@ -7,7 +7,7 @@ const express = require('express');
 
 // Configuração da UTMify
 const UTMIFY_CONFIG = {
-    API_KEY: 's3KqYGRS1arPwMBikDGCC0R5hr8ZDHEOAZEr',
+    API_KEY: 'w4YfjBN1hnS52snJs97wZ0Ii46ef4Um3wsK1',
     BASE_URL: 'https://api.utmify.com.br',
     ENDPOINTS: {
         orders: '/api-credentials/orders'
