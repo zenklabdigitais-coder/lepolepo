@@ -17,6 +17,22 @@
     {
       "src": "funil_completo/**",
       "use": "@vercel/static"
+    },
+    {
+      "src": "links/**",
+      "use": "@vercel/static"
+    },
+    {
+      "src": "compra-aprovada/**",
+      "use": "@vercel/static"
+    },
+    {
+      "src": "presell-privacy/**",
+      "use": "@vercel/static"
+    },
+    {
+      "src": "manutenção/**",
+      "use": "@vercel/static"
     }
   ],
   "routes": [
