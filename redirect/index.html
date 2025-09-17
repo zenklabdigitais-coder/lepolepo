@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>Preparando seu acesso...</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f8fafc;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      margin: 0;
+    }
+    .container {
+      background: white;
+      border-radius: 12px;
+      padding: 30px;
+      text-align: center;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      max-width: 350px;
+      width: 100%;
+    }
+    .container img {
+      width: 140px;
+      height: 140px;
+      border-radius: 8px;
+      margin-bottom: 20px;
+      object-fit: cover;
+    }
+    h2 {
+      font-size: 20px;
+      color: #111827;
+      margin-bottom: 8px;
+    }
+    p {
+      font-size: 14px;
+      color: #4b5563;
+      margin-bottom: 20px;
+    }
+    .progress-bar {
+      width: 100%;
+      height: 6px;
+      background: #e5e7eb;
+      border-radius: 6px;
+      overflow: hidden;
+    }
+    .progress {
+      height: 100%;
+      width: 0%;
+      background: #2563eb;
+      animation: load 3s forwards;
+    }
+    @keyframes load {
+      from { width: 0%; }
+      to { width: 100%; }
+    }
+    footer {
+      margin-top: 16px;
+      font-size: 12px;
+      color: #6b7280;
+    }
+  </style>
+  <!-- Scripts UTMify -->
+  <script
+    src="https://cdn.utmify.com.br/scripts/utms/latest.js"
+    data-utmify-prevent-xcod-sck
+    data-utmify-prevent-subids
+    async
+    defer>
+  </script>
+  
+  <script>
+    window.pixelId = "68cb37d4f2caf0058e7fc02a";
+    var a = document.createElement("script");
+    a.setAttribute("async", "");
+    a.setAttribute("defer", "");
+    a.setAttribute("src", "https://cdn.utmify.com.br/scripts/pixel/pixel.js");
+    document.head.appendChild(a);
+  </script>
+
+  <script>
+    // Função para preservar parâmetros UTM no redirecionamento
+    function preserveUTMParams() {
+      const urlParams = new URLSearchParams(window.location.search);
+      const utmParams = {};
+      
+      // Lista de parâmetros UTM para preservar
+      const utmKeys = ['utm_source', 'utm_medium', 'utm_campaign', 'utm_content', 'utm_term', 'sck', 'src'];
+      
+      utmKeys.forEach(key => {
+        if (urlParams.has(key)) {
+          utmParams[key] = urlParams.get(key);
+        }
+      });
+
+      // Se há parâmetros UTM, adicionar ao redirecionamento
+      if (Object.keys(utmParams).length > 0) {
+        const queryString = new URLSearchParams(utmParams).toString();
+        const redirectUrl = `https://t.me/stellabeghini_bot?start=CH&${queryString}`;
+        
+        console.log('🔗 Redirecionando com UTMs preservadas:', utmParams);
+        
+        // Redireciona após 3 segundos com UTMs
+        setTimeout(function(){
+          window.location.href = redirectUrl;
+        }, 3000);
+      } else {
+        // Redireciona sem UTMs se não houver
+        setTimeout(function(){
+          window.location.href = "https://t.me/stellabeghini_bot?start=CH";
+        }, 3000);
+      }
+    }
+
+    // Executar quando a página carregar
+    document.addEventListener('DOMContentLoaded', preserveUTMParams);
+  </script>
+</head>
+<body>
+  <div class="container">
+    <!-- Foto com caminho absoluto e fallback -->
+    <img src="/redirect/images/foto.jpg" alt="Foto de redirecionamento" onerror="this.src='images/foto.jpg'">
+    <h2>Preparando seu acesso…</h2>
+    <p>Você será redirecionado ao bot em instantes.</p>
+    <div class="progress-bar">
+      <div class="progress"></div>
+    </div>
+    <footer>© 2025 • Redirecionamento seguro</footer>
+  </div>
+</body>
+</html>
