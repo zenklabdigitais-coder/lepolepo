@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🧪 Teste UTMify - Stella Beghini</title>
+    
+    <!-- Scripts UTMify -->
+    <script src="https://cdn.utmify.com.br/scripts/utms/latest.js" 
+            data-utmify-prevent-xcod-sck 
+            data-utmify-prevent-subids 
+            async defer></script>
+    
+    <script>
+        window.pixelId = "68cb37d4f2caf0058e7fc02a";
+        var a = document.createElement("script");
+        a.setAttribute("async", "");
+        a.setAttribute("defer", "");
+        a.setAttribute("src", "https://cdn.utmify.com.br/scripts/pixel/pixel.js");
+        document.head.appendChild(a);
+    </script>
+    
+    <!-- Facebook Pixel Code -->
+    <script>
+        !function(f,b,e,v,n,t,s)
+        {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+        n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+        if(!f._fbq)f._fbq=n;n.push=n.loaded=!0;n.version='2.0';
+        n.queue=[];t=b.createElement(e);t.async=!0;
+        t.src=v;s=b.getElementsByTagName(e)[0];
+        s.parentNode.insertBefore(t,s)}(window, document,'script',
+        'https://connect.facebook.net/en_US/fbevents.js');
+        
+        fbq('init', '68cb37d4f2caf0058e7fc02a');
+        fbq('track', 'PageView');
+        
+        console.log('✅ Facebook Pixel inicializado para teste');
+    </script>
+    <noscript>
+        <img height="1" width="1" style="display:none" 
+             src="https://www.facebook.com/tr?id=68cb37d4f2caf0058e7fc02a&ev=PageView&noscript=1"/>
+    </noscript>
+
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            color: white;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: rgba(255,255,255,0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+        }
+        h1 {
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 2.5em;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+        .test-section {
+            margin-bottom: 30px;
+            padding: 20px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 15px;
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+        .test-section h2 {
+            margin-bottom: 15px;
+            color: #ffd700;
+            font-size: 1.3em;
+        }
+        .test-button {
+            background: linear-gradient(45deg, #ff6b6b, #ee5a24);
+            color: white;
+            border: none;
+            padding: 15px 25px;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            margin: 10px 10px 10px 0;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+        .test-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.3);
+        }
+        .test-button.success {
+            background: linear-gradient(45deg, #00b894, #00a085);
+        }
+        .test-button.warning {
+            background: linear-gradient(45deg, #fdcb6e, #e17055);
+        }
+        .log-area {
+            background: rgba(0,0,0,0.3);
+            border-radius: 10px;
+            padding: 15px;
+            margin-top: 15px;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            max-height: 200px;
+            overflow-y: auto;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+        .status {
+            display: inline-block;
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+            margin-left: 10px;
+        }
+        .status.ok { background: #00b894; }
+        .status.error { background: #d63031; }
+        .status.warning { background: #fdcb6e; color: #2d3436; }
+        .info {
+            background: rgba(116, 185, 255, 0.2);
+            border-left: 4px solid #74b9ff;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 5px;
+        }
+        .utm-params {
+            background: rgba(0,0,0,0.2);
+            padding: 10px;
+            border-radius: 8px;
+            margin-top: 10px;
+            font-family: monospace;
+            font-size: 13px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🧪 Teste UTMify - Stella Beghini</h1>
+        
+        <!-- Seção 1: Verificação de Scripts -->
+        <div class="test-section">
+            <h2>📋 1. Verificação de Scripts</h2>
+            <button class="test-button" onclick="checkScripts()">🔍 Verificar Scripts Carregados</button>
+            <div id="scripts-status"></div>
+        </div>
+
+        <!-- Seção 2: Teste PageView -->
+        <div class="test-section">
+            <h2>👁️ 2. Teste PageView</h2>
+            <p>PageView deve disparar automaticamente ao carregar esta página.</p>
+            <button class="test-button" onclick="testPageView()">📊 Disparar PageView Manual</button>
+            <div id="pageview-status"></div>
+        </div>
+
+        <!-- Seção 3: Teste InitiateCheckout -->
+        <div class="test-section">
+            <h2>🛒 3. Teste InitiateCheckout</h2>
+            <p>Simula quando usuário clica "COPIAR CHAVE PIX"</p>
+            <button class="test-button" onclick="testInitiateCheckout(19.90)">💰 Testar R$ 19,90</button>
+            <button class="test-button" onclick="testInitiateCheckout(59.70)">💰 Testar R$ 59,70</button>
+            <button class="test-button" onclick="testInitiateCheckout(119.40)">💰 Testar R$ 119,40</button>
+            <div id="initiate-status"></div>
+        </div>
+
+        <!-- Seção 4: Teste Purchase -->
+        <div class="test-section">
+            <h2>💳 4. Teste Purchase (Simulação)</h2>
+            <p>Simula evento de compra aprovada</p>
+            <button class="test-button" onclick="testPurchase()">✅ Simular Compra Aprovada</button>
+            <div id="purchase-status"></div>
+        </div>
+
+        <!-- Seção 5: Teste Webhook -->
+        <div class="test-section">
+            <h2>🔗 5. Teste Webhook UTMify</h2>
+            <button class="test-button" onclick="testWebhook()">📤 Testar Envio para UTMify</button>
+            <div id="webhook-status"></div>
+        </div>
+
+        <!-- Seção 6: Parâmetros UTM -->
+        <div class="test-section">
+            <h2>🎯 6. Parâmetros UTM Capturados</h2>
+            <button class="test-button" onclick="showUTMParams()">📋 Mostrar UTMs</button>
+            <div class="info">
+                <strong>💡 Dica:</strong> Para testar UTMs, acesse esta página com parâmetros:<br>
+                <code>?utm_source=facebook&utm_medium=cpc&utm_campaign=teste&utm_content=botao&utm_term=assinatura</code>
+            </div>
+            <div id="utm-status"></div>
+        </div>
+
+        <!-- Log de Eventos -->
+        <div class="test-section">
+            <h2>📝 Log de Eventos</h2>
+            <button class="test-button" onclick="clearLog()">🗑️ Limpar Log</button>
+            <div id="event-log" class="log-area">
+                <div>🚀 Sistema de teste iniciado...</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Função para adicionar log
+        function addLog(message, type = 'info') {
+            const log = document.getElementById('event-log');
+            const timestamp = new Date().toLocaleTimeString();
+            const emoji = type === 'success' ? '✅' : type === 'error' ? '❌' : type === 'warning' ? '⚠️' : 'ℹ️';
+            log.innerHTML += `<div>${emoji} [${timestamp}] ${message}</div>`;
+            log.scrollTop = log.scrollHeight;
+        }
+
+        // 1. Verificar Scripts
+        function checkScripts() {
+            const status = document.getElementById('scripts-status');
+            let html = '<div style="margin-top: 15px;">';
+            
+            // Verificar fbq
+            if (typeof fbq === 'function') {
+                html += '<span class="status ok">✅ Facebook Pixel (fbq)</span>';
+                addLog('Facebook Pixel (fbq) carregado com sucesso', 'success');
+            } else {
+                html += '<span class="status error">❌ Facebook Pixel (fbq)</span>';
+                addLog('Facebook Pixel (fbq) NÃO encontrado', 'error');
+            }
+            
+            // Verificar UTMify scripts
+            const utmifyScript = document.querySelector('script[src*="utmify.com.br/scripts/utms"]');
+            if (utmifyScript) {
+                html += '<span class="status ok">✅ UTMify UTMs Script</span>';
+                addLog('UTMify UTMs Script encontrado', 'success');
+            } else {
+                html += '<span class="status error">❌ UTMify UTMs Script</span>';
+                addLog('UTMify UTMs Script NÃO encontrado', 'error');
+            }
+            
+            const pixelScript = document.querySelector('script[src*="utmify.com.br/scripts/pixel"]');
+            if (pixelScript) {
+                html += '<span class="status ok">✅ UTMify Pixel Script</span>';
+                addLog('UTMify Pixel Script encontrado', 'success');
+            } else {
+                html += '<span class="status error">❌ UTMify Pixel Script</span>';
+                addLog('UTMify Pixel Script NÃO encontrado', 'error');
+            }
+            
+            // Verificar window.pixelId
+            if (window.pixelId) {
+                html += '<span class="status ok">✅ Pixel ID: ' + window.pixelId + '</span>';
+                addLog('Pixel ID configurado: ' + window.pixelId, 'success');
+            } else {
+                html += '<span class="status error">❌ Pixel ID não configurado</span>';
+                addLog('Pixel ID NÃO configurado', 'error');
+            }
+            
+            html += '</div>';
+            status.innerHTML = html;
+        }
+
+        // 2. Teste PageView
+        function testPageView() {
+            if (typeof fbq === 'function') {
+                fbq('track', 'PageView');
+                document.getElementById('pageview-status').innerHTML = 
+                    '<div style="margin-top: 15px;"><span class="status ok">✅ PageView Disparado</span></div>';
+                addLog('Evento PageView disparado manualmente', 'success');
+            } else {
+                document.getElementById('pageview-status').innerHTML = 
+                    '<div style="margin-top: 15px;"><span class="status error">❌ fbq não disponível</span></div>';
+                addLog('Erro: fbq não disponível para PageView', 'error');
+            }
+        }
+
+        // 3. Teste InitiateCheckout
+        function testInitiateCheckout(value) {
+            if (typeof fbq === 'function') {
+                fbq('track', 'InitiateCheckout', {
+                    value: value,
+                    currency: 'BRL',
+                    content_name: 'Assinatura Privacy',
+                    content_category: 'subscription'
+                });
+                document.getElementById('initiate-status').innerHTML = 
+                    `<div style="margin-top: 15px;"><span class="status ok">✅ InitiateCheckout R$ ${value}</span></div>`;
+                addLog(`Evento InitiateCheckout disparado - Valor: R$ ${value}`, 'success');
+            } else {
+                document.getElementById('initiate-status').innerHTML = 
+                    '<div style="margin-top: 15px;"><span class="status error">❌ fbq não disponível</span></div>';
+                addLog('Erro: fbq não disponível para InitiateCheckout', 'error');
+            }
+        }
+
+        // 4. Teste Purchase
+        function testPurchase() {
+            if (typeof fbq === 'function') {
+                fbq('track', 'Purchase', {
+                    value: 19.90,
+                    currency: 'BRL',
+                    content_name: 'Assinatura Privacy',
+                    content_category: 'subscription'
+                });
+                document.getElementById('purchase-status').innerHTML = 
+                    '<div style="margin-top: 15px;"><span class="status ok">✅ Purchase Simulado</span></div>';
+                addLog('Evento Purchase simulado - Valor: R$ 19.90', 'success');
+            } else {
+                document.getElementById('purchase-status').innerHTML = 
+                    '<div style="margin-top: 15px;"><span class="status error">❌ fbq não disponível</span></div>';
+                addLog('Erro: fbq não disponível para Purchase', 'error');
+            }
+        }
+
+        // 5. Teste Webhook
+        async function testWebhook() {
+            const status = document.getElementById('webhook-status');
+            status.innerHTML = '<div style="margin-top: 15px;"><span class="status warning">⏳ Testando webhook...</span></div>';
+            addLog('Iniciando teste de webhook...', 'info');
+
+            try {
+                const response = await fetch('/api/test-utmify', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        test: true,
+                        orderId: 'TEST-' + Date.now(),
+                        value: 1990,
+                        customer: {
+                            name: 'Cliente Teste',
+                            email: 'teste@exemplo.com'
+                        }
+                    })
+                });
+
+                if (response.ok) {
+                    const result = await response.json();
+                    status.innerHTML = '<div style="margin-top: 15px;"><span class="status ok">✅ Webhook OK</span></div>';
+                    addLog('Webhook testado com sucesso: ' + JSON.stringify(result), 'success');
+                } else {
+                    status.innerHTML = '<div style="margin-top: 15px;"><span class="status error">❌ Erro no webhook</span></div>';
+                    addLog('Erro no webhook: ' + response.status, 'error');
+                }
+            } catch (error) {
+                status.innerHTML = '<div style="margin-top: 15px;"><span class="status error">❌ Erro de conexão</span></div>';
+                addLog('Erro de conexão no webhook: ' + error.message, 'error');
+            }
+        }
+
+        // 6. Mostrar UTMs
+        function showUTMParams() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const utmParams = {};
+            
+            ['utm_source', 'utm_medium', 'utm_campaign', 'utm_content', 'utm_term'].forEach(param => {
+                const value = urlParams.get(param);
+                if (value) utmParams[param] = value;
+            });
+
+            let html = '<div class="utm-params">';
+            if (Object.keys(utmParams).length > 0) {
+                html += '<strong>📊 UTMs Detectados:</strong><br>';
+                Object.entries(utmParams).forEach(([key, value]) => {
+                    html += `${key}: ${value}<br>`;
+                });
+                addLog('UTMs detectados: ' + JSON.stringify(utmParams), 'success');
+            } else {
+                html += '<strong>⚠️ Nenhum parâmetro UTM detectado na URL</strong><br>';
+                html += 'Acesse a página com ?utm_source=teste&utm_campaign=teste para testar';
+                addLog('Nenhum parâmetro UTM detectado na URL', 'warning');
+            }
+            html += '</div>';
+            
+            document.getElementById('utm-status').innerHTML = html;
+        }
+
+        // Limpar log
+        function clearLog() {
+            document.getElementById('event-log').innerHTML = '<div>🚀 Log limpo...</div>';
+        }
+
+        // Verificar scripts automaticamente ao carregar
+        window.addEventListener('load', () => {
+            setTimeout(() => {
+                checkScripts();
+                addLog('Página de teste carregada completamente', 'success');
+            }, 2000);
+        });
+
+        // Interceptar eventos fbq para log
+        if (typeof fbq === 'function') {
+            const originalFbq = fbq;
+            fbq = function() {
+                addLog(`fbq('${arguments[0]}', '${arguments[1]}') chamado`, 'info');
+                return originalFbq.apply(this, arguments);
+            };
+        }
+    </script>
+</body>
+</html>

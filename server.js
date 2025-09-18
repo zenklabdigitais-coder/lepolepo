@@ -952,6 +952,84 @@ app.use((err, req, res, next) => {
     `);
 });
 
+// ===== ENDPOINT DE TESTE UTMIFY =====
+app.post('/api/test-utmify', async (req, res) => {
+  try {
+    console.log('🧪 Teste UTMify iniciado...');
+    
+    // Simular dados de teste
+    const testData = {
+      orderId: req.body.orderId || 'TEST-' + Date.now(),
+      paymentMethod: 'pix',
+      status: 'paid',
+      createdAt: new Date().toISOString(),
+      approvedDate: new Date().toISOString(),
+      platform: 'Teste',
+      customer: req.body.customer || {
+        name: 'Cliente Teste',
+        email: 'teste@exemplo.com',
+        phone: '11999999999',
+        document: null
+      },
+      trackingParameters: {
+        utm_campaign: 'teste-campanha',
+        utm_content: 'teste-conteudo',
+        utm_medium: 'teste-meio',
+        utm_source: 'teste-origem',
+        utm_term: 'teste-termo'
+      },
+      commission: {
+        totalPriceInCents: req.body.value || 1990,
+        gatewayFeeInCents: Math.round((req.body.value || 1990) * 0.05),
+        userCommissionInCents: Math.round((req.body.value || 1990) * 0.95)
+      },
+      product: {
+        id: 'prod_teste_001',
+        name: 'Assinatura Teste',
+        priceInCents: req.body.value || 1990,
+        planName: 'Teste Mensal',
+        quantity: 1
+      }
+    };
+
+    // Tentar enviar para UTMify
+    let utmifyResult = { success: false, error: 'Webhook handler não encontrado' };
+    
+    try {
+      const { WebhookHandler } = require('./webhookHandler');
+      const webhookHandler = new WebhookHandler();
+      utmifyResult = await webhookHandler.sendToUtmify(testData);
+    } catch (error) {
+      console.log('⚠️ Tentando PushinPay handler...');
+      try {
+        const { PushinPayWebhookHandler } = require('./pushinpayWebhook');
+        const pushinpayHandler = new PushinPayWebhookHandler();
+        utmifyResult = await pushinpayHandler.sendToUtmify(testData);
+      } catch (error2) {
+        utmifyResult.error = 'Nenhum handler disponível: ' + error2.message;
+      }
+    }
+
+    console.log('🧪 Resultado do teste UTMify:', utmifyResult);
+
+    res.json({
+      success: true,
+      message: 'Teste UTMify executado',
+      testData: testData,
+      utmifyResult: utmifyResult,
+      timestamp: new Date().toISOString()
+    });
+
+  } catch (error) {
+    console.error('❌ Erro no teste UTMify:', error);
+    res.status(500).json({
+      success: false,
+      error: error.message,
+      timestamp: new Date().toISOString()
+    });
+  }
+});
+
 app.listen(PORT, '0.0.0.0', () => {
     console.log(`🚀 Servidor rodando na porta ${PORT}`);
     console.log(`📱 Página Principal: http://localhost:${PORT}/links`);
@@ -959,6 +1037,7 @@ app.listen(PORT, '0.0.0.0', () => {
     console.log(`🎁 Oferta Premiada: http://localhost:${PORT}/oferta-premiada`);
     console.log(`🏆 Assinatura Premiada: http://localhost:${PORT}/assinatura-premiada`);
     console.log(`🔄 Redirecionamento: http://localhost:${PORT}/redirect`);
+    console.log(`🧪 Teste UTMify: http://localhost:${PORT}/test-utmify.html`);
     console.log(`🌐 Acesse externamente: http://0.0.0.0:${PORT}/links`);
     
     // Mostrar informações do controller
