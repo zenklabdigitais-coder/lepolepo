@@ -242,6 +242,18 @@ class PaymentModal {
         if (pixCodeElement) {
             const pixCode = pixCodeElement.textContent.trim();
 
+            // 🎯 DISPARAR EVENTO INITIATE_CHECKOUT DA UTMIFY
+            if (window.utmify && typeof window.utmify.track === 'function') {
+                const planData = this.currentTransaction || {};
+                window.utmify.track('InitiateCheckout', {
+                    value: planData.amount || 0,
+                    currency: 'BRL',
+                    content_name: 'Assinatura Privacy',
+                    content_category: 'subscription'
+                });
+                console.log('✅ Evento InitiateCheckout disparado para UTMify ao copiar PIX');
+            }
+
             if (navigator.clipboard && navigator.clipboard.writeText) {
                 navigator.clipboard.writeText(pixCode).then(() => {
                     this.showCopyFeedback();

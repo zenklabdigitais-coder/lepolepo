@@ -18,17 +18,6 @@
                 // Definir o plano atual para redirecionamento
                 window.currentPaymentPlan = planKey;
                 
-                // 🎯 DISPARAR EVENTO INITIATE_CHECKOUT DA UTMIFY
-                if (window.utmify && typeof window.utmify.track === 'function') {
-                    window.utmify.track('InitiateCheckout', {
-                        value: plan.price,
-                        currency: 'BRL',
-                        content_name: plan.description,
-                        content_category: 'subscription'
-                    });
-                    console.log('✅ Evento InitiateCheckout disparado para UTMify');
-                }
-                
                 // Usar a integração universal que detecta o gateway automaticamente
                 const paymentService = window.universalPayment || window.syncPay;
                 
